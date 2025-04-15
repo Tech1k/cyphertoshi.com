@@ -1,0 +1,169 @@
+@font-face {
+  font-family: 'Inter';
+  src: url('/assets/fonts/inter.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+body {
+	font-family: 'Inter', sans-serif !important;
+	color: whitesmoke;
+	background: #333333;
+}
+
+a {
+    color: lightblue;
+}
+
+a:visited {
+    color: darkcyan;
+}
+
+#main {
+	margin: auto;
+	width: 50%;
+}
+
+#navlink {
+	margin-right: 10px;
+	font-size: 18px;
+}
+
+@media (max-width: 992px) {
+	#main {
+		width: 85%;
+	}
+	#navlink {
+		margin-right: auto;
+	}
+}
+
+/* Navbar styling */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    width: 65%;
+    margin: 0 auto;
+}
+
+.navbar a {
+    text-decoration: none;
+    font-weight: bold;
+    margin: 0 5px;
+}
+
+.navbar img {
+    max-height: 40px;
+}
+
+/* The css hamburger menu! */
+.menu-toggle {
+    display: none;
+}
+
+/* The beloved hamburger icon...in css! */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    gap: 5px;
+}
+
+.hamburger div {
+    width: 25px;
+    height: 3px;
+    background-color: white;
+}
+
+.nav-links {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+#curpage {
+    color: rgb(50, 200, 200) !important;
+    text-decoration: underline;
+}
+
+/* Full/desktop viewport */
+@media (min-width: 1092px) {
+    .navbar {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .navbar-content {
+        width: 75%;
+        margin: 0 auto;
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+}
+
+/* Medium/tablet viewport */
+@media (max-width: 1091px) and (min-width: 621px) {
+    .navbar {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .navbar-content {
+        width: 75%;
+        margin: 0 auto;
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 15px;
+        flex-direction: row;
+        margin-top: 10px;
+        align-items: center;
+    }
+
+    .hamburger {
+        display: none;
+    }
+}
+
+/* Mobile viewport */
+@media (max-width: 620px) {
+    .navbar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 85%;
+    }
+
+    .navbar a {
+        margin: 10px 0;
+    }
+
+    .hamburger {
+        display: flex;
+        margin-left: 10px;
+    }
+
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        align-items: center;
+        margin-top: 10px;
+        padding: 0;
+    }
+
+    .menu-toggle:checked + .hamburger + .nav-links {
+        display: flex;
+    }
+
+    .navbar a {
+        font-size: 14px;
+    }
+}

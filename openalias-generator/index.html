@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#5271ff">
+        <link rel="canonical" href="https://cyphertoshi.com/openalias-generator"/>
+        <meta name="robots" content="index, follow">
+        <meta name="description" content="A simple, open-source, client-side tool to generate OpenAlias TXT records to place in your domain's DNS settings"/>
+        <meta name="author" content="Tech1k">
+        <title>OpenAlias Generator</title>
+        <link rel="shortcut icon" href="assets/favicon.png"/>
+        <meta property="og:title" content="OpenAlias Generator"/>
+        <meta property="og:description" content="A simple, open-source, client-side tool to generate OpenAlias TXT records to place in your domain's DNS settings"/>
+        <meta property="og:type" content="website"/>
+        <meta property="og:url" content="https://cyphertoshi.com/openalias-generator"/>
+        <meta property="og:site_name" content="OpenAlias Generator"/>
+        <meta name="twitter:card" content="summary"/>
+        <meta name="twitter:title" content="OpenAlias Generator"/>
+        <meta name="twitter:description" content="A simple, open-source, client-side tool to generate OpenAlias TXT records to place in your domain's DNS settings"/>
+        <link rel="stylesheet" href="assets/style.css?v=3">
+    </head>
+    <body id="main">
+        <h1>OpenAlias TXT Record Generator</h1>
+        <p>A simple, open-source, client-side tool to generate OpenAlias TXT records to place in your domain's DNS settings.</p>
+        
+        <form id="aliasForm">
+            <label>Cryptocurrency type (e.g., xmr, ltc, btc):</label><br/>
+            <input type="text" id="typeInput" placeholder="e.g. xmr (only one coin)" required>
+            <br/><br/>
+            <label>Recipient address:</label><br/>
+            <input type="text" id="addressInput" placeholder="your crypto address" required>
+            <br/><br/>        
+            <label>Recipient name (optional):</label><br/>
+            <input type="text" id="nameInput" placeholder="e.g. John Monero">
+            <br/><br/>
+            <label>Transaction description (optional):</label><br/>
+            <input type="text" id="descInput" placeholder="e.g. Donation to John Monero">
+            <br/><br/>
+            <input type="submit" value="Generate OpenAlias TXT Record">
+        </form>
+        
+        <div id="output" class="result" style="margin-top: 20px;"></div>
+        
+        <script>
+            const aliasForm = document.getElementById('aliasForm');
+            const output = document.getElementById('output');
+
+            aliasForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const type = document.getElementById('typeInput').value.trim().toLowerCase();
+                const address = document.getElementById('addressInput').value.trim();
+                const name = document.getElementById('nameInput').value.trim();
+                const desc = document.getElementById('descInput').value.trim();
+
+                output.style.display = 'block';
+
+                // If form requirements are bypassed, only allow lowercase chars
+                if (!/^[a-z0-9]+$/.test(type)) {
+                    output.innerHTML = `<span class="error">❌ Invalid cryptocurrency type format. Use lowercase letters and numbers only.</span>`;
+                    return;
+                }
+
+                // Validate address length, using 20 chars as a general checksum
+                if (address.length < 20) {
+                    output.innerHTML = `<span class="error">❌ The address seems too short. It should be at least 20 characters.</span>`;
+                    return;
+                }
+
+                let oa_record = `oa1:${type} recipient_address=${address}`;
+                if (name) oa_record += `; recipient_name=${name}`;
+                if (desc) oa_record += `; tx_description=${desc}`;
+
+                // Wrap record in quotes for a valid DNS TXT record
+                const AliasRecord = `"${oa_record}"`;
+
+                    
+                output.innerHTML = `<p><strong>Your OpenAlias TXT Record:</strong></p><code style="word-break: break-word;">${AliasRecord}</code><br/><br/>
+                    <p>Add this to your DNS settings as a TXT record for the domain you want to use as your OpenAlias (e.g. <code>donate.example.com</code> for <code>donate@getmonero.org</code> or <code>getmonero.org</code> for a root domain). Make sure DNSSEC is enabled on your domain!
+                    <br/><br/><button type="button" onclick="copyToClipboard()">Copy TXT Record</button></p>`;
+            });
+        </script>
+        <hr>
+        <section style="margin-top: 40px;">
+            <h2>FAQs</h2>
+
+            <h3>What is this site?</h3>
+            <p>This site allows you to generate OpenAlias DNS TXT records for your domain within your browser.</p>
+
+            <h3>What is OpenAlias?</h3>
+            <p>OpenAlias is a DNS TXT record added to a domain that points to a cryptocurrency address, along with optional metadata such as the recipient's name and a transaction description.</p>
+            <p>To learn more, check out the <a href="https://openalias.org/#implement" target="_blank" rel="noopener noreferrer">OpenAlias implementation guide</a>.</p>
+
+            <h4>Example OpenAlias TXT Record for Bitcoin:</h4>
+            <code style="word-break: break-word;">oa1:btc recipient_address=bc1q33pgz4dsal3h2ahkhe8ty0e7z32ttteyz4tx2d; recipient_name=Cyphertoshi; tx_description=Donation to Cyphertoshi</code>
+
+            <h3>How can I support this site?</h3>
+            <p>If you'd like to support the upkeep of this site, you can donate via Bitcoin, Litecoin, or Monero to: <strong>cyphertoshi.com</strong> via OpenAlias in a supported wallet.</p>
+
+            <h3>Is this site open source?</h3>
+            <p>Yes! You can find the full source code on GitHub: <a href="https://github.com/Tech1k/OpenAliasGenerator" target="_blank" rel="noopener noreferrer">github.com/Tech1k/OpenAliasGenerator</a>.</p>
+        </section>
+        <hr/>
+        <p style="font-size: 0.9em; color: gray;">
+            Disclaimer: This tool is provided "as is" with no warranties. Use at your own risk. Always double-check results when configuring critical records.
+        </p>
+        <br/>
+    </body>
+    <script>
+        function copyToClipboard() {
+            const text = output.querySelector("code").innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Copied your OpenAlias TXT record to clipboard!");
+            });
+        }
+    </script>
+</html>

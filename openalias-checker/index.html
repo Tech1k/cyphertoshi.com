@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#5271ff">
+        <link rel="canonical" href="https://cyphertoshi.com/openalias-checker/"/>
+        <meta name="robots" content="index, follow">
+        <meta name="description" content="A simple, open-source, client-side tool to check OpenAlias configurations."/>
+        <meta name="author" content="Tech1k">
+        <title>OpenAlias Checker</title>
+        <link rel="shortcut icon" href="assets/favicon.png"/>
+        <meta property="og:title" content="OpenAlias Checker"/>
+        <meta property="og:description" content="A simple, open-source, client-side tool to check OpenAlias configurations."/>
+        <meta property="og:type" content="website"/>
+        <meta property="og:url" content="https://cyphertoshi.com/openalias-checker/"/>
+        <meta property="og:site_name" content="OpenAlias Checker"/>
+        <meta name="twitter:card" content="summary"/>
+        <meta name="twitter:title" content="OpenAlias Checker"/>
+        <meta name="twitter:description" content="A simple, open-source, client-side tool to check OpenAlias configurations."/>
+        <link rel="stylesheet" href="assets/style.css?v=3">
+    </head>
+    <body id="main">
+        <h1>OpenAlias Domain Checker</h1>
+        <p>A simple, open-source, client-side tool to check OpenAlias configurations.</p>
+        <p>Enter a domain name (e.g. <code>getmonero.org</code>) to verify it's OpenAlias configuration:</p>
+
+        <form id="checkForm">
+            <input type="text" id="domainInput" placeholder="example.com" required>
+            <input type="submit" value="Check OpenAlias">
+        </form>
+
+        <div id="output" class="result"></div>
+
+        <script>
+            const form = document.getElementById('checkForm');
+            const output = document.getElementById('output');
+
+            const isValidDomain = (domain) => {
+            const re = /^((?!-)[A-Za-z0-9-]{1,63}(?<!-)\.)+[A-Za-z]{2,63}$/;
+            return re.test(domain);
+            };
+
+            const resolveTXT = async (domain) => {
+                const resolvers = [
+                    // Cloudflare and Google support DoH lookups
+                    { name: 'Cloudflare DNS', url: 'https://cloudflare-dns.com/dns-query' },
+                    { name: 'Google DNS', url: 'https://dns.google/resolve' } // Use Google's DNS as a fallback
+                ];
+
+                for (const { name, url } of resolvers) {
+                    try {
+                    const res = await fetch(`${url}?name=${domain}&type=TXT`, {
+                        headers: { 'accept': 'application/dns-json' }
+                    });
+                    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+                    const data = await res.json();
+                    return { data, resolver: name };
+                    } catch (err) {
+                        console.warn(`Failed with ${name}: ${err.message}`);
+                    }
+                }
+
+                throw new Error('All DNS resolvers failed.');
+            };
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                output.innerHTML = "Checking DNS TXT records (this may take some time)...";
+                output.style.display = 'block';
+                let raw = document.getElementById('domainInput').value.trim().toLowerCase();
+                let domain = raw.includes('@') ? raw.replace('@', '.') : raw;
+
+                if (!isValidDomain(domain)) {
+                    output.innerHTML = `<span class="error">❌ Not a valid domain name.</span>`;
+                    return;
+                }
+
+                try {
+                    const { data, resolver } = await resolveTXT(domain);
+                    const txtAnswers = data.Answer?.filter(r => r.type === 16);
+                    if (!txtAnswers || txtAnswers.length === 0) {
+                        output.innerHTML = `<span class="error">❌ No TXT records were found for <strong>${raw}</strong> when queried via <strong>${resolver}</strong>. Make sure the domain is set up correctly.</span>`;
+                        return;
+                    }
+
+                    const txtRecords = data.Answer?.filter(r => r.type === 16).map(r => r.data.replace(/^"|"$/g, ''));
+
+                    const oa1Records = [];
+                    for (const txt of txtRecords) {
+                        if (txt.startsWith('oa1:')) {
+                            const oa1Match = txt.match(/^oa1:([a-zA-Z0-9]+)\s*(.*)$/);
+                            if (oa1Match) {
+                            const type = oa1Match[1];
+                            const rest = oa1Match[2];
+
+                            const record = { oa1: type };
+                            rest.split(';').map(p => p.trim()).forEach(p => {
+                                const [k, v] = p.split('=');
+                                if (k && v) record[k.trim()] = v.trim();
+                            });
+                            oa1Records.push(record);
+                            }
+                        }
+                    }
+
+                    if (oa1Records.length === 0) {
+                        output.innerHTML = `<span class="error">❌ No valid OA1 (OpenAlias) TXT records were found for <strong>${raw}</strong> when queried via ${resolver}.</span>`;
+                    } else {
+                        let html = `<h3>OpenAlias Results for <strong>${raw}</strong>, queried via <strong>${resolver}:</h3></strong>`;
+                        oa1Records.forEach((rec, idx) => {
+                            html += `<div><strong>oa1:</strong> ${rec.oa1}<br>`;
+                            Object.keys(rec).forEach(k => {
+                                if (k !== 'oa1') html += `<strong>${k}:</strong> ${rec[k]}<br>`;
+                            });
+                            //html += `<hr>`;
+                            html += '</div><br>';
+                        });
+
+                        // DNSSEC check
+                        const dnssecVerified = data.AD === true;
+                        html += `<strong>DNSSEC Verified:</strong> ${dnssecVerified ? "Yes" : "No"}<br>`;
+                        if (!dnssecVerified) {
+                            html += `<small>Note: DNSSEC is not enabled. Some wallets may not trust OpenAlias configurations without DNSSEC.</small>`;
+                        }
+
+                        html += `<br/><strong>✅ Your OpenAlias DNS TXT record(s) look valid!</strong>`;
+
+                        output.innerHTML = `<div class="valid">${html}</div>`;
+                    }
+                } catch (err) {
+                    console.error(err);
+                    output.innerHTML = `<span class="error">❌ Error checking domain: ${err.message}</span>`;
+                }
+            });
+        </script>
+        <hr>
+        <section style="margin-top: 40px;">
+            <h2>FAQs</h2>
+
+            <h3>What is this site?</h3>
+            <p>This site allows you to verify whether your OpenAlias configuration is valid and matches what you want others to see.</p>
+
+            <h3>What is OpenAlias?</h3>
+            <p>OpenAlias is a DNS TXT record added to a domain that points to a cryptocurrency address, along with optional metadata such as the recipient's name and a transaction description.</p>
+            <p>To learn more, check out the <a href="https://openalias.org/#implement" target="_blank" rel="noopener noreferrer">OpenAlias implementation guide</a>.</p>
+
+            <h4>Example OpenAlias TXT Record for Bitcoin:</h4>
+            <code style="word-break: break-word;">oa1:btc recipient_address=bc1q33pgz4dsal3h2ahkhe8ty0e7z32ttteyz4tx2d; recipient_name=CypherToshi; tx_description=Donation to Cyphertoshi</code>
+
+            <h3>Do you log the domains I check?</h3>
+            <p>No. This site is hosted on GitHub Pages and runs entirely client-side in your browser. However, the DNS resolvers used (Cloudflare or Google) may log your lookup request according to their policies.</p>
+
+            <h3>How can I support this site?</h3>
+            <p>If you'd like to support the upkeep of this site, you can donate via Bitcoin, Litecoin, or Monero to: <strong>cyphertoshi.com</strong> or <strong>tech1k.com</strong> via OpenAlias in a supported wallet.</p>
+
+            <h3>Is this site open source?</h3>
+            <p>Yes! You can find the full source code on GitHub: <a href="https://github.com/Tech1k/OpenAliasChecker" target="_blank" rel="noopener noreferrer">github.com/Tech1k/OpenAliasChecker</a>.</p>
+        </section>
+        <hr/>
+        <p style="font-size: 0.9em; color: gray;">
+            Disclaimer: This tool is provided "as is" with no warranties. Use at your own risk. Always double-check results with your own DNS tools when configuring critical records.
+        </p>
+        <br/>
+    </body>
+</html>
