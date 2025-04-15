@@ -88,6 +88,10 @@ a:visited {
     text-decoration: underline;
 }
 
+#listlink {
+    margin-bottom: 8px;
+}
+
 /* Full/desktop viewport */
 @media (min-width: 1092px) {
     .navbar {
