@@ -1,0 +1,28 @@
+<rss version="2.0">
+    <channel>
+        <title>CypherToshi's RSS Feed</title>
+        <link>https://cyphertoshi.com</link>
+        <description>Updates and news from CypherToshi.</description>
+        <item>
+            <title>Site Update: RSS feed and dedicated page for tools</title>
+            <link>https://cyphertoshi.com</link>
+            <description>CypherToshi.com has been updated to include a RSS feed and a new page dedicated for linking CypherToshi's privacy-focused utilities.</description>
+            <pubDate>Wen, 16 Apr 2025 01:50:00 UTC</pubDate>
+            <guid>https://cyphertoshi.com</guid>
+        </item>
+        <item>
+            <title>New List: OpenAlias Supported Wallets</title>
+            <link>https://cyphertoshi.com/posts/openalias-wallets</link>
+            <description>A list of wallets that support OpenAlias.</description>
+            <pubDate>Tue, 15 Apr 2025 17:45:00 UTC</pubDate>
+            <guid>https://cyphertoshi.com/posts/openalias-wallets</guid>
+        </item>
+        <item>
+            <title>New Note: Genesis</title>
+            <link>https://cyphertoshi.com/posts/genesis</link>
+            <description>A new beginning.</description>
+            <pubDate>Tue, 15 Apr 2025 00:17:00 UTC</pubDate>
+            <guid>https://cyphertoshi.com/posts/genesis</guid>
+        </item>
+    </channel>
+</rss>
