@@ -1,0 +1,125 @@
+<html>
+	<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#5271ff">
+        <link rel="canonical" href="https://cyphertoshi.com/donate"/>
+        <meta name="robots" content="index, follow">
+        <meta name="description" content="Support CypherToshi's mission."/>
+        <meta name="author" content="Tech1k">
+        <title>Donate | Cyphertoshi</title>
+        <link rel="shortcut icon" href="/assets/favicon.png"/>
+        <meta property="og:title" content="Cyphertoshi"/>
+        <meta property="og:description" content="Support Cyphertoshi's mission."/>
+        <meta property="og:type" content="website"/>
+        <meta property="og:url" content="https://cyphertoshi.com/links"/>
+        <meta property="og:site_name" content="CypherToshi"/>
+        <meta name="twitter:card" content="summary"/>
+        <meta name="twitter:title" content="Donate | CypherToshi"/>
+        <meta name="twitter:description" content="Support CypherToshi's mission."/>
+		<link rel="stylesheet" href="/assets/style.css?v=3">
+		<style>
+			.dropdown {
+				position: relative;
+				display: inline-block;
+				margin-bottom: 10px;
+			}
+			.toggle-checkbox {
+				display: none;
+			}
+			.dropdown-label {
+				display: flex;
+				align-items: center;
+				cursor: pointer;
+			}
+			.arrow {
+				margin-right: 8px;
+				transition: transform 0.3s ease;
+			}
+			.dropdown-content {
+				overflow: hidden;
+				max-height: 0;
+				position: relative;
+				transition: max-height 0.3s ease-out;
+				padding: 0 10px;
+			}
+			.toggle-checkbox:checked + .dropdown-label + .dropdown-content {
+				max-height: 300px;
+				padding: 10px;
+			}
+			.toggle-checkbox:checked + .dropdown-label .arrow {
+				transform: rotate(90deg);
+			}
+			.qr-code {
+				width: 150px;
+				height: 150px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="main">
+            <h1>Donate</h1>
+			<p>Thank you for considering supporting my work. CypherToshi.com is an extension of my personal site, Tech1k.com, where I advocate for privacy, the future of money, and offer tools to help others. If you've found value in my projects and insights, your support will help me continue to build and share these resources.</p>
+            <center>
+                <h3>
+                    <a href="/">Home</a> |
+                    <a href="/links.html">Links</a> |
+                    <a href="/notes.html">Notes</a> |
+                    <a href="/tools.html">Toolkit</a> |
+                    <a href="/donate.html" id="curpage">Donate</a>
+                </h3>
+            </center>
+            <hr/>
+			<div>
+			<p>
+				<div style="margin-top: 25px;">
+					<img src="/assets/monero.png" width="28px" alt="Monero icon" style="margin-right: 3px; vertical-align: middle;"><b>Monero (XMR):</b>
+					<p style="word-break: break-word;">4AjmsjSoVXF6TJgVfu4i4r1XfBqt76hVZRFPUqrmoATERZ65u2oDBdEFuZTd6wqL2MTTGEgV8456xEXMMBUEaEP6EShonnC</p>
+					<div class="dropdown">
+						<input type="checkbox" id="toggle1" class="toggle-checkbox">
+						<label for="toggle1" class="dropdown-label">
+							<span class="arrow">&#9654;</span> QR Code
+						</label>
+						<div class="dropdown-content">
+							<img src="/assets/xmr-qr.png" alt="XMR QR Code" class="qr-code">
+						</div>
+					</div>
+				</div>
+				<div style="margin-top: 25px;">
+					<img src="/assets/litecoin.png" width="28px" alt="Litecoin icon" style="margin-right: 3px; vertical-align: middle;"><b>Litecoin (LTC):</b>
+					<p style="word-break: break-word;">ltc1q49qxt7zllrzzejvu8sy344vtnfw4a5yk6rjndk</p>
+					<div class="dropdown">
+						<input type="checkbox" id="toggle2" class="toggle-checkbox">
+						<label for="toggle2" class="dropdown-label">
+							<span class="arrow">&#9654;</span> QR Code
+						</label>
+						<div class="dropdown-content">
+							<img src="/assets/ltc-qr.png" alt="LTC QR Code" class="qr-code">
+						</div>
+					</div>
+				</div>
+				<div style="margin-top: 25px;">
+					<img src="/assets/bitcoin.png" width="28px" alt="Bitcoin icon" style="margin-right: 3px; vertical-align: middle;"><b>Bitcoin (BTC):</b>
+					<p style="word-break: break-word;">bc1q33pgz4dsal3h2ahkhe8ty0e7z32ttteyz4tx2d</p>
+					<div class="dropdown">
+						<input type="checkbox" id="toggle3" class="toggle-checkbox">
+						<label for="toggle3" class="dropdown-label">
+							<span class="arrow">&#9654;</span> QR Code
+						</label>
+						<div class="dropdown-content">
+							<img src="/assets/btc-qr.png" alt="BTC QR Code" class="qr-code">
+						</div>
+					</div>
+				</div>
+				<div style="margin-top: 25px;">
+					<p><b>OpenAlias:</b> cyphertoshi.com</p>
+				</div>
+				<div style="margin-top: 25px;">
+					<img src="/assets/bmc.png" width="28px" style="margin-right: 3px; vertical-align: middle;"><b>Buy Me a Coffee:</b>
+					<p style="word-break: break-word;"><a href="https://buymeacoffee.com/tech1k" target="_blank">buymeacoffee.com/tech1k</p>
+				</div>
+				<br/>
+			</p>
+		</div>
+	</body>
+</html>
