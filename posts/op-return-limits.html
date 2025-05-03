@@ -1,0 +1,91 @@
+<html>
+	<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#5271ff">
+        <link rel="canonical" href="https://cyphertoshi.com/posts/op-return-limits"/>
+        <meta name="robots" content="index, follow">
+        <meta name="description" content="My opinion on the removal of size restrictions on OP_RETURN as proposed in Bitcoin Core PR #32359."/>
+        <meta name="author" content="Tech1k">
+        <title>Thoughts on Bitcoin Core PR #32359 and OP_RETURN Size Limits | CypherToshi's Notes</title>
+        <link rel="shortcut icon" href="/assets/favicon.png"/>
+        <meta property="og:title" content="Thoughts on Bitcoin Core PR #32359 and OP_RETURN Size Limits | CypherToshi's Notes"/>
+        <meta property="og:description" content="My opinion on the removal of size restrictions on OP_RETURN as proposed in Bitcoin Core PR #32359."/>
+        <meta property="og:type" content="website"/>
+        <meta property="og:url" content="https://cyphertoshi.com/posts/op-return-limits"/>
+        <meta property="og:site_name" content="CypherToshi's Notes"/>
+        <meta name="twitter:card" content="summary"/>
+        <meta name="twitter:title" content="Thoughts on Bitcoin Core PR #32359 and OP_RETURN Size Limits | CypherToshi's Notes"/>
+        <meta name="twitter:description" content="My opinion on the removal of size restrictions on OP_RETURN as proposed in Bitcoin Core PR #32359."/>
+		<link rel="stylesheet" href="/assets/style.css?v=2">
+	</head>
+	<body>
+		<div id="main">
+            <div>
+                <center>
+                    <h1>Thoughts on Bitcoin Core PR #32359 and OP_RETURN Size Limits</h1>
+                    <p>May 3, 2025</p>
+                    <h3>
+                        <a href="/">Home</a> |
+                        <a href="/links.html">Links</a> |
+                        <a href="/notes.html">Notes</a> |
+                        <a href="/tools.html">Toolkit</a> |
+                        <a href="/donate.html">Donate</a>
+                    </h3>
+                </center>
+                <hr/>
+                <section id="content">
+                    <p>
+
+                        This is my opinion in response to Bitcoin Core PR <a href="https://github.com/bitcoin/bitcoin/pull/32359" target="_blank" rel="noopener">#32359</a>.
+                        I've been involved in cryptocurrencies since 2013 and have followed debates surrounding OP_RETURN size limits and discourse around modifying consensus-level restrictions.
+                        My personal view on this matter hopes to align with Satoshi Nakamoto's original vision for Bitcoin: Bitcoin should remain fast, efficient, and focused on being a peer-to-peer electronic cash system, not a general-purpose data storage network <sup><a href="#footnotes">[1]</a></sup>.
+                        The risk of long-term blockchain bloat could lead to centralization of nodes and undermine the ethos of Bitcoin.
+                        <br/><br/>
+                        While this pull request proposes removing arbitrary limits on OP_RETURN data size, it doesn't directly change the general consensus rules.
+                        However, since most major mining pools that mine the majority of blocks, typically upgrade to the latest Bitcoin Core release.
+                        This change could effectively lead to the overall removal of OP_RETURN size limits across the entire Bitcoin network, creating a pseudo-consensus change.
+                        <br/><br/>
+                        I believe that if this pull request is approved, we will witness an substantial increase of OP_RETURN data embedded into the blockchain, particularly with protocols like Ordinals.
+                        Ordinals uses a couple workarounds, such as storing data within witness scripts via fake spends and utilizing Taproot to output data across many paths <sup><a href="#footnotes">[2]</a></sup>.
+                        This approach has already allowed a significant amount of data to be inscribed onto the Bitcoin blockchain.
+                        Since the launch of Ordinals (post-Taproot in 2021), it is estimated that the blockchain size has increased by hundreds of gigabytes, with a substantial portion of this increase linked directly to Ordinal inscriptions.
+                        <br/><br/>
+                        This is not at the direct fault of Taproot as it was designed to enhance Bitcoin's script capabilities and privacy <sup><a href="#footnotes">[3]</a></sup>, but it's use by protocols like Ordinals has exploited its enhancements in ways not originally intended.
+                        This has contributed to blockchain bloat which raises important questions about Bitcoin's long-term scalability and centralization mitigation <sup><a href="#footnotes">[4]</a></sup>.
+                        In particular, the main concern is whether the blockchain can keep scaling without an increase of centralization by a decrease of independent node operators as they may not have the storage capacity to operate full nodes.
+                        <br/><br/>
+                        Furthermore, if this change is approved, we could see a significant increase in transaction fees <sup><a href="#footnotes">[5]</a></sup>.
+                        This would occur due to increased competition for block space particularly if non-limited OP_RETURN data is adopted in mass-scale by protocols such as Ordinals.
+                        The increase of block space demand may cause delays in transactions potentially requiring users to wait for additional block before their transactions are confirmed, especially during times of network congestion.
+                        <br/><br/>
+                        In conclusion, I strongly believe that the approval of this PR could significantly impact block space utilization which will lead to higher minimum fee rates and add a substantial amount of bloat onto the blockchain.
+                        This could have many negative consequences, including potential centralization of node operators due to higher storage requirements and a negative user experience.
+                        For the average user, this could mean waiting for several blocks until a transaction is confirmed, especially in periods of high demand.
+                        <br/><br/>
+                        In my opinion, this pull request should not be merged in its current form.
+                        Instead, I suggest it should be refined to allow for dynamic adjustments or chaining of OP_RETURNS within a single script.
+                        This would enable increased fees to prevent abuse of the limited block space while maintaining a balance between blockchain efficiency and network decentralization.
+                    </p>
+                </section>
+                <hr/>
+                <section id="footnotes">
+                    <h3>Footnotes</h3>
+                    <sup>[1]</sup><a href="https://bitcoin.org/bitcoin.pdf" target="_blank" rel="noopener">Bitcoin Whitepaper</a>
+                    <br/><br/>
+                    <sup>[2]</sup><a href="https://docs.ordinals.com/inscriptions.html" target="_blank" rel="noopener">Ordinals Documentation</a>
+                    <br/><br/>
+                    <sup>[3]</sup><a href="https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki" target="_blank" rel="noopener">BIP-341 (Taproot)</a>
+                    <br/><br/>
+                    <sup>[4]</sup><a href="https://en.bitcoin.it/wiki/Block_size_limit_controversy" target="_blank" rel="noopener">Block size limit controversy</a>
+                    <br/><br/>
+                    <sup>[4]</sup><a href="https://jochen-hoenicke.de/queue/#BTC,30d,weight" target="_blank" rel="noopener">Johoe's mempool stats</a>
+                </section>
+                <br/>
+                <footer>
+                    <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>. This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>.</p>
+                </footer>
+            </div>
+		</div>
+	</body>
+</html>
