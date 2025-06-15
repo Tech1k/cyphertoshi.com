@@ -4,8 +4,15 @@
         <link>https://cyphertoshi.com</link>
         <description>Updates and news from CypherToshi.</description>
         <item>
+            <title>Scalability Constraints of Bitcoin (PDF)</title>
+            <link>https://cyphertoshi.com/docs/scalability-constraints-of-bitcoin.pdf</link>
+            <description>A technical analysis of Bitcoin's scalability limitations.</description>
+            <pubDate>Sun, 15 Jun 2025 20:15:00 UTC</pubDate>
+            <guid>https://cyphertoshi.com/docs/scalability-constraints-of-bitcoin.pdf</guid>
+        </item>
+        <item>
             <title>Thoughts on Bitcoin Core PR #32359 and OP_RETURN Size Limits</title>
-            <link>https://cyphertoshi.com/posts/openalias-wallets</link>
+            <link>https://cyphertoshi.com/posts/op-return-limits</link>
             <description>My opinion on the removal of size restrictions on OP_RETURN as proposed in Bitcoin Core PR #32359.</description>
             <pubDate>Sat, 3 May 2025 05:00:00 UTC</pubDate>
             <guid>https://cyphertoshi.com/posts/op-return-limits</guid>
