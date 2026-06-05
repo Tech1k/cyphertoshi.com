@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#5271ff">
+        <link rel="canonical" href="https://cyphertoshi.com/monero-node-config-generator"/>
+        <meta name="robots" content="index, follow">
+        <meta name="description" content="A simple, open-source, client-side tool to generate a monerod.conf configuration file for running your own Monero node."/>
+        <meta name="author" content="Tech1k">
+        <title>Monero Node Config Generator</title>
+        <link rel="shortcut icon" href="assets/favicon.png"/>
+        <meta property="og:title" content="Monero Node Config Generator"/>
+        <meta property="og:description" content="A simple, open-source, client-side tool to generate a monerod.conf configuration file for running your own Monero node."/>
+        <meta property="og:type" content="website"/>
+        <meta property="og:url" content="https://cyphertoshi.com/monero-node-config-generator"/>
+        <meta property="og:site_name" content="Monero Node Config Generator"/>
+        <meta name="twitter:card" content="summary"/>
+        <meta name="twitter:title" content="Monero Node Config Generator"/>
+        <meta name="twitter:description" content="A simple, open-source, client-side tool to generate a monerod.conf configuration file for running your own Monero node."/>
+        <link rel="stylesheet" href="assets/style.css?v=1">
+    </head>
+    <body id="main">
+        <h1>Monero Node Config Generator</h1>
+        <p>A simple, open-source, client-side tool to generate a <code>monerod.conf</code> configuration file for running your own Monero node. Nothing leaves your browser.</p>
+
+        <form id="configForm">
+            <fieldset>
+                <legend>Quick start preset</legend>
+                <label>Start from a recommended config, then tweak as needed:</label><br/>
+                <select id="preset">
+                    <option value="private" selected>Private local node (wallet use, full blockchain)</option>
+                    <option value="pruned">Pruned local node (low disk space)</option>
+                    <option value="public">Public restricted RPC node (help the network)</option>
+                    <option value="tor">Tor privacy node (broadcast over Tor)</option>
+                    <option value="custom">Custom (don't change my fields)</option>
+                </select>
+            </fieldset>
+
+            <fieldset>
+                <legend>Network &amp; storage</legend>
+                <label>Network:</label><br/>
+                <select id="network">
+                    <option value="mainnet" selected>Mainnet (real XMR)</option>
+                    <option value="stagenet">Stagenet (testing, real-like)</option>
+                    <option value="testnet">Testnet</option>
+                </select>
+                <br/><br/>
+                <label>Data directory (optional, where the blockchain is stored):</label><br/>
+                <input type="text" id="dataDir" placeholder="e.g. /home/user/.bitmonero">
+                <br/><br/>
+                <label class="check"><input type="checkbox" id="prune"> Enable blockchain pruning (saves ~2/3 of disk space)</label>
+                <br/><br/>
+                <label>Database sync mode:</label><br/>
+                <select id="syncMode">
+                    <option value="default" selected>Default (fast while syncing, safe near the tip)</option>
+                    <option value="safe">Safe (fsync every block, slowest but safest)</option>
+                </select>
+            </fieldset>
+
+            <fieldset>
+                <legend>RPC access</legend>
+                <label>RPC access mode:</label><br/>
+                <select id="rpcMode">
+                    <option value="local" selected>Local only (127.0.0.1) for private wallet use</option>
+                    <option value="public">Public restricted RPC node (share with the network)</option>
+                </select>
+                <br/><br/>
+                <label>Restricted RPC port (used in public mode):</label><br/>
+                <input type="number" id="rpcPort" placeholder="default=18089 (mainnet)">
+                <br/><br/>
+                <label class="check"><input type="checkbox" id="zmq"> Enable ZMQ RPC (needed by some wallets/tools, e.g. LWS)</label>
+            </fieldset>
+
+            <fieldset>
+                <legend>P2P &amp; peers</legend>
+                <label>P2P port (optional):</label><br/>
+                <input type="number" id="p2pPort" placeholder="default=18080 (mainnet)">
+                <br/><br/>
+                <label>Max outgoing peers (optional):</label><br/>
+                <input type="number" id="outPeers" placeholder="default=12">
+                <br/><br/>
+                <label>Max incoming peers (optional):</label><br/>
+                <input type="number" id="inPeers" placeholder="default=-1 (unlimited)">
+                <br/><br/>
+                <label>Upload rate limit kB/s (optional):</label><br/>
+                <input type="number" id="limitUp" placeholder="default=8192">
+                <br/><br/>
+                <label>Download rate limit kB/s (optional):</label><br/>
+                <input type="number" id="limitDown" placeholder="default=32768">
+                <br/><br/>
+                <label class="check"><input type="checkbox" id="noIgd" checked> Disable UPnP/IGD port forwarding (recommended)</label>
+            </fieldset>
+
+            <fieldset>
+                <legend>Privacy (Tor)</legend>
+                <label class="check"><input type="checkbox" id="torProxy"> Route transaction broadcasts over Tor (SOCKS proxy at 127.0.0.1:9050)</label>
+                <br/><br/>
+                <label>Tor hidden-service inbound address (optional):</label><br/>
+                <input type="text" id="onion" placeholder="e.g. abcd...xyz.onion:18084">
+            </fieldset>
+
+            <fieldset>
+                <legend>Logging &amp; advanced</legend>
+                <label>Log level (0 = least, 4 = most verbose):</label><br/>
+                <select id="logLevel">
+                    <option value="" selected>Default (0)</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+                <br/><br/>
+                <label>Max number of log files to keep (optional):</label><br/>
+                <input type="number" id="maxLogFiles" placeholder="default=10">
+                <br/><br/>
+                <label>Extra raw config lines (optional, one per line):</label><br/>
+                <input type="text" id="extra" placeholder="e.g. max-concurrency=4">
+            </fieldset>
+
+            <input type="submit" value="Generate monerod.conf">
+        </form>
+
+        <div id="output" class="result"></div>
+
+        <script>
+            const configForm = document.getElementById('configForm');
+            const output = document.getElementById('output');
+
+            // Default ports per network. zmq is the ZMQ-RPC port (18082, not the 18083 Pub port).
+            // The Tor inbound port is a dedicated P2P listener, separate from these.
+            const PORTS = {
+                mainnet:  { p2p: 18080, rpc: 18081, restricted: 18089, zmq: 18082 },
+                stagenet: { p2p: 38080, rpc: 38081, restricted: 38089, zmq: 38082 },
+                testnet:  { p2p: 28080, rpc: 28081, restricted: 28089, zmq: 28082 }
+            };
+
+            function val(id) { return document.getElementById(id).value.trim(); }
+            function checked(id) { return document.getElementById(id).checked; }
+
+            // Recommended starting configs. Any field omitted is left at its default/blank.
+            const PRESETS = {
+                private: { prune: false, syncMode: 'default', rpcMode: 'local', zmq: false, noIgd: true, torProxy: false },
+                pruned:  { prune: true,  syncMode: 'default', rpcMode: 'local', zmq: false, noIgd: true, torProxy: false },
+                public:  { prune: false, syncMode: 'default', rpcMode: 'public', zmq: false, noIgd: true, torProxy: false, outPeers: '64', inPeers: '128' },
+                tor:     { prune: false, syncMode: 'default', rpcMode: 'local', zmq: false, noIgd: true, torProxy: true }
+            };
+
+            // Fields cleared before a preset is applied, so switching presets doesn't leave stragglers.
+            const PRESET_FIELDS = ['prune','syncMode','rpcMode','zmq','noIgd','torProxy','outPeers','inPeers'];
+
+            function applyPreset(name) {
+                const preset = PRESETS[name];
+                if (!preset) return; // "custom" leaves everything untouched
+                PRESET_FIELDS.forEach(function (id) {
+                    const el = document.getElementById(id);
+                    if (el.type === 'checkbox') el.checked = false;
+                    else if (el.tagName === 'SELECT') el.selectedIndex = 0;
+                    else el.value = '';
+                });
+                Object.keys(preset).forEach(function (id) {
+                    const el = document.getElementById(id);
+                    if (el.type === 'checkbox') el.checked = preset[id];
+                    else el.value = preset[id];
+                });
+            }
+
+            document.getElementById('preset').addEventListener('change', function () {
+                applyPreset(this.value);
+            });
+
+            // If the user tweaks a preset-controlled field by hand, mark the preset as "custom".
+            // Programmatic changes in applyPreset() don't fire 'change', so this won't loop.
+            PRESET_FIELDS.forEach(function (id) {
+                document.getElementById(id).addEventListener('change', function () {
+                    document.getElementById('preset').value = 'custom';
+                });
+            });
+
+            // Keep the port hint placeholders in sync with the selected network.
+            function updatePortHints() {
+                const p = PORTS[val('network')];
+                document.getElementById('rpcPort').placeholder = 'default=' + p.restricted;
+                document.getElementById('p2pPort').placeholder = 'default=' + p.p2p;
+            }
+            document.getElementById('network').addEventListener('change', updatePortHints);
+            updatePortHints();
+
+            // Apply the default preset on load so the form reflects a sensible starting config.
+            applyPreset(document.getElementById('preset').value);
+
+            configForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                output.style.display = 'block';
+
+                const network = val('network');
+                const ports = PORTS[network];
+                const lines = [];
+
+                lines.push('# monerod.conf generated with cyphertoshi.com/monero-node-config-generator');
+                lines.push('# Run with: monerod --config-file /path/to/monerod.conf');
+                lines.push('');
+
+                // Network
+                if (network === 'testnet') lines.push('testnet=1');
+                if (network === 'stagenet') lines.push('stagenet=1');
+
+                const dataDir = val('dataDir');
+                if (dataDir) lines.push('data-dir=' + dataDir);
+
+                if (checked('prune')) lines.push('prune-blockchain=1');
+
+                // "default" leaves db-sync-mode unset (monerod's own default already syncs
+                // fast while catching up and switches to safe near the chain tip).
+                const syncMode = val('syncMode');
+                if (syncMode === 'safe') lines.push('db-sync-mode=safe:sync');
+
+                lines.push('');
+                lines.push('# RPC');
+                const rpcMode = val('rpcMode');
+                if (rpcMode === 'public') {
+                    const rpcPort = val('rpcPort') || ports.restricted;
+                    lines.push('public-node=1');
+                    lines.push('rpc-restricted-bind-ip=0.0.0.0');
+                    lines.push('rpc-restricted-bind-port=' + rpcPort);
+                    lines.push('confirm-external-bind=1');
+                    // Keep the unrestricted RPC private
+                    lines.push('rpc-bind-ip=127.0.0.1');
+                    lines.push('rpc-bind-port=' + ports.rpc);
+                } else {
+                    // Local node: unrestricted RPC, but bound to localhost only so it stays private.
+                    lines.push('rpc-bind-ip=127.0.0.1');
+                    lines.push('rpc-bind-port=' + ports.rpc);
+                }
+
+                if (checked('zmq')) {
+                    lines.push('zmq-rpc-bind-ip=127.0.0.1');
+                    lines.push('zmq-rpc-bind-port=' + ports.zmq);
+                } else {
+                    lines.push('no-zmq=1');
+                }
+
+                lines.push('');
+                lines.push('# P2P & peers');
+                const p2pPort = val('p2pPort') || ports.p2p;
+                lines.push('p2p-bind-port=' + p2pPort);
+                const outPeers = val('outPeers');
+                if (outPeers) lines.push('out-peers=' + outPeers);
+                const inPeers = val('inPeers');
+                if (inPeers) lines.push('in-peers=' + inPeers);
+                const limitUp = val('limitUp');
+                if (limitUp) lines.push('limit-rate-up=' + limitUp);
+                const limitDown = val('limitDown');
+                if (limitDown) lines.push('limit-rate-down=' + limitDown);
+                if (checked('noIgd')) lines.push('no-igd=1');
+
+                // Privacy
+                const torProxy = checked('torProxy');
+                const onion = val('onion');
+                if (torProxy || onion) {
+                    lines.push('');
+                    lines.push('# Privacy (Tor)');
+                    if (torProxy) lines.push('tx-proxy=tor,127.0.0.1:9050,disable_noise');
+                    if (onion) {
+                        // anonymous-inbound = <onion:port>,<local-bind:port>. The local port must
+                        // match the port your torrc HiddenServicePort forwards to, so mirror the
+                        // port from the onion address (defaulting to a dedicated Tor P2P port).
+                        const m = onion.match(/:(\d+)\s*$/);
+                        const inPort = m ? m[1] : '18084';
+                        const onionAddr = m ? onion : onion + ':18084';
+                        lines.push('anonymous-inbound=' + onionAddr + ',127.0.0.1:' + inPort);
+                    }
+                }
+
+                // Logging & advanced
+                const logLevel = val('logLevel');
+                const maxLogFiles = val('maxLogFiles');
+                const extra = val('extra');
+                if (logLevel || maxLogFiles || extra) {
+                    lines.push('');
+                    lines.push('# Logging & advanced');
+                    if (logLevel) lines.push('log-level=' + logLevel);
+                    if (maxLogFiles) lines.push('max-log-files=' + maxLogFiles);
+                    if (extra) extra.split('\n').forEach(function (l) {
+                        l = l.trim();
+                        if (l) lines.push(l);
+                    });
+                }
+
+                // Collapse any runs of blank lines that occur when a section is empty.
+                const conf = lines.join('\n').replace(/\n{3,}/g, '\n\n');
+
+                output.innerHTML = '<p><strong>Your monerod.conf:</strong></p>' +
+                    '<pre class="result" id="confOutput" style="display:block;">' + escapeHtml(conf) + '</pre>' +
+                    '<button type="button" onclick="copyToClipboard()">Copy config</button> ' +
+                    '<button type="button" onclick="downloadConf()">Download monerod.conf</button>' +
+                    '<p>Save this as <code>monerod.conf</code> and start your node with ' +
+                    '<code>monerod --config-file /path/to/monerod.conf</code>. ' +
+                    'If you run a public node, remember to open your P2P (and restricted RPC) port on your firewall/router.</p>';
+            });
+
+            function escapeHtml(s) {
+                return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
+        </script>
+        <hr>
+        <section style="margin-top: 40px;">
+            <h2>FAQs</h2>
+
+            <h3>What is this site?</h3>
+            <p>This site lets you generate a <code>monerod.conf</code> configuration file for running your own Monero node, entirely within your browser. No data is sent anywhere.</p>
+
+            <h3>What is a Monero node?</h3>
+            <p>A Monero node runs <code>monerod</code>, the Monero daemon, which downloads and validates the blockchain and relays transactions across the peer-to-peer network. Running your own node means you don't have to trust a third party's node when using your wallet.</p>
+
+            <h3>What's the difference between a private and a public node?</h3>
+            <p>A <strong>local-only</strong> node binds its RPC to <code>127.0.0.1</code> so only you (or wallets on the same machine/LAN) can use it. A <strong>public restricted RPC node</strong> exposes a limited, read-only RPC interface so others on the network can connect their wallets to it, helping decentralize the network.</p>
+
+            <h3>What is blockchain pruning?</h3>
+            <p>Pruning discards most of the older, already-validated transaction data, reducing disk usage by roughly two-thirds while still fully validating the chain. It's a good option if you're short on disk space.</p>
+
+            <h3>Where do I put the config file?</h3>
+            <p>Anywhere you like. Common locations are <code>/etc/monerod.conf</code> or alongside your data directory. Then start the daemon with <code>monerod --config-file /path/to/monerod.conf</code>. For full details, see the <a href="https://docs.getmonero.org/interacting/monerod-reference/" target="_blank" rel="noopener noreferrer">monerod reference</a>.</p>
+
+            <h3>Is this site open source?</h3>
+            <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/monero-node-config-generator" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+        </section>
+        <hr/>
+        <p style="font-size: 0.9em; color: gray;">
+            Disclaimer: This tool is provided "as is" with no warranties. Use at your own risk. Always double-check the generated configuration and consult the official Monero documentation before running a node.
+        </p>
+        <br/>
+    </body>
+    <script>
+        function copyToClipboard() {
+            const text = document.getElementById("confOutput").innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Copied your monerod.conf to clipboard!");
+            });
+        }
+
+        function downloadConf() {
+            const text = document.getElementById("confOutput").innerText;
+            const blob = new Blob([text], { type: "text/plain" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "monerod.conf";
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+    </script>
+</html>

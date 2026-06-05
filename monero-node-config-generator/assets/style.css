@@ -33,10 +33,39 @@ a:visited {
 	}
 }
 
-input[type="text"] {
+input[type="text"], input[type="number"], select {
 	padding: 10px;
 	font-size: 16px;
 	width: 250px;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+input[type="checkbox"] {
+	width: 16px;
+	height: 16px;
+	vertical-align: middle;
+}
+
+label.check {
+	display: inline-block;
+	cursor: pointer;
+}
+
+fieldset {
+	border: 1px solid #666;
+	margin: 0 0 20px 0;
+	padding: 15px;
+}
+
+legend {
+	font-weight: bold;
+	padding: 0 6px;
+}
+
+pre.result {
+	white-space: pre-wrap;
+	font-family: monospace;
 }
 
 input[type="submit"] {
