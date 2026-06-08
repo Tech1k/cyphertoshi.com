@@ -7,4 +7,4 @@ The live site is accessible over the clearnet and Tor:
 
 - Clearnet: [cyphertoshi.com](https://cyphertoshi.com)
 
-- Tor: [bck7t6qyjlkrqt4la4njef57icl6f2aqzx6f2wzutaj4yzy2mqnafjad.onion](http://bck7t6qyjlkrqt4la4njef57icl6f2aqzx6f2wzutaj4yzy2mqnafjad.onion)
+- Tor: [d7w3gz2atjwmvxtjr32j4rwskgro7vsyxvzt4l2bivcrtbos3drkjcqd.onion](http://d7w3gz2atjwmvxtjr32j4rwskgro7vsyxvzt4l2bivcrtbos3drkjcqd.onion)
