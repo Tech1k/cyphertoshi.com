@@ -4,37 +4,45 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="theme-color" content="#5271ff">
-        <link rel="canonical" href="https://cyphertoshi.com/openalias-generator"/>
+        <meta name="referrer" content="no-referrer">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
+        <link rel="canonical" href="https://cyphertoshi.com/openalias-generator/"/>
         <meta name="robots" content="index, follow">
         <meta name="description" content="A simple, open-source, client-side tool to generate OpenAlias TXT records to place in your domain's DNS settings"/>
         <meta name="author" content="Tech1k">
         <title>OpenAlias Generator</title>
-        <link rel="shortcut icon" href="assets/favicon.png"/>
+        <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
         <meta property="og:title" content="OpenAlias Generator"/>
         <meta property="og:description" content="A simple, open-source, client-side tool to generate OpenAlias TXT records to place in your domain's DNS settings"/>
         <meta property="og:type" content="website"/>
-        <meta property="og:url" content="https://cyphertoshi.com/openalias-generator"/>
+        <meta property="og:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta property="og:image:width" content="1200"/>
+        <meta property="og:image:height" content="630"/>
+        <meta property="og:url" content="https://cyphertoshi.com/openalias-generator/"/>
         <meta property="og:site_name" content="OpenAlias Generator"/>
-        <meta name="twitter:card" content="summary"/>
+        <meta name="twitter:card" content="summary_large_image"/>
+        <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
         <meta name="twitter:title" content="OpenAlias Generator"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to generate OpenAlias TXT records to place in your domain's DNS settings"/>
-        <link rel="stylesheet" href="assets/style.css?v=3">
+        <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
+        <link rel="stylesheet" href="/assets/tool.css?v=1">
     </head>
     <body id="main">
         <h1>OpenAlias TXT Record Generator</h1>
         <p>A simple, open-source, client-side tool to generate OpenAlias TXT records to place in your domain's DNS settings.</p>
         
         <form id="aliasForm">
-            <label>Cryptocurrency type (e.g., xmr, ltc, btc):</label><br/>
+            <label for="typeInput">Cryptocurrency type (e.g., xmr, ltc, btc):</label><br/>
             <input type="text" id="typeInput" placeholder="e.g. xmr (only one coin)" required>
             <br/><br/>
-            <label>Recipient address:</label><br/>
+            <label for="addressInput">Recipient address:</label><br/>
             <input type="text" id="addressInput" placeholder="your crypto address" required>
             <br/><br/>        
-            <label>Recipient name (optional):</label><br/>
+            <label for="nameInput">Recipient name (optional):</label><br/>
             <input type="text" id="nameInput" placeholder="e.g. John Monero">
             <br/><br/>
-            <label>Transaction description (optional):</label><br/>
+            <label for="descInput">Transaction description (optional):</label><br/>
             <input type="text" id="descInput" placeholder="e.g. Donation to John Monero">
             <br/><br/>
             <input type="submit" value="Generate OpenAlias TXT Record">
@@ -45,6 +53,9 @@
         <script>
             const aliasForm = document.getElementById('aliasForm');
             const output = document.getElementById('output');
+
+            const escapeHtml = (s) =>
+                String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
             aliasForm.addEventListener('submit', function (e) {
                 e.preventDefault();
@@ -62,7 +73,7 @@
                     return;
                 }
 
-                // Validate address length, using 20 chars as a general checksum
+                // Validate address length (a minimal sanity check, not a real checksum)
                 if (address.length < 20) {
                     output.innerHTML = `<span class="error">❌ The address seems too short. It should be at least 20 characters.</span>`;
                     return;
@@ -76,7 +87,7 @@
                 const AliasRecord = `"${oa_record}"`;
 
                     
-                output.innerHTML = `<p><strong>Your OpenAlias TXT Record:</strong></p><code style="word-break: break-word;">${AliasRecord}</code><br/><br/>
+                output.innerHTML = `<p><strong>Your OpenAlias TXT Record:</strong></p><code style="word-break: break-word;">${escapeHtml(AliasRecord)}</code><br/><br/>
                     <p>Add this to your DNS settings as a TXT record for the domain you want to use as your OpenAlias (e.g. <code>donate.example.com</code> for <code>donate@getmonero.org</code> or <code>getmonero.org</code> for a root domain). Make sure DNSSEC is enabled on your domain!
                     <br/><br/><button type="button" onclick="copyToClipboard()">Copy TXT Record</button></p>`;
             });
@@ -96,7 +107,7 @@
             <code style="word-break: break-word;">oa1:btc recipient_address=bc1q33pgz4dsal3h2ahkhe8ty0e7z32ttteyz4tx2d; recipient_name=Cyphertoshi; tx_description=Donation to Cyphertoshi</code>
 
             <h3>Does every wallet support OpenAlias?</h3>
-            <p>Not all wallets currently support OpenAlias, but many popular ones for Monero, Bitcoin, and Litecoin do. You can find a list of compatible wallets <a href="https://cyphertoshi.com/posts/openalias-wallets" target="_blank" rel="noopener noreferrer">here</a>. If your wallet doesn't support OpenAlias yet and you'd like it to, consider reaching out to the developers of the wallet to request integration!</p>
+            <p>Not all wallets currently support OpenAlias, but many popular ones for Monero, Bitcoin, and Litecoin do. You can find a list of compatible wallets <a href="/posts/openalias-wallets" target="_blank" rel="noopener noreferrer">here</a>. If your wallet doesn't support OpenAlias yet and you'd like it to, consider reaching out to the developers of the wallet to request integration!</p>
 
             <h3>Is this site open source?</h3>
             <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/openalias-generator" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>

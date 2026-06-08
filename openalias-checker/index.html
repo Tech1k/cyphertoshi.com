@@ -4,21 +4,29 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="theme-color" content="#5271ff">
+        <meta name="referrer" content="no-referrer">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src https://cloudflare-dns.com https://dns.google; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
         <link rel="canonical" href="https://cyphertoshi.com/openalias-checker/"/>
         <meta name="robots" content="index, follow">
         <meta name="description" content="A simple, open-source, client-side tool to check OpenAlias configurations."/>
         <meta name="author" content="Tech1k">
         <title>OpenAlias Checker</title>
-        <link rel="shortcut icon" href="assets/favicon.png"/>
+        <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
         <meta property="og:title" content="OpenAlias Checker"/>
         <meta property="og:description" content="A simple, open-source, client-side tool to check OpenAlias configurations."/>
         <meta property="og:type" content="website"/>
+        <meta property="og:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta property="og:image:width" content="1200"/>
+        <meta property="og:image:height" content="630"/>
         <meta property="og:url" content="https://cyphertoshi.com/openalias-checker/"/>
         <meta property="og:site_name" content="OpenAlias Checker"/>
-        <meta name="twitter:card" content="summary"/>
+        <meta name="twitter:card" content="summary_large_image"/>
+        <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
         <meta name="twitter:title" content="OpenAlias Checker"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to check OpenAlias configurations."/>
-        <link rel="stylesheet" href="assets/style.css?v=3">
+        <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
+        <link rel="stylesheet" href="/assets/tool.css?v=1">
     </head>
     <body id="main">
         <h1>OpenAlias Domain Checker</h1>
@@ -26,6 +34,7 @@
         <p>Enter a domain name (e.g. <code>getmonero.org</code>) to verify it's OpenAlias configuration:</p>
 
         <form id="checkForm">
+            <label for="domainInput">Domain name:</label><br/>
             <input type="text" id="domainInput" placeholder="example.com" required>
             <input type="submit" value="Check OpenAlias">
         </form>
@@ -40,6 +49,9 @@
             const re = /^((?!-)[A-Za-z0-9-]{1,63}(?<!-)\.)+[A-Za-z]{2,63}$/;
             return re.test(domain);
             };
+
+            const escapeHtml = (s) =>
+                String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
             const resolveTXT = async (domain) => {
                 const resolvers = [
@@ -80,7 +92,7 @@
                     const { data, resolver } = await resolveTXT(domain);
                     const txtAnswers = data.Answer?.filter(r => r.type === 16);
                     if (!txtAnswers || txtAnswers.length === 0) {
-                        output.innerHTML = `<span class="error">❌ No TXT records were found for <strong>${raw}</strong> when queried via <strong>${resolver}</strong>. Make sure the domain is set up correctly.</span>`;
+                        output.innerHTML = `<span class="error">❌ No TXT records were found for <strong>${escapeHtml(raw)}</strong> when queried via <strong>${escapeHtml(resolver)}</strong>. Make sure the domain is set up correctly.</span>`;
                         return;
                     }
 
@@ -105,13 +117,13 @@
                     }
 
                     if (oa1Records.length === 0) {
-                        output.innerHTML = `<span class="error">❌ No valid OA1 (OpenAlias) TXT records were found for <strong>${raw}</strong> when queried via ${resolver}.</span>`;
+                        output.innerHTML = `<span class="error">❌ No valid OA1 (OpenAlias) TXT records were found for <strong>${escapeHtml(raw)}</strong> when queried via ${escapeHtml(resolver)}.</span>`;
                     } else {
-                        let html = `<h3>OpenAlias Results for <strong>${raw}</strong>, queried via <strong>${resolver}:</h3></strong>`;
+                        let html = `<h3>OpenAlias Results for <strong>${escapeHtml(raw)}</strong>, queried via <strong>${escapeHtml(resolver)}:</strong></h3>`;
                         oa1Records.forEach((rec, idx) => {
-                            html += `<div><strong>oa1:</strong> ${rec.oa1}<br>`;
+                            html += `<div><strong>oa1:</strong> ${escapeHtml(rec.oa1)}<br>`;
                             Object.keys(rec).forEach(k => {
-                                if (k !== 'oa1') html += `<strong>${k}:</strong> ${rec[k]}<br>`;
+                                if (k !== 'oa1') html += `<strong>${escapeHtml(k)}:</strong> ${escapeHtml(rec[k])}<br>`;
                             });
                             //html += `<hr>`;
                             html += '</div><br>';
@@ -121,7 +133,7 @@
                         const dnssecVerified = data.AD === true;
                         html += `<strong>DNSSEC Verified:</strong> ${dnssecVerified ? "Yes" : "No"}<br>`;
                         if (!dnssecVerified) {
-                            html += `<small>Note: DNSSEC is not enabled. Some wallets may not trust OpenAlias configurations without DNSSEC.</small>`;
+                            html += `<small>Note: the resolver returned no DNSSEC-authenticated answer. This usually means the domain has no DNSSEC, though it can also mean the resolver did not validate it. Some wallets may not trust OpenAlias configurations without DNSSEC.</small>`;
                         }
 
                         html += `<br/><strong>✅ Your OpenAlias DNS TXT record(s) look valid!</strong>`;
@@ -130,7 +142,7 @@
                     }
                 } catch (err) {
                     console.error(err);
-                    output.innerHTML = `<span class="error">❌ Error checking domain: ${err.message}</span>`;
+                    output.innerHTML = `<span class="error">❌ Error checking domain: ${escapeHtml(err.message)}</span>`;
                 }
             });
         </script>
@@ -149,7 +161,7 @@
             <code style="word-break: break-word;">oa1:btc recipient_address=bc1q33pgz4dsal3h2ahkhe8ty0e7z32ttteyz4tx2d; recipient_name=CypherToshi; tx_description=Donation to Cyphertoshi</code>
 
             <h3>Does every wallet support OpenAlias?</h3>
-            <p>Not all wallets currently support OpenAlias, but many popular ones for Monero, Bitcoin, and Litecoin do. You can find a list of compatible wallets <a href="https://cyphertoshi.com/posts/openalias-wallets" target="_blank" rel="noopener noreferrer">here</a>. If your wallet doesn't support OpenAlias yet and you'd like it to, consider reaching out to the developers of the wallet to request integration!</p>
+            <p>Not all wallets currently support OpenAlias, but many popular ones for Monero, Bitcoin, and Litecoin do. You can find a list of compatible wallets <a href="/posts/openalias-wallets" target="_blank" rel="noopener noreferrer">here</a>. If your wallet doesn't support OpenAlias yet and you'd like it to, consider reaching out to the developers of the wallet to request integration!</p>
 
             <h3>Do you log the domains I check?</h3>
             <p>No. This site is hosted on GitHub Pages and runs entirely client-side in your browser. However, the DNS resolvers used (Cloudflare or Google) may log your lookup request according to their policies.</p>

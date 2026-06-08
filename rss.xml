@@ -1,7 +1,9 @@
-<rss version="2.0">
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>CypherToshi's RSS Feed</title>
         <link>https://cyphertoshi.com</link>
+        <atom:link href="https://cyphertoshi.com/rss.xml" rel="self" type="application/rss+xml"/>
         <description>Updates and news from CypherToshi.</description>
         <item>
             <title>Scalability Constraints of Bitcoin (PDF)</title>
@@ -21,7 +23,7 @@
             <title>Site Update: RSS feed and dedicated page for tools</title>
             <link>https://cyphertoshi.com</link>
             <description>CypherToshi.com has been updated to include a RSS feed and a new page dedicated for linking CypherToshi's privacy-focused utilities.</description>
-            <pubDate>Wen, 16 Apr 2025 01:50:00 UTC</pubDate>
+            <pubDate>Wed, 16 Apr 2025 01:50:00 UTC</pubDate>
             <guid>https://cyphertoshi.com</guid>
         </item>
         <item>

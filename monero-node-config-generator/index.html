@@ -4,21 +4,29 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="theme-color" content="#5271ff">
-        <link rel="canonical" href="https://cyphertoshi.com/monero-node-config-generator"/>
+        <meta name="referrer" content="no-referrer">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
+        <link rel="canonical" href="https://cyphertoshi.com/monero-node-config-generator/"/>
         <meta name="robots" content="index, follow">
         <meta name="description" content="A simple, open-source, client-side tool to generate a monerod.conf configuration file for running your own Monero node."/>
         <meta name="author" content="Tech1k">
         <title>Monero Node Config Generator</title>
-        <link rel="shortcut icon" href="assets/favicon.png"/>
+        <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
         <meta property="og:title" content="Monero Node Config Generator"/>
         <meta property="og:description" content="A simple, open-source, client-side tool to generate a monerod.conf configuration file for running your own Monero node."/>
         <meta property="og:type" content="website"/>
-        <meta property="og:url" content="https://cyphertoshi.com/monero-node-config-generator"/>
+        <meta property="og:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta property="og:image:width" content="1200"/>
+        <meta property="og:image:height" content="630"/>
+        <meta property="og:url" content="https://cyphertoshi.com/monero-node-config-generator/"/>
         <meta property="og:site_name" content="Monero Node Config Generator"/>
-        <meta name="twitter:card" content="summary"/>
+        <meta name="twitter:card" content="summary_large_image"/>
+        <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
         <meta name="twitter:title" content="Monero Node Config Generator"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to generate a monerod.conf configuration file for running your own Monero node."/>
-        <link rel="stylesheet" href="assets/style.css?v=1">
+        <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
+        <link rel="stylesheet" href="/assets/tool.css?v=1">
     </head>
     <body id="main">
         <h1>Monero Node Config Generator</h1>
@@ -27,7 +35,7 @@
         <form id="configForm">
             <fieldset>
                 <legend>Quick start preset</legend>
-                <label>Start from a recommended config, then tweak as needed:</label><br/>
+                <label for="preset">Start from a recommended config, then tweak as needed:</label><br/>
                 <select id="preset">
                     <option value="private" selected>Private local node (wallet use, full blockchain)</option>
                     <option value="pruned">Pruned local node (low disk space)</option>
@@ -39,19 +47,19 @@
 
             <fieldset>
                 <legend>Network &amp; storage</legend>
-                <label>Network:</label><br/>
+                <label for="network">Network:</label><br/>
                 <select id="network">
                     <option value="mainnet" selected>Mainnet (real XMR)</option>
                     <option value="stagenet">Stagenet (testing, real-like)</option>
                     <option value="testnet">Testnet</option>
                 </select>
                 <br/><br/>
-                <label>Data directory (optional, where the blockchain is stored):</label><br/>
+                <label for="dataDir">Data directory (optional, where the blockchain is stored):</label><br/>
                 <input type="text" id="dataDir" placeholder="e.g. /home/user/.bitmonero">
                 <br/><br/>
                 <label class="check"><input type="checkbox" id="prune"> Enable blockchain pruning (saves ~2/3 of disk space)</label>
                 <br/><br/>
-                <label>Database sync mode:</label><br/>
+                <label for="syncMode">Database sync mode:</label><br/>
                 <select id="syncMode">
                     <option value="default" selected>Default (fast while syncing, safe near the tip)</option>
                     <option value="safe">Safe (fsync every block, slowest but safest)</option>
@@ -60,13 +68,13 @@
 
             <fieldset>
                 <legend>RPC access</legend>
-                <label>RPC access mode:</label><br/>
+                <label for="rpcMode">RPC access mode:</label><br/>
                 <select id="rpcMode">
                     <option value="local" selected>Local only (127.0.0.1) for private wallet use</option>
                     <option value="public">Public restricted RPC node (share with the network)</option>
                 </select>
                 <br/><br/>
-                <label>Restricted RPC port (used in public mode):</label><br/>
+                <label for="rpcPort">Restricted RPC port (used in public mode):</label><br/>
                 <input type="number" id="rpcPort" placeholder="default=18089 (mainnet)">
                 <br/><br/>
                 <label class="check"><input type="checkbox" id="zmq"> Enable ZMQ RPC (needed by some wallets/tools, e.g. LWS)</label>
@@ -74,19 +82,19 @@
 
             <fieldset>
                 <legend>P2P &amp; peers</legend>
-                <label>P2P port (optional):</label><br/>
+                <label for="p2pPort">P2P port (optional):</label><br/>
                 <input type="number" id="p2pPort" placeholder="default=18080 (mainnet)">
                 <br/><br/>
-                <label>Max outgoing peers (optional):</label><br/>
+                <label for="outPeers">Max outgoing peers (optional):</label><br/>
                 <input type="number" id="outPeers" placeholder="default=12">
                 <br/><br/>
-                <label>Max incoming peers (optional):</label><br/>
+                <label for="inPeers">Max incoming peers (optional):</label><br/>
                 <input type="number" id="inPeers" placeholder="default=-1 (unlimited)">
                 <br/><br/>
-                <label>Upload rate limit kB/s (optional):</label><br/>
+                <label for="limitUp">Upload rate limit kB/s (optional):</label><br/>
                 <input type="number" id="limitUp" placeholder="default=8192">
                 <br/><br/>
-                <label>Download rate limit kB/s (optional):</label><br/>
+                <label for="limitDown">Download rate limit kB/s (optional):</label><br/>
                 <input type="number" id="limitDown" placeholder="default=32768">
                 <br/><br/>
                 <label class="check"><input type="checkbox" id="noIgd" checked> Disable UPnP/IGD port forwarding (recommended)</label>
@@ -96,13 +104,13 @@
                 <legend>Privacy (Tor)</legend>
                 <label class="check"><input type="checkbox" id="torProxy"> Route transaction broadcasts over Tor (SOCKS proxy at 127.0.0.1:9050)</label>
                 <br/><br/>
-                <label>Tor hidden-service inbound address (optional):</label><br/>
+                <label for="onion">Tor hidden-service inbound address (optional):</label><br/>
                 <input type="text" id="onion" placeholder="e.g. abcd...xyz.onion:18084">
             </fieldset>
 
             <fieldset>
                 <legend>Logging &amp; advanced</legend>
-                <label>Log level (0 = least, 4 = most verbose):</label><br/>
+                <label for="logLevel">Log level (0 = least, 4 = most verbose):</label><br/>
                 <select id="logLevel">
                     <option value="" selected>Default (0)</option>
                     <option value="1">1</option>
@@ -111,10 +119,10 @@
                     <option value="4">4</option>
                 </select>
                 <br/><br/>
-                <label>Max number of log files to keep (optional):</label><br/>
+                <label for="maxLogFiles">Max number of log files to keep (optional):</label><br/>
                 <input type="number" id="maxLogFiles" placeholder="default=10">
                 <br/><br/>
-                <label>Extra raw config lines (optional, one per line):</label><br/>
+                <label for="extra">Extra raw config lines (optional, one per line):</label><br/>
                 <input type="text" id="extra" placeholder="e.g. max-concurrency=4">
             </fieldset>
 
