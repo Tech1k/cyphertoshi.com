@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#5271ff">
+        <meta name="referrer" content="no-referrer">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src https://cloudflare-dns.com https://dns.google; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
+        <link rel="canonical" href="https://cyphertoshi.com/openalias-pay/"/>
+        <meta name="robots" content="index, follow">
+        <meta name="description" content="A simple, open-source, client-side tool to resolve an OpenAlias address and generate a payment URI and scannable QR code."/>
+        <meta name="author" content="Tech1k">
+        <title>OpenAlias Pay</title>
+        <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
+        <meta property="og:title" content="OpenAlias Pay"/>
+        <meta property="og:description" content="A simple, open-source, client-side tool to resolve an OpenAlias address and generate a payment URI and scannable QR code."/>
+        <meta property="og:type" content="website"/>
+        <meta property="og:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta property="og:image:width" content="1200"/>
+        <meta property="og:image:height" content="630"/>
+        <meta property="og:url" content="https://cyphertoshi.com/openalias-pay/"/>
+        <meta property="og:site_name" content="OpenAlias Pay"/>
+        <meta name="twitter:card" content="summary_large_image"/>
+        <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta name="twitter:title" content="OpenAlias Pay"/>
+        <meta name="twitter:description" content="A simple, open-source, client-side tool to resolve an OpenAlias address and generate a payment URI and scannable QR code."/>
+        <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
+        <link rel="stylesheet" href="/assets/tool.css?v=1">
+    </head>
+    <body id="main">
+        <h1>OpenAlias Pay</h1>
+        <p>A simple, open-source, client-side tool to resolve an <a href="https://openalias.org/" target="_blank" rel="noopener noreferrer">OpenAlias</a> address into a cryptocurrency address and generate a payment URI and scannable QR code.</p>
+        <p>Enter an OpenAlias address (e.g. <code>donate@getmonero.org</code> or <code>getmonero.org</code>):</p>
+
+        <div style="text-align:center;">
+            <h3>
+                <a href="/">Home</a> |
+                <a href="/tools">Toolkit</a> |
+                <a href="/links">Links</a> |
+                <a href="/notes">Notes</a> |
+                <a href="/contact">Contact</a>
+            </h3>
+        </div>
+        <hr/>
+
+        <form id="payForm">
+            <label for="aliasInput">OpenAlias address:</label><br/>
+            <input type="text" id="aliasInput" placeholder="donate@getmonero.org" required>
+            <br/><br/>
+            <label for="amount">Amount (optional, applied to every result):</label><br/>
+            <input type="text" id="amount" placeholder="e.g. 0.5">
+            <br/><br/>
+            <input type="submit" value="Resolve &amp; Generate">
+        </form>
+
+        <div id="output" class="result"></div>
+
+        <script src="/assets/qrcode.js"></script>
+        <script>
+            const form = document.getElementById('payForm');
+            const output = document.getElementById('output');
+            let qrItems = [];
+
+            const escapeHtml = (s) =>
+                String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+            const isValidDomain = (domain) => {
+                const re = /^((?!-)[A-Za-z0-9-]{1,63}(?<!-)\.)+[A-Za-z]{2,63}$/;
+                return re.test(domain);
+            };
+
+            // OpenAlias asset tag -> URI scheme and BIP21-style parameter names.
+            const SCHEMES = {
+                xmr: { scheme: 'monero',   amount: 'tx_amount', name: 'recipient_name', desc: 'tx_description' },
+                btc: { scheme: 'bitcoin',  amount: 'amount',    name: 'label',          desc: 'message' },
+                ltc: { scheme: 'litecoin', amount: 'amount',    name: 'label',          desc: 'message' }
+            };
+
+            const resolveTXT = async (domain) => {
+                const resolvers = [
+                    { name: 'Cloudflare DNS', url: 'https://cloudflare-dns.com/dns-query' },
+                    { name: 'Google DNS', url: 'https://dns.google/resolve' }
+                ];
+                for (const { name, url } of resolvers) {
+                    try {
+                        const res = await fetch(`${url}?name=${domain}&type=TXT`, { headers: { 'accept': 'application/dns-json' } });
+                        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+                        return { data: await res.json(), resolver: name };
+                    } catch (err) {
+                        console.warn(`Failed with ${name}: ${err.message}`);
+                    }
+                }
+                throw new Error('All DNS resolvers failed.');
+            };
+
+            function buildURI(asset, address, amount, name, desc) {
+                const s = SCHEMES[asset] || { scheme: asset, amount: 'amount', name: 'label', desc: 'message' };
+                const params = [];
+                if (amount) params.push(s.amount + '=' + encodeURIComponent(amount));
+                if (name)   params.push(s.name   + '=' + encodeURIComponent(name));
+                if (desc)   params.push(s.desc   + '=' + encodeURIComponent(desc));
+                let uri = s.scheme + ':' + address;
+                if (params.length) uri += '?' + params.join('&');
+                return uri;
+            }
+
+            // Render a QR code to a <canvas> (CSP-clean: draws modules, no image loading).
+            function renderQRCanvas(uri) {
+                const qr = qrcode(0, 'M');
+                qr.addData(uri);
+                qr.make();
+                const count = qr.getModuleCount();
+                const cell = 6, margin = 4;
+                const size = (count + margin * 2) * cell;
+                const canvas = document.createElement('canvas');
+                canvas.width = canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, size, size);
+                ctx.fillStyle = '#000000';
+                for (let r = 0; r < count; r++)
+                    for (let c = 0; c < count; c++)
+                        if (qr.isDark(r, c)) ctx.fillRect((c + margin) * cell, (r + margin) * cell, cell, cell);
+                canvas.style.maxWidth = '100%';
+                canvas.style.height = 'auto';
+                canvas.style.imageRendering = 'pixelated';
+                return canvas;
+            }
+
+            function downloadQR(i) {
+                const item = qrItems[i];
+                if (!item) return;
+                item.canvas.toBlob(function (blob) {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'openalias-' + item.asset + '-qr.png';
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                }, 'image/png');
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                output.style.display = 'block';
+                output.innerHTML = 'Resolving OpenAlias record (this may take a moment)...';
+
+                const amount = document.getElementById('amount').value.trim();
+                if (amount && !/^\d*\.?\d+$/.test(amount)) {
+                    output.innerHTML = `<span class="error">❌ Amount must be a positive number (e.g. 0.5).</span>`;
+                    return;
+                }
+
+                const rawInput = document.getElementById('aliasInput').value.trim().toLowerCase();
+                const domain = rawInput.includes('@') ? rawInput.replace('@', '.') : rawInput;
+                if (!isValidDomain(domain)) {
+                    output.innerHTML = `<span class="error">❌ Not a valid OpenAlias address.</span>`;
+                    return;
+                }
+
+                try {
+                    const { data, resolver } = await resolveTXT(domain);
+                    const txtRecords = (data.Answer || [])
+                        .filter(r => r.type === 16)
+                        .map(r => r.data.replace(/^"|"$/g, ''));
+
+                    const records = [];
+                    for (const txt of txtRecords) {
+                        if (!txt.startsWith('oa1:')) continue;
+                        const m = txt.match(/^oa1:([a-zA-Z0-9]+)\s*(.*)$/);
+                        if (!m) continue;
+                        const rec = { asset: m[1].toLowerCase() };
+                        m[2].split(';').map(p => p.trim()).forEach(p => {
+                            const idx = p.indexOf('=');
+                            if (idx > 0) rec[p.slice(0, idx).trim()] = p.slice(idx + 1).trim();
+                        });
+                        if (rec.recipient_address) records.push(rec);
+                    }
+
+                    if (records.length === 0) {
+                        output.innerHTML = `<span class="error">❌ No OpenAlias (oa1) records with a recipient address were found for <strong>${escapeHtml(rawInput)}</strong> via ${escapeHtml(resolver)}.</span>`;
+                        return;
+                    }
+
+                    qrItems = [];
+                    let html = `<p>Resolved <strong>${escapeHtml(rawInput)}</strong> via <strong>${escapeHtml(resolver)}</strong>:</p>`;
+                    records.forEach((rec, i) => {
+                        const uri = buildURI(rec.asset, rec.recipient_address, amount, rec.recipient_name, rec.tx_description);
+                        qrItems.push({ canvas: renderQRCanvas(uri), asset: rec.asset });
+                        html += `<div style="margin-bottom: 28px;">`;
+                        html += `<strong>Asset:</strong> ${escapeHtml(rec.asset.toUpperCase())}<br/>`;
+                        if (rec.recipient_name) html += `<strong>Recipient:</strong> ${escapeHtml(rec.recipient_name)}<br/>`;
+                        html += `<strong>Address:</strong> <code style="word-break: break-word;">${escapeHtml(rec.recipient_address)}</code><br/><br/>`;
+                        html += `<strong>Payment URI:</strong><br/><code style="word-break: break-word;">${escapeHtml(uri)}</code><br/><br/>`;
+                        html += `<div id="qrBox${i}" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>`;
+                        html += `<br/><br/><button type="button" onclick="downloadQR(${i})">Download QR (PNG)</button>`;
+                        html += `</div>`;
+                    });
+
+                    const dnssec = data.AD === true;
+                    html += `<small><strong>DNSSEC authenticated:</strong> ${dnssec ? 'Yes' : 'No'}. `;
+                    html += dnssec ? 'The record was DNSSEC-validated by the resolver.' : 'This record was not DNSSEC-validated; treat the result with extra caution.';
+                    html += `</small>`;
+
+                    output.innerHTML = `<div class="valid">${html}</div>`;
+                    qrItems.forEach((o, i) => document.getElementById('qrBox' + i).appendChild(o.canvas));
+                } catch (err) {
+                    console.error(err);
+                    output.innerHTML = `<span class="error">❌ Error resolving address: ${escapeHtml(err.message)}</span>`;
+                }
+            });
+        </script>
+        <hr>
+        <section style="margin-top: 40px;">
+            <h2>FAQs</h2>
+
+            <h3>What is this site?</h3>
+            <p>This site looks up the OpenAlias record on a domain, extracts the cryptocurrency address it points to, and turns it into a payment URI and scannable QR code, all in your browser.</p>
+
+            <h3>What is OpenAlias?</h3>
+            <p>OpenAlias is a DNS TXT record that maps a human-friendly name (like <code>donate@getmonero.org</code>) to a cryptocurrency address plus optional metadata such as a recipient name. Learn more in the <a href="https://openalias.org/#implement" target="_blank" rel="noopener noreferrer">OpenAlias implementation guide</a>.</p>
+
+            <h3>Which coins are supported?</h3>
+            <p>Monero, Bitcoin, and Litecoin get fully standard payment URIs. Other OpenAlias assets are still resolved and shown, using a best-effort URI format that not every wallet will recognize.</p>
+
+            <h3>I already have the address. Can I just make a QR?</h3>
+            <p>Yes. Use the <a href="/payment-qr-generator/">Crypto Payment QR Generator</a> to build a payment URI and QR from an address you already have, with no DNS lookup.</p>
+
+            <h3>Should I trust the resolved address?</h3>
+            <p>OpenAlias relies on DNSSEC for integrity. This tool reports whether the record was DNSSEC-authenticated. If it was not, be cautious, as the result could have been tampered with in transit. You can also inspect a domain's records with the <a href="/openalias-checker/">OpenAlias checker</a>.</p>
+
+            <h3>Do you log the addresses I look up?</h3>
+            <p>No. This site is hosted on GitHub Pages and runs entirely client-side. The DNS lookup is sent directly from your browser to the chosen resolver (Cloudflare or Google), which may log it per their policies; nothing is sent to this site.</p>
+
+            <h3>Is this site open source?</h3>
+            <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/openalias-pay" target="_blank" rel="noopener noreferrer">GitHub</a>. QR codes are rendered with the open-source <a href="https://github.com/kazuhikoarase/qrcode-generator" target="_blank" rel="noopener noreferrer">qrcode-generator</a> library (MIT), self-hosted on this site.</p>
+        </section>
+        <hr/>
+        <p style="font-size: 0.9em; color: gray;">
+            Disclaimer: This tool is provided "as is" with no warranties. Use at your own risk. Always confirm a resolved address through a trusted channel before sending any funds.
+        </p>
+        <br/>
+        <hr/>
+        <footer>
+            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>. This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>.</p>
+        </footer>
+    </body>
+</html>

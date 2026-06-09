@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#5271ff">
+        <meta name="referrer" content="no-referrer">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
+        <link rel="canonical" href="https://cyphertoshi.com/payment-qr-generator/"/>
+        <meta name="robots" content="index, follow">
+        <meta name="description" content="A simple, open-source, client-side tool to generate Monero, Bitcoin, and Litecoin payment URIs and scannable QR codes."/>
+        <meta name="author" content="Tech1k">
+        <title>Crypto Payment QR Generator</title>
+        <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
+        <meta property="og:title" content="Crypto Payment QR Generator"/>
+        <meta property="og:description" content="A simple, open-source, client-side tool to generate Monero, Bitcoin, and Litecoin payment URIs and scannable QR codes."/>
+        <meta property="og:type" content="website"/>
+        <meta property="og:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta property="og:image:width" content="1200"/>
+        <meta property="og:image:height" content="630"/>
+        <meta property="og:url" content="https://cyphertoshi.com/payment-qr-generator/"/>
+        <meta property="og:site_name" content="Crypto Payment QR Generator"/>
+        <meta name="twitter:card" content="summary_large_image"/>
+        <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta name="twitter:title" content="Crypto Payment QR Generator"/>
+        <meta name="twitter:description" content="A simple, open-source, client-side tool to generate Monero, Bitcoin, and Litecoin payment URIs and scannable QR codes."/>
+        <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
+        <link rel="stylesheet" href="/assets/tool.css?v=1">
+    </head>
+    <body id="main">
+        <h1>Crypto Payment QR Generator</h1>
+        <p>A simple, open-source, client-side tool to generate a payment URI and scannable QR code for Monero, Bitcoin, or Litecoin. Nothing leaves your browser.</p>
+
+        <div style="text-align:center;">
+            <h3>
+                <a href="/">Home</a> |
+                <a href="/tools">Toolkit</a> |
+                <a href="/links">Links</a> |
+                <a href="/notes">Notes</a> |
+                <a href="/contact">Contact</a>
+            </h3>
+        </div>
+        <hr/>
+
+        <form id="payForm">
+            <label for="coin">Cryptocurrency:</label><br/>
+            <select id="coin">
+                <option value="monero" selected>Monero (XMR)</option>
+                <option value="bitcoin">Bitcoin (BTC)</option>
+                <option value="litecoin">Litecoin (LTC)</option>
+                <option value="custom">Custom</option>
+            </select>
+            <div id="customWrap" style="display:none; margin-top:10px;">
+                <label for="customScheme">Custom URI scheme:</label><br/>
+                <input type="text" id="customScheme" placeholder="e.g. dogecoin">
+                <br/><small>Uses the BIP21 format <code>scheme:address?amount=&amp;label=&amp;message=</code>.</small>
+            </div>
+            <br/><br/>
+            <label for="address">Recipient address:</label><br/>
+            <input type="text" id="address" placeholder="your crypto address" required>
+            <br/><br/>
+            <label for="amount">Amount (optional):</label><br/>
+            <input type="text" id="amount" placeholder="e.g. 0.5">
+            <br/><br/>
+            <label for="name">Recipient name / label (optional):</label><br/>
+            <input type="text" id="name" placeholder="e.g. CypherToshi">
+            <br/><br/>
+            <label for="desc">Description / message (optional):</label><br/>
+            <input type="text" id="desc" placeholder="e.g. Donation">
+            <br/><br/>
+            <label class="check"><input type="checkbox" id="logo" checked> Add the coin logo to the center of the QR (predefined coins only)</label>
+            <br/><br/>
+            <input type="submit" value="Generate Payment QR">
+        </form>
+
+        <div id="output" class="result"></div>
+
+        <script src="/assets/qrcode.js"></script>
+        <script src="/assets/xmr-address.js"></script>
+        <script>
+            const form = document.getElementById('payForm');
+            const output = document.getElementById('output');
+            let lastCanvas = null, lastScheme = '';
+
+            const escapeHtml = (s) =>
+                String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+            // Per-coin URI scheme and parameter names.
+            // Monero: monero:<addr>?tx_amount=&recipient_name=&tx_description=
+            // Bitcoin/Litecoin (BIP21): <scheme>:<addr>?amount=&label=&message=
+            const SCHEMES = {
+                monero:   { scheme: 'monero',   amount: 'tx_amount', name: 'recipient_name', desc: 'tx_description' },
+                bitcoin:  { scheme: 'bitcoin',  amount: 'amount',    name: 'label',          desc: 'message' },
+                litecoin: { scheme: 'litecoin', amount: 'amount',    name: 'label',          desc: 'message' }
+            };
+            const ICONS = { monero: '/assets/monero.png', bitcoin: '/assets/bitcoin.png', litecoin: '/assets/litecoin.png' };
+
+            // Resolve the scheme/parameter map for the selected coin (or a custom one).
+            function schemeFor(coin) {
+                if (coin === 'custom') {
+                    const cs = document.getElementById('customScheme').value.trim().toLowerCase().replace(/[^a-z0-9.+-]/g, '');
+                    return cs ? { scheme: cs, amount: 'amount', name: 'label', desc: 'message' } : null;
+                }
+                return SCHEMES[coin];
+            }
+
+            function buildURI(s, address, amount, name, desc) {
+                const params = [];
+                if (amount) params.push(s.amount + '=' + encodeURIComponent(amount));
+                if (name)   params.push(s.name   + '=' + encodeURIComponent(name));
+                if (desc)   params.push(s.desc   + '=' + encodeURIComponent(desc));
+                let uri = s.scheme + ':' + address;
+                if (params.length) uri += '?' + params.join('&');
+                return uri;
+            }
+
+            // Render a QR code to a <canvas> (CSP-clean: draws modules, no image loading).
+            function renderQRCanvas(uri, ecc) {
+                const qr = qrcode(0, ecc || 'M');
+                qr.addData(uri);
+                qr.make();
+                const count = qr.getModuleCount();
+                const cell = 8, margin = 4;
+                const size = (count + margin * 2) * cell;
+                const canvas = document.createElement('canvas');
+                canvas.width = canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, size, size);
+                ctx.fillStyle = '#000000';
+                for (let r = 0; r < count; r++)
+                    for (let c = 0; c < count; c++)
+                        if (qr.isDark(r, c)) ctx.fillRect((c + margin) * cell, (r + margin) * cell, cell, cell);
+                canvas.style.maxWidth = '100%';
+                canvas.style.height = 'auto';
+                canvas.style.imageRendering = 'pixelated';
+                return canvas;
+            }
+
+            // Draw a coin logo in the center of a QR canvas. Same-origin image keeps the canvas
+            // untainted, so PNG download/copy still work. Pair with high error correction.
+            function drawLogo(canvas, url) {
+                const img = new Image();
+                img.onload = function () {
+                    const ctx = canvas.getContext('2d');
+                    const sz = canvas.width;
+                    const logo = Math.round(sz * 0.22);
+                    const pad = Math.round(logo * 0.16);
+                    const box = logo + pad * 2;
+                    const pos = Math.round((sz - box) / 2);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(pos, pos, box, box);
+                    ctx.drawImage(img, pos + pad, pos + pad, logo, logo);
+                };
+                img.src = url;
+            }
+
+            document.getElementById('coin').addEventListener('change', function () {
+                document.getElementById('customWrap').style.display = this.value === 'custom' ? 'block' : 'none';
+            });
+
+            // Best-effort address sanity check. Monero gets a real checksum (via the shared
+            // validator); Bitcoin/Litecoin get a loose format check. Returns a warning string,
+            // or null. This only warns, it never blocks generation.
+            function looksLikeBTC(a) {
+                return /^bc1[0-9ac-hj-np-z]{6,87}$/i.test(a) || /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(a);
+            }
+            function looksLikeLTC(a) {
+                return /^ltc1[0-9ac-hj-np-z]{6,87}$/i.test(a) || /^[LM3][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(a);
+            }
+            function addressWarning(coin, address) {
+                if (coin === 'monero') {
+                    const r = moneroAddress.validate(address);
+                    if (!r.valid) return 'This is not a valid Monero address (' + r.error + '). Double-check it before sending.';
+                } else if (coin === 'bitcoin' && !looksLikeBTC(address)) {
+                    return 'This does not look like a typical Bitcoin address. Double-check it before sending.';
+                } else if (coin === 'litecoin' && !looksLikeLTC(address)) {
+                    return 'This does not look like a typical Litecoin address. Double-check it before sending.';
+                }
+                return null;
+            }
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                output.style.display = 'block';
+
+                const coin = document.getElementById('coin').value;
+                const address = document.getElementById('address').value.trim();
+                const amount = document.getElementById('amount').value.trim();
+                const name = document.getElementById('name').value.trim();
+                const desc = document.getElementById('desc').value.trim();
+
+                if (!address) {
+                    output.innerHTML = `<span class="error">❌ Please enter a recipient address.</span>`;
+                    return;
+                }
+                const s = schemeFor(coin);
+                if (!s) {
+                    output.innerHTML = `<span class="error">❌ Please enter a custom URI scheme (e.g. dogecoin).</span>`;
+                    return;
+                }
+                if (amount && !/^\d*\.?\d+$/.test(amount)) {
+                    output.innerHTML = `<span class="error">❌ Amount must be a positive number (e.g. 0.5).</span>`;
+                    return;
+                }
+
+                const uri = buildURI(s, address, amount, name, desc);
+                const wantLogo = document.getElementById('logo').checked && !!ICONS[coin];
+
+                let canvas;
+                try {
+                    canvas = renderQRCanvas(uri, wantLogo ? 'H' : 'M');
+                } catch (err) {
+                    output.innerHTML = `<span class="error">❌ Could not generate a QR code: ${escapeHtml(err.message)}</span>`;
+                    return;
+                }
+                lastCanvas = canvas;
+                lastScheme = s.scheme;
+
+                const warn = addressWarning(coin, address);
+                const warnHtml = warn ? `<div class="error">⚠️ ${escapeHtml(warn)}</div><br/>` : '';
+                output.innerHTML =
+                    warnHtml +
+                    `<p><strong>Payment URI:</strong></p>` +
+                    `<code id="uriOut" style="word-break: break-word;">${escapeHtml(uri)}</code>` +
+                    `<br/><br/><button type="button" onclick="copyURI()">Copy URI</button>` +
+                    `<p><strong>QR code</strong> (scan with a compatible wallet):</p>` +
+                    `<div id="qrBox" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>` +
+                    `<br/><br/><button type="button" onclick="downloadQR()">Download QR (PNG)</button> ` +
+                    `<button type="button" onclick="copyQRImage()">Copy QR</button>`;
+                document.getElementById('qrBox').appendChild(canvas);
+                if (wantLogo) drawLogo(canvas, ICONS[coin]);
+            });
+
+            function copyURI() {
+                const text = document.getElementById('uriOut').innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Copied the payment URI to clipboard!');
+                });
+            }
+
+            function downloadQR() {
+                if (!lastCanvas) return;
+                lastCanvas.toBlob(function (blob) {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = (lastScheme || 'payment') + '-payment-qr.png';
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                }, 'image/png');
+            }
+
+            function copyQRImage() {
+                if (!lastCanvas) return;
+                if (!window.ClipboardItem || !navigator.clipboard || !navigator.clipboard.write) {
+                    alert('Copying images is not supported in this browser. Use Download instead.');
+                    return;
+                }
+                lastCanvas.toBlob(function (blob) {
+                    navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(
+                        () => alert('Copied the QR image to clipboard!'),
+                        () => alert('Could not copy the image. Use Download instead.')
+                    );
+                }, 'image/png');
+            }
+
+            // Pre-fill from URL params so a payment can be shared as a link, e.g.
+            // ?coin=monero&address=...&amount=0.1&label=Name&message=Note  (scheme=... for custom)
+            (function prefillFromURL() {
+                const q = new URLSearchParams(location.search);
+                if (![...q.keys()].length) return;
+                const coin = q.get('coin');
+                if (coin === 'custom' || (coin && SCHEMES[coin])) document.getElementById('coin').value = coin;
+                document.getElementById('customWrap').style.display =
+                    document.getElementById('coin').value === 'custom' ? 'block' : 'none';
+                if (q.get('scheme')) document.getElementById('customScheme').value = q.get('scheme');
+                if (q.get('address')) document.getElementById('address').value = q.get('address');
+                if (q.get('amount')) document.getElementById('amount').value = q.get('amount');
+                if (q.get('label')) document.getElementById('name').value = q.get('label');
+                if (q.get('message')) document.getElementById('desc').value = q.get('message');
+                if (q.get('logo') === '0' || q.get('logo') === 'false') document.getElementById('logo').checked = false;
+                if (q.get('address')) {
+                    if (form.requestSubmit) form.requestSubmit();
+                    else form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                }
+            })();
+        </script>
+        <hr>
+        <section style="margin-top: 40px;">
+            <h2>FAQs</h2>
+
+            <h3>What is this site?</h3>
+            <p>This site builds a standard payment URI and a matching QR code for Monero, Bitcoin, or Litecoin, entirely within your browser. Share the QR or URI and a compatible wallet can pre-fill the address, amount, and a note.</p>
+
+            <h3>What is a payment URI?</h3>
+            <p>A payment URI is a link like <code>monero:&lt;address&gt;?tx_amount=0.5</code> (or <code>bitcoin:&lt;address&gt;?amount=0.5</code> following BIP21). Wallets recognize these to pre-fill a payment. The amount, name, and description fields are optional.</p>
+
+            <h3>Does it check that my address is valid?</h3>
+            <p>It runs a sanity check and warns you if something looks off. Monero addresses are fully checksum-verified; Bitcoin and Litecoin get a looser format check. The warning never blocks you, so always double-check the address yourself. You can also fully verify a Monero address with the <a href="/monero-address-validator/">Monero address validator</a>.</p>
+
+            <h3>Is the amount in whole coins?</h3>
+            <p>Yes. Enter the amount in whole units (XMR, BTC, or LTC), e.g. <code>0.5</code>, not in atomic units like piconero or satoshis.</p>
+
+            <h3>Can I use other coins?</h3>
+            <p>Yes. Choose <strong>Custom</strong> and enter the coin's URI scheme (e.g. <code>dogecoin</code>, <code>dash</code>). Custom coins use the common BIP21 format <code>scheme:address?amount=&amp;label=&amp;message=</code>, which most wallets understand. Monero, Bitcoin, and Litecoin use their own correct parameter names automatically.</p>
+
+            <h3>Can I download the QR code?</h3>
+            <p>Yes. Use the <strong>Download QR (PNG)</strong> button to save the QR as an image you can share or print, or <strong>Copy QR</strong> to copy it straight to your clipboard. A center logo, if enabled, is included in the saved image.</p>
+
+            <h3>Can I put the coin logo in the QR?</h3>
+            <p>Yes. Leave <strong>Add the coin logo to the center of the QR</strong> checked (on by default for Monero, Bitcoin, and Litecoin). The code switches to higher error correction when a logo is shown, so it still scans reliably. Uncheck it for a plain code. Custom coins have no logo.</p>
+
+            <h3>Can I pre-fill a payment from a link?</h3>
+            <p>Yes. Add URL parameters and the form fills in (and generates) automatically, e.g. <code>?coin=monero&amp;address=...&amp;amount=0.1&amp;label=Name&amp;message=Note</code>. Handy for sharing a ready-to-scan donation link.</p>
+
+            <h3>Can I pay an OpenAlias address?</h3>
+            <p>Yes. Use <a href="/openalias-pay/">OpenAlias Pay</a>, which resolves an OpenAlias name (like <code>donate@getmonero.org</code>) to its address and builds the QR for you.</p>
+
+            <h3>Do you log anything I enter?</h3>
+            <p>No. This site is hosted on GitHub Pages and runs entirely client-side. The address, amount, and QR are generated in your browser and never sent anywhere, so it works offline.</p>
+
+            <h3>Is this site open source?</h3>
+            <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/payment-qr-generator" target="_blank" rel="noopener noreferrer">GitHub</a>. QR codes are rendered with the open-source <a href="https://github.com/kazuhikoarase/qrcode-generator" target="_blank" rel="noopener noreferrer">qrcode-generator</a> library (MIT), self-hosted on this site.</p>
+        </section>
+        <hr/>
+        <p style="font-size: 0.9em; color: gray;">
+            Disclaimer: This tool is provided "as is" with no warranties. Use at your own risk. Always double-check the address and amount before sending any funds.
+        </p>
+        <br/>
+        <hr/>
+        <footer>
+            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>. This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>.</p>
+        </footer>
+    </body>
+</html>
