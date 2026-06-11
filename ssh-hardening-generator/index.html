@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#5271ff">
+        <meta name="referrer" content="no-referrer">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
+        <link rel="canonical" href="https://cyphertoshi.com/ssh-hardening-generator/"/>
+        <meta name="robots" content="index, follow">
+        <meta name="description" content="A simple, open-source, client-side tool to generate a hardened sshd_config for your SSH server."/>
+        <meta name="author" content="Tech1k">
+        <title>SSH Hardening Generator</title>
+        <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="manifest" href="/site.webmanifest"/>
+        <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
+        <meta property="og:title" content="SSH Hardening Generator"/>
+        <meta property="og:description" content="A simple, open-source, client-side tool to generate a hardened sshd_config for your SSH server."/>
+        <meta property="og:type" content="website"/>
+        <meta property="og:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta property="og:image:width" content="1200"/>
+        <meta property="og:image:height" content="630"/>
+        <meta property="og:url" content="https://cyphertoshi.com/ssh-hardening-generator/"/>
+        <meta property="og:site_name" content="SSH Hardening Generator"/>
+        <meta name="twitter:card" content="summary_large_image"/>
+        <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta name="twitter:title" content="SSH Hardening Generator"/>
+        <meta name="twitter:description" content="A simple, open-source, client-side tool to generate a hardened sshd_config for your SSH server."/>
+        <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
+        <link rel="stylesheet" href="/assets/tool.css?v=1">
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"SSH Hardening Generator","description":"Generate a hardened sshd_config for your SSH server.","applicationCategory":"SecurityApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/ssh-hardening-generator/","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
+    </head>
+    <body id="main">
+        <h1>SSH Hardening Generator</h1>
+        <p>A simple, open-source, client-side tool to generate a hardened <code>sshd_config</code> for an OpenSSH server. Nothing leaves your browser.</p>
+
+        <div style="text-align:center;">
+            <h3>
+                <a href="/">Home</a> |
+                <a href="/links">Links</a> |
+                <a href="/notes">Notes</a> |
+                <a href="/tools">Toolkit</a> |
+                <a href="/contact">Contact</a>
+            </h3>
+        </div>
+        <hr/>
+
+        <form id="sshForm">
+            <fieldset>
+                <legend>Access</legend>
+                <label for="port">Port:</label><br/>
+                <input type="number" id="port" placeholder="default=22">
+                <br/><br/>
+                <label for="rootLogin">Root login:</label><br/>
+                <select id="rootLogin">
+                    <option value="no" selected>Disabled (recommended)</option>
+                    <option value="prohibit-password">Key-only (prohibit-password)</option>
+                    <option value="yes">Allowed (not recommended)</option>
+                </select>
+                <br/><br/>
+                <label for="allowUsers">Allow only these users (space-separated, optional):</label><br/>
+                <input type="text" id="allowUsers" placeholder="e.g. alice bob">
+            </fieldset>
+
+            <fieldset>
+                <legend>Authentication</legend>
+                <label class="check"><input type="checkbox" id="pubkey" checked> Allow public-key authentication</label>
+                <br/><br/>
+                <label class="check"><input type="checkbox" id="passwordAuth"> Allow password authentication (leave off for key-only)</label>
+                <br/><br/>
+                <label for="maxAuth">Max auth tries:</label><br/>
+                <input type="number" id="maxAuth" placeholder="default=3">
+                <br/><br/>
+                <label for="grace">Login grace time (seconds):</label><br/>
+                <input type="number" id="grace" placeholder="default=30">
+            </fieldset>
+
+            <fieldset>
+                <legend>Session &amp; forwarding</legend>
+                <label class="check"><input type="checkbox" id="x11"> Allow X11 forwarding</label>
+                <br/><br/>
+                <label for="tcpfwd">TCP forwarding:</label><br/>
+                <select id="tcpfwd">
+                    <option value="" selected>Default</option>
+                    <option value="no">Disabled</option>
+                    <option value="local">Local only</option>
+                    <option value="yes">Allowed</option>
+                </select>
+                <br/><br/>
+                <label for="alive">Idle timeout (ClientAliveInterval seconds, optional):</label><br/>
+                <input type="number" id="alive" placeholder="e.g. 300">
+            </fieldset>
+
+            <fieldset>
+                <legend>Cryptography</legend>
+                <label class="check"><input type="checkbox" id="modern" checked> Restrict to modern, strong algorithms (recommended)</label>
+            </fieldset>
+
+            <input type="submit" value="Generate sshd_config">
+        </form>
+
+        <div id="output" class="result"></div>
+
+        <script>
+            const form = document.getElementById('sshForm');
+            const output = document.getElementById('output');
+            const val = (id) => document.getElementById(id).value.trim();
+            const checked = (id) => document.getElementById(id).checked;
+            function escapeHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                output.style.display = 'block';
+                const lines = [];
+                lines.push('# sshd_config hardening, generated with cyphertoshi.com/ssh-hardening-generator');
+                lines.push('# Review carefully, keep a second session open, and reload with: sudo systemctl reload sshd');
+                lines.push('');
+                lines.push('Port ' + (val('port') || '22'));
+                lines.push('PermitRootLogin ' + val('rootLogin'));
+                if (val('allowUsers')) lines.push('AllowUsers ' + val('allowUsers'));
+                lines.push('');
+                lines.push('PubkeyAuthentication ' + (checked('pubkey') ? 'yes' : 'no'));
+                lines.push('PasswordAuthentication ' + (checked('passwordAuth') ? 'yes' : 'no'));
+                lines.push('PermitEmptyPasswords no');
+                lines.push('KbdInteractiveAuthentication ' + (checked('passwordAuth') ? 'yes' : 'no'));
+                lines.push('MaxAuthTries ' + (val('maxAuth') || '3'));
+                lines.push('LoginGraceTime ' + (val('grace') || '30'));
+                lines.push('');
+                lines.push('X11Forwarding ' + (checked('x11') ? 'yes' : 'no'));
+                if (val('tcpfwd')) lines.push('AllowTcpForwarding ' + val('tcpfwd'));
+                if (val('alive')) { lines.push('ClientAliveInterval ' + val('alive')); lines.push('ClientAliveCountMax 2'); }
+                lines.push('');
+
+                if (checked('modern')) {
+                    lines.push('# Modern, strong algorithms only');
+                    lines.push('KexAlgorithms sntrup761x25519-sha512@openssh.com,curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512');
+                    lines.push('Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr');
+                    lines.push('MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com');
+                    lines.push('HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256');
+                }
+
+                const conf = lines.join('\n').replace(/\n{3,}/g, '\n\n').replace(/\s+$/, '') + '\n';
+                output.innerHTML =
+                    '<p><strong>Your sshd_config:</strong></p>' +
+                    '<pre class="result" id="confOutput" style="display:block; white-space:pre-wrap;">' + escapeHtml(conf) + '</pre>' +
+                    '<button type="button" onclick="copyConf()">Copy config</button> ' +
+                    '<button type="button" onclick="downloadConf()">Download sshd_config</button>' +
+                    '<p><strong>Important:</strong> before reloading SSH, open a second session and confirm you can still log in (especially after disabling passwords). A lockout is hard to undo on a remote machine. Place this in <code>/etc/ssh/sshd_config</code> or a drop-in under <code>/etc/ssh/sshd_config.d/</code>.</p>';
+            });
+
+            function copyConf() {
+                navigator.clipboard.writeText(document.getElementById('confOutput').innerText).then(() => { alert('Copied your sshd_config to clipboard!'); });
+            }
+            function downloadConf() {
+                const blob = new Blob([document.getElementById('confOutput').innerText], { type: 'text/plain' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob); a.download = 'sshd_config'; a.click(); URL.revokeObjectURL(a.href);
+            }
+        </script>
+        <hr>
+        <section style="margin-top: 40px;">
+            <h2>FAQs</h2>
+
+            <h3>What is this site?</h3>
+            <p>This site builds a hardened <code>sshd_config</code> for the OpenSSH server based on common best practices, entirely in your browser.</p>
+
+            <h3>Will this lock me out?</h3>
+            <p>It can if you are not careful. If you disable password authentication, make sure your SSH key works first. Always keep an existing session open and test a new login before closing it, so you can roll back if something is wrong.</p>
+
+            <h3>What does "modern algorithms only" do?</h3>
+            <p>It restricts key exchange, ciphers, MACs, and host-key algorithms to current strong choices (curve25519, ChaCha20-Poly1305, AES-GCM, Ed25519, and so on), dropping older and weaker options. Very old clients may not connect.</p>
+
+            <h3>Do you log anything I enter?</h3>
+            <p>No. This site is a static page that runs entirely client-side. Nothing you enter is sent anywhere, so it works offline.</p>
+
+            <h3>Is this site open source?</h3>
+            <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/ssh-hardening-generator" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+        </section>
+        <hr/>
+        <p style="font-size: 0.9em; color: gray;">
+            Disclaimer: This tool is provided "as is" with no warranties. Review the generated configuration and keep a fallback session open before applying it to a remote server.
+        </p>
+        <br/>
+        <hr/>
+        <footer>
+            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>. This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>.</p>
+        </footer>
+    </body>
+</html>

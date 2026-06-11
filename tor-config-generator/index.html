@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#5271ff">
+        <meta name="referrer" content="no-referrer">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
+        <link rel="canonical" href="https://cyphertoshi.com/tor-config-generator/"/>
+        <meta name="robots" content="index, follow">
+        <meta name="description" content="A simple, open-source, client-side tool to generate a torrc configuration for a Tor client, relay, bridge, or onion (hidden) service."/>
+        <meta name="author" content="Tech1k">
+        <title>Tor Config Generator</title>
+        <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="manifest" href="/site.webmanifest"/>
+        <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
+        <meta property="og:title" content="Tor Config Generator"/>
+        <meta property="og:description" content="A simple, open-source, client-side tool to generate a torrc configuration for a Tor client, relay, bridge, or onion (hidden) service."/>
+        <meta property="og:type" content="website"/>
+        <meta property="og:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta property="og:image:width" content="1200"/>
+        <meta property="og:image:height" content="630"/>
+        <meta property="og:url" content="https://cyphertoshi.com/tor-config-generator/"/>
+        <meta property="og:site_name" content="Tor Config Generator"/>
+        <meta name="twitter:card" content="summary_large_image"/>
+        <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta name="twitter:title" content="Tor Config Generator"/>
+        <meta name="twitter:description" content="A simple, open-source, client-side tool to generate a torrc configuration for a Tor client, relay, bridge, or onion service."/>
+        <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
+        <link rel="stylesheet" href="/assets/tool.css?v=1">
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Tor Config Generator","description":"Generate a torrc configuration for a Tor client, relay, bridge, or onion service.","applicationCategory":"SecurityApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/tor-config-generator/","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
+    </head>
+    <body id="main">
+        <h1>Tor Config Generator</h1>
+        <p>A simple, open-source, client-side tool to generate a <code>torrc</code> configuration file. Nothing leaves your browser.</p>
+
+        <div style="text-align:center;">
+            <h3>
+                <a href="/">Home</a> |
+                <a href="/links">Links</a> |
+                <a href="/notes">Notes</a> |
+                <a href="/tools">Toolkit</a> |
+                <a href="/contact">Contact</a>
+            </h3>
+        </div>
+        <hr/>
+
+        <form id="torForm">
+            <fieldset>
+                <legend>Role</legend>
+                <label for="role">What is this Tor instance for?</label><br/>
+                <select id="role">
+                    <option value="client" selected>Client (browse/route over Tor)</option>
+                    <option value="relay">Relay (help carry traffic)</option>
+                    <option value="bridge">Bridge (help censored users connect)</option>
+                </select>
+            </fieldset>
+
+            <fieldset>
+                <legend>Client</legend>
+                <label for="socks">SOCKS port:</label><br/>
+                <input type="number" id="socks" placeholder="default=9050">
+                <br/><br/>
+                <label class="check"><input type="checkbox" id="useBridges"> Connect through bridges (for censored networks)</label>
+                <br/><br/>
+                <label for="bridges">Bridge lines (one per line, from <a href="https://bridges.torproject.org/" target="_blank" rel="noopener noreferrer">BridgeDB</a>):</label><br/>
+                <textarea id="bridges" rows="3" style="width:100%; max-width:520px; box-sizing:border-box; font-size:15px;" placeholder="obfs4 1.2.3.4:443 FINGERPRINT cert=... iat-mode=0"></textarea>
+            </fieldset>
+
+            <fieldset>
+                <legend>Relay / Bridge (when running one)</legend>
+                <label for="nick">Nickname:</label><br/>
+                <input type="text" id="nick" placeholder="MyTorRelay">
+                <br/><br/>
+                <label for="orport">ORPort:</label><br/>
+                <input type="number" id="orport" placeholder="default=9001">
+                <br/><br/>
+                <label for="contact">Contact info (so operators can reach you):</label><br/>
+                <input type="text" id="contact" placeholder="you@example.com">
+                <br/><br/>
+                <label for="bw">Bandwidth rate limit KB/s (optional):</label><br/>
+                <input type="number" id="bw" placeholder="e.g. 2048">
+                <br/><br/>
+                <label class="check"><input type="checkbox" id="exit"> Allow exit traffic (advanced; carries real legal exposure)</label>
+            </fieldset>
+
+            <fieldset>
+                <legend>Onion (hidden) service</legend>
+                <label class="check"><input type="checkbox" id="hs"> Host an onion service</label>
+                <br/><br/>
+                <label for="hsdir">Service directory:</label><br/>
+                <input type="text" id="hsdir" placeholder="/var/lib/tor/hidden_service/">
+                <br/><br/>
+                <label for="hsvport">Virtual (onion) port:</label><br/>
+                <input type="number" id="hsvport" placeholder="80">
+                <br/><br/>
+                <label for="hstarget">Forward to (host:port):</label><br/>
+                <input type="text" id="hstarget" placeholder="127.0.0.1:80">
+            </fieldset>
+
+            <fieldset>
+                <legend>Logging</legend>
+                <label for="log">Log level:</label><br/>
+                <select id="log">
+                    <option value="" selected>Default</option>
+                    <option value="notice">notice</option>
+                    <option value="info">info</option>
+                </select>
+            </fieldset>
+
+            <input type="submit" value="Generate torrc">
+        </form>
+
+        <div id="output" class="result"></div>
+
+        <script>
+            const form = document.getElementById('torForm');
+            const output = document.getElementById('output');
+            const val = (id) => document.getElementById(id).value.trim();
+            const checked = (id) => document.getElementById(id).checked;
+            function escapeHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                output.style.display = 'block';
+                const role = val('role');
+                const lines = [];
+                lines.push('# torrc generated with cyphertoshi.com/tor-config-generator');
+                lines.push('');
+
+                if (role === 'client' || role === 'bridge') {
+                    lines.push('# Client');
+                    lines.push('SocksPort ' + (val('socks') || '9050'));
+                    if (checked('useBridges')) {
+                        lines.push('UseBridges 1');
+                        lines.push('ClientTransportPlugin obfs4 exec /usr/bin/obfs4proxy');
+                        const br = val('bridges');
+                        if (br) br.split('\n').forEach(function (l) { l = l.trim(); if (l) lines.push('Bridge ' + l.replace(/^Bridge\s+/i, '')); });
+                    }
+                    lines.push('');
+                } else {
+                    // a pure relay does not need a local SOCKS proxy
+                    lines.push('SocksPort 0');
+                    lines.push('');
+                }
+
+                if (role === 'relay' || role === 'bridge') {
+                    lines.push('# ' + (role === 'bridge' ? 'Bridge relay' : 'Relay'));
+                    if (val('nick')) lines.push('Nickname ' + val('nick'));
+                    lines.push('ORPort ' + (val('orport') || '9001'));
+                    if (val('contact')) lines.push('ContactInfo ' + val('contact'));
+                    if (val('bw')) { lines.push('RelayBandwidthRate ' + val('bw') + ' KBytes'); lines.push('RelayBandwidthBurst ' + (parseInt(val('bw'), 10) * 2) + ' KBytes'); }
+                    if (role === 'bridge') {
+                        lines.push('BridgeRelay 1');
+                        lines.push('ServerTransportPlugin obfs4 exec /usr/bin/obfs4proxy');
+                        lines.push('ServerTransportListenAddr obfs4 0.0.0.0:443');
+                        lines.push('ExtORPort auto');
+                        lines.push('ExitPolicy reject *:*');
+                    } else if (checked('exit')) {
+                        lines.push('ExitRelay 1');
+                        lines.push('ReducedExitPolicy 1');
+                    } else {
+                        lines.push('ExitRelay 0');
+                        lines.push('ExitPolicy reject *:*');
+                    }
+                    lines.push('');
+                }
+
+                if (checked('hs')) {
+                    lines.push('# Onion service');
+                    lines.push('HiddenServiceDir ' + (val('hsdir') || '/var/lib/tor/hidden_service/'));
+                    lines.push('HiddenServicePort ' + (val('hsvport') || '80') + ' ' + (val('hstarget') || '127.0.0.1:80'));
+                    lines.push('');
+                }
+
+                if (val('log')) { lines.push('# Logging'); lines.push('Log ' + val('log') + ' stdout'); lines.push(''); }
+
+                const conf = lines.join('\n').replace(/\n{3,}/g, '\n\n').replace(/\s+$/, '') + '\n';
+                output.innerHTML =
+                    '<p><strong>Your torrc:</strong></p>' +
+                    '<pre class="result" id="confOutput" style="display:block; white-space:pre-wrap;">' + escapeHtml(conf) + '</pre>' +
+                    '<button type="button" onclick="copyConf()">Copy config</button> ' +
+                    '<button type="button" onclick="downloadConf()">Download torrc</button>' +
+                    '<p>Save this as your <code>torrc</code> (often <code>/etc/tor/torrc</code>) and restart Tor. For onion services, Tor creates the hostname file in the service directory on first start. See the <a href="https://2019.www.torproject.org/docs/tor-manual.html.en" target="_blank" rel="noopener noreferrer">Tor manual</a> for every option.</p>';
+            });
+
+            function copyConf() {
+                navigator.clipboard.writeText(document.getElementById('confOutput').innerText).then(() => { alert('Copied your torrc to clipboard!'); });
+            }
+            function downloadConf() {
+                const blob = new Blob([document.getElementById('confOutput').innerText], { type: 'text/plain' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob); a.download = 'torrc'; a.click(); URL.revokeObjectURL(a.href);
+            }
+        </script>
+        <hr>
+        <section style="margin-top: 40px;">
+            <h2>FAQs</h2>
+
+            <h3>What is this site?</h3>
+            <p>This site builds a <code>torrc</code>, the configuration file for the Tor daemon, entirely in your browser. Choose a role and options, and it writes the directives for you.</p>
+
+            <h3>What is an onion service?</h3>
+            <p>An onion (hidden) service exposes a server through Tor at a <code>.onion</code> address, so neither its IP nor its visitors' IPs are revealed. Tick the onion service box and point it at a local port to host one. This site itself runs an onion service.</p>
+
+            <h3>Should I run an exit relay?</h3>
+            <p>Exit relays carry traffic out to the open internet and can attract abuse complaints and legal attention to your address. Most operators run non-exit relays or bridges, which still help the network with far less risk. Only enable exit traffic if you understand the implications.</p>
+
+            <h3>Do you log anything I enter?</h3>
+            <p>No. This site is a static page that runs entirely client-side. Nothing you enter is sent anywhere, so it works offline.</p>
+
+            <h3>Is this site open source?</h3>
+            <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/tor-config-generator" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+        </section>
+        <hr/>
+        <p style="font-size: 0.9em; color: gray;">
+            Disclaimer: This tool is provided "as is" with no warranties. Always review the generated configuration and consult the official Tor documentation before running it.
+        </p>
+        <br/>
+        <hr/>
+        <footer>
+            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>. This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>.</p>
+        </footer>
+    </body>
+</html>

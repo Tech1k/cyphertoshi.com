@@ -12,6 +12,7 @@
         <meta name="author" content="Tech1k">
         <title>Thoughts on Bitcoin Core PR #32359 and OP_RETURN Size Limits | CypherToshi's Notes</title>
         <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="manifest" href="/site.webmanifest"/>
         <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
         <meta property="og:title" content="Thoughts on Bitcoin Core PR #32359 and OP_RETURN Size Limits | CypherToshi's Notes"/>
         <meta property="og:description" content="My opinion on the removal of size restrictions on OP_RETURN as proposed in Bitcoin Core PR #32359."/>
@@ -26,7 +27,7 @@
         <meta name="twitter:title" content="Thoughts on Bitcoin Core PR #32359 and OP_RETURN Size Limits | CypherToshi's Notes"/>
         <meta name="twitter:description" content="My opinion on the removal of size restrictions on OP_RETURN as proposed in Bitcoin Core PR #32359."/>
 		<link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-		<link rel="stylesheet" href="/assets/style.css?v=5">
+		<link rel="stylesheet" href="/assets/style.css?v=6">
 	</head>
 	<body>
 		<div id="main">
@@ -63,11 +64,11 @@
                     This has contributed to blockchain bloat which raises important questions about Bitcoin's long-term scalability and centralization mitigation <sup><a href="#footnotes">[4]</a></sup>.
                     In particular, the main concern is whether the blockchain can keep scaling without an increase of centralization by a decrease of independent node operators as they may not have the storage capacity to operate full nodes.
                     <br/><br/>
-                    Furthermore, if this change is approved, we could see a significant increase in transaction fees <sup><a href="#footnotes">[5]</a></sup>.
+                    Also, if this change is approved, we could see a significant increase in transaction fees <sup><a href="#footnotes">[5]</a></sup>.
                     This would occur due to increased competition for block space particularly if non-limited OP_RETURN data is adopted in mass-scale by protocols such as Ordinals.
                     The increase of block space demand may cause delays in transactions potentially requiring users to wait for additional block before their transactions are confirmed, especially during times of network congestion.
                     <br/><br/>
-                    In conclusion, I strongly believe that the approval of this PR could significantly impact block space utilization which will lead to higher minimum fee rates and add a substantial amount of bloat onto the blockchain.
+                    Overall, I strongly believe that the approval of this PR could significantly impact block space utilization which will lead to higher minimum fee rates and add a substantial amount of bloat onto the blockchain.
                     This could have many negative consequences, including potential centralization of node operators due to higher storage requirements and a negative user experience.
                     For the average user, this could mean waiting for several blocks until a transaction is confirmed, especially in periods of high demand.
                     <br/><br/>

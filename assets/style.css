@@ -85,3 +85,9 @@ a:visited {
         transform: rotate(360deg);
     }
 }
+
+@media (prefers-reduced-motion: reduce) {
+    .neon-ring::before {
+        animation: none;
+    }
+}

@@ -12,6 +12,7 @@
         <meta name="author" content="Tech1k">
         <title>Crypto Payment QR Generator</title>
         <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="manifest" href="/site.webmanifest"/>
         <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
         <meta property="og:title" content="Crypto Payment QR Generator"/>
         <meta property="og:description" content="A simple, open-source, client-side tool to generate Monero, Bitcoin, and Litecoin payment URIs and scannable QR codes."/>
@@ -27,6 +28,7 @@
         <meta name="twitter:description" content="A simple, open-source, client-side tool to generate Monero, Bitcoin, and Litecoin payment URIs and scannable QR codes."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
         <link rel="stylesheet" href="/assets/tool.css?v=1">
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Crypto Payment QR Generator","description":"Generate Monero, Bitcoin, and Litecoin payment URIs and scannable QR codes.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/payment-qr-generator/","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body id="main">
         <h1>Crypto Payment QR Generator</h1>
@@ -35,9 +37,9 @@
         <div style="text-align:center;">
             <h3>
                 <a href="/">Home</a> |
-                <a href="/tools">Toolkit</a> |
                 <a href="/links">Links</a> |
                 <a href="/notes">Notes</a> |
+                <a href="/tools">Toolkit</a> |
                 <a href="/contact">Contact</a>
             </h3>
         </div>
@@ -220,6 +222,7 @@
 
                 const warn = addressWarning(coin, address);
                 const warnHtml = warn ? `<div class="error">⚠️ ${escapeHtml(warn)}</div><br/>` : '';
+                const shareUrl = buildShareLink();
                 output.innerHTML =
                     warnHtml +
                     `<p><strong>Payment URI:</strong></p>` +
@@ -228,7 +231,10 @@
                     `<p><strong>QR code</strong> (scan with a compatible wallet):</p>` +
                     `<div id="qrBox" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>` +
                     `<br/><br/><button type="button" onclick="downloadQR()">Download QR (PNG)</button> ` +
-                    `<button type="button" onclick="copyQRImage()">Copy QR</button>`;
+                    `<button type="button" onclick="copyQRImage()">Copy QR</button>` +
+                    `<p><strong>Shareable link</strong> (opens this page pre-filled and ready to scan):</p>` +
+                    `<code id="shareOut" style="word-break: break-word;">${escapeHtml(shareUrl)}</code>` +
+                    `<br/><br/><button type="button" onclick="copyShareLink()">Copy link</button>`;
                 document.getElementById('qrBox').appendChild(canvas);
                 if (wantLogo) drawLogo(canvas, ICONS[coin]);
             });
@@ -237,6 +243,35 @@
                 const text = document.getElementById('uriOut').innerText;
                 navigator.clipboard.writeText(text).then(() => {
                     alert('Copied the payment URI to clipboard!');
+                });
+            }
+
+            // Build a link to this page that pre-fills (and auto-generates) the same payment.
+            // Uses the current origin, so it stays on clearnet or the onion mirror as appropriate.
+            function buildShareLink() {
+                const q = new URLSearchParams();
+                const coin = document.getElementById('coin').value;
+                q.set('coin', coin);
+                if (coin === 'custom') {
+                    const cs = document.getElementById('customScheme').value.trim();
+                    if (cs) q.set('scheme', cs);
+                }
+                const address = document.getElementById('address').value.trim();
+                const amount = document.getElementById('amount').value.trim();
+                const name = document.getElementById('name').value.trim();
+                const desc = document.getElementById('desc').value.trim();
+                if (address) q.set('address', address);
+                if (amount) q.set('amount', amount);
+                if (name) q.set('label', name);
+                if (desc) q.set('message', desc);
+                if (!document.getElementById('logo').checked) q.set('logo', '0');
+                return location.origin + location.pathname + '?' + q.toString();
+            }
+
+            function copyShareLink() {
+                const text = document.getElementById('shareOut').innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Copied a shareable payment link to clipboard!');
                 });
             }
 
@@ -311,14 +346,14 @@
             <h3>Can I put the coin logo in the QR?</h3>
             <p>Yes. Leave <strong>Add the coin logo to the center of the QR</strong> checked (on by default for Monero, Bitcoin, and Litecoin). The code switches to higher error correction when a logo is shown, so it still scans reliably. Uncheck it for a plain code. Custom coins have no logo.</p>
 
-            <h3>Can I pre-fill a payment from a link?</h3>
-            <p>Yes. Add URL parameters and the form fills in (and generates) automatically, e.g. <code>?coin=monero&amp;address=...&amp;amount=0.1&amp;label=Name&amp;message=Note</code>. Handy for sharing a ready-to-scan donation link.</p>
+            <h3>Can I pre-fill or share a payment link?</h3>
+            <p>Yes. After you generate a QR, use the <strong>Copy link</strong> button to get a URL that opens this page pre-filled and ready to scan. Hand it to someone and they land on a ready payment. You can also build one by hand with URL parameters, e.g. <code>?coin=monero&amp;address=...&amp;amount=0.1&amp;label=Name&amp;message=Note</code>.</p>
 
             <h3>Can I pay an OpenAlias address?</h3>
             <p>Yes. Use <a href="/openalias-pay/">OpenAlias Pay</a>, which resolves an OpenAlias name (like <code>donate@getmonero.org</code>) to its address and builds the QR for you.</p>
 
             <h3>Do you log anything I enter?</h3>
-            <p>No. This site is hosted on GitHub Pages and runs entirely client-side. The address, amount, and QR are generated in your browser and never sent anywhere, so it works offline.</p>
+            <p>No. This site is a static page that runs entirely client-side. The address, amount, and QR are generated in your browser and never sent anywhere, so it works offline.</p>
 
             <h3>Is this site open source?</h3>
             <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/payment-qr-generator" target="_blank" rel="noopener noreferrer">GitHub</a>. QR codes are rendered with the open-source <a href="https://github.com/kazuhikoarase/qrcode-generator" target="_blank" rel="noopener noreferrer">qrcode-generator</a> library (MIT), self-hosted on this site.</p>

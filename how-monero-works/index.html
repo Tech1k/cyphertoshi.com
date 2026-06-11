@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#5271ff">
+        <meta name="referrer" content="no-referrer">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
+        <link rel="canonical" href="https://cyphertoshi.com/how-monero-works/"/>
+        <meta name="robots" content="index, follow">
+        <meta name="description" content="An interactive, client-side explainer of how Monero protects privacy: stealth addresses computed live in your browser, ring signatures, RingCT, and why fungibility matters."/>
+        <meta name="author" content="Tech1k">
+        <title>How Monero Works</title>
+        <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="manifest" href="/site.webmanifest"/>
+        <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
+        <meta property="og:title" content="How Monero Works"/>
+        <meta property="og:description" content="An interactive, client-side explainer of how Monero protects privacy: stealth addresses computed live in your browser, ring signatures, RingCT, and why fungibility matters."/>
+        <meta property="og:type" content="website"/>
+        <meta property="og:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta property="og:image:width" content="1200"/>
+        <meta property="og:image:height" content="630"/>
+        <meta property="og:url" content="https://cyphertoshi.com/how-monero-works/"/>
+        <meta property="og:site_name" content="How Monero Works"/>
+        <meta name="twitter:card" content="summary_large_image"/>
+        <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta name="twitter:title" content="How Monero Works"/>
+        <meta name="twitter:description" content="An interactive, client-side explainer of how Monero protects privacy: stealth addresses, ring signatures, RingCT, and fungibility."/>
+        <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
+        <link rel="stylesheet" href="/assets/tool.css?v=1">
+        <style>
+            #main { width: 70%; }
+            @media (max-width: 992px) { #main { width: 90%; } }
+            .lead { font-size: 1.15em; line-height: 1.5; }
+            section.concept { margin: 48px 0; }
+            .concept h2 { border-bottom: 1px solid #555; padding-bottom: 6px; }
+            .card { background: #2b2b2b; border: 1px solid #4a4a4a; border-radius: 6px; padding: 16px 18px; margin: 14px 0; }
+            .muted { color: #aaa; }
+            .ok { color: #6fce6f; }
+            .mono { font-family: monospace; word-break: break-all; }
+            .pill { display: inline-block; background: #3a3a4a; border-radius: 999px; padding: 2px 10px; font-size: 0.85em; margin: 2px; }
+            .three { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+            .three > div { flex: 1 1 180px; background: #2b2b2b; border: 1px solid #4a4a4a; border-radius: 6px; padding: 12px 14px; }
+            .ledger { font-family: monospace; font-size: 0.9em; }
+            .hide { color: #777; }
+            button { padding: 9px 14px; font-size: 15px; cursor: pointer; margin: 4px 6px 4px 0; }
+            .ring { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+            .ring span { padding: 8px 12px; border: 1px solid #4a4a4a; border-radius: 6px; background: #2b2b2b; cursor: pointer; font-family: monospace; }
+            .stealth-out { font-family: monospace; font-size: 0.9em; }
+            .step { margin: 8px 0; }
+            .label { color: #8fb6ff; }
+        </style>
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"How Monero Works","description":"An interactive explainer of how Monero protects privacy: stealth addresses, ring signatures, key images, RingCT, and fungibility, with live cryptography.","url":"https://cyphertoshi.com/how-monero-works/","author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
+    </head>
+    <body id="main">
+        <h1>How Monero Works</h1>
+        <p class="lead">An interactive, plain-language tour of how Monero keeps payments private. The stealth-address section below runs the <strong>real elliptic-curve cryptography live in your browser</strong>, not an animation, and the code is checked against Monero's own <a href="/tests/">test vectors</a> that you can run yourself. Nothing leaves your device.</p>
+
+        <div style="text-align:center;">
+            <h3>
+                <a href="/">Home</a> |
+                <a href="/links">Links</a> |
+                <a href="/notes">Notes</a> |
+                <a href="/tools">Toolkit</a> |
+                <a href="/contact">Contact</a>
+            </h3>
+        </div>
+        <hr/>
+
+        <nav style="margin: 0 auto 8px;">
+            <p class="muted" style="margin-bottom:4px;">Jump to:</p>
+            <p style="line-height:1.9;">
+                <a href="#problem">The problem</a> &middot;
+                <a href="#stealth">Stealth addresses</a> &middot;
+                <a href="#ringsig">Ring signatures</a> &middot;
+                <a href="#ringct">RingCT</a> &middot;
+                <a href="#transaction">A whole transaction</a> &middot;
+                <a href="#fungibility">Fungibility</a> &middot;
+                <a href="#limits">What it doesn't hide</a> &middot;
+                <a href="#deeper">Go deeper</a>
+            </p>
+        </nav>
+        <hr/>
+
+        <section class="concept" id="problem">
+            <h2>The problem: transparent money</h2>
+            <p>On a transparent blockchain like Bitcoin, every payment is public forever. Anyone can read three things off the chain:</p>
+            <div class="card ledger">
+                tx 9f3c...  <span class="label">from</span> 1A2b3C...  <span class="label">to</span> 1XyZ9k...  <span class="label">amount</span> 0.42 BTC
+            </div>
+            <p>That means your balance, your counterparties, and your history are open to employers, exchanges, chain-analysis firms, and anyone who cares to look. Monero hides all three:</p>
+            <div class="three">
+                <div><strong>Who received it</strong><br/><span class="muted">Stealth addresses</span></div>
+                <div><strong>Who sent it</strong><br/><span class="muted">Ring signatures (today) / FCMP++ (next)</span></div>
+                <div><strong>How much</strong><br/><span class="muted">RingCT + Bulletproofs</span></div>
+            </div>
+            <p>And because the history is hidden, every coin stays interchangeable. That property, <strong>fungibility</strong>, is the whole point, and we come back to it at the end.</p>
+        </section>
+
+        <section class="concept" id="stealth">
+            <h2>1. Stealth addresses: hiding the recipient</h2>
+            <p>You publish <em>one</em> address, but it never appears on the blockchain. Instead, every payment to you lands on a fresh, single-use <strong>one-time address</strong> that an outside observer cannot link to your published address or to your other payments.</p>
+            <p>Here is the real math. Your address holds two public keys: a <strong>spend</strong> key <span class="mono label">B = b·G</span> and a <strong>view</strong> key <span class="mono label">A = a·G</span> (lowercase letters are your private keys; <span class="mono">G</span> is the curve's base point). When someone pays you:</p>
+            <ul>
+                <li>The sender picks a random secret <span class="mono">r</span> and publishes <span class="mono label">R = r·G</span> with the transaction.</li>
+                <li>Both sides derive a shared secret: the sender computes <span class="mono">8·r·A</span>, and you compute <span class="mono">8·a·R</span>. These are equal, because <span class="mono">a·R = a·r·G = r·A</span>.</li>
+                <li>The on-chain one-time address is <span class="mono label">P = Hs(shared secret)·G + B</span>. Only you can compute the matching private key, so only you can spend it.</li>
+            </ul>
+            <p>Try it. This generates a throwaway demo wallet and "receives" payments to it, computing every value for real:</p>
+
+            <div class="card">
+                <button type="button" id="genWallet">Generate a demo wallet</button>
+                <button type="button" id="receive" disabled>Receive a payment</button>
+                <div id="walletBox" class="muted" style="margin-top:10px;">No wallet yet.</div>
+                <div id="payments" style="margin-top:10px;"></div>
+            </div>
+            <p class="muted"><small>The demo wallet's keys are random and for illustration only. Never use a browser-generated key for real funds.</small></p>
+
+            <h3>Watch-only: the view key</h3>
+            <p>Your wallet has two private keys that do different jobs. The <strong>view key</strong> <span class="mono">a</span> lets you <em>detect</em> incoming payments; the <strong>spend key</strong> <span class="mono">b</span> lets you <em>spend</em> them. Share only <span class="mono">a</span> and someone gets a read-only window into your wallet, useful for an accountant or auditor and useless for theft. This scans a batch of outputs with the view key alone:</p>
+            <div class="card">
+                <button type="button" id="scanBtn">Scan a batch of outputs (view key only)</button>
+                <div id="scanOut" class="muted" style="margin-top:10px;">Uses the demo wallet above.</div>
+            </div>
+
+            <h3>Subaddresses: one wallet, many faces</h3>
+            <p>You can hand out a fresh address to every payer without making new wallets. A <strong>subaddress</strong> is derived from your main keys, looks completely unrelated on-chain (they start with 8), yet your single view key still finds payments to all of them. Derive one:</p>
+            <div class="card">
+                <label for="subMajor">Account:</label> <input type="number" id="subMajor" value="0" min="0" style="width:70px;">
+                &nbsp;<label for="subMinor">Index:</label> <input type="number" id="subMinor" value="1" min="0" style="width:70px;">
+                <button type="button" id="subBtn">Derive subaddress</button>
+                <div id="subOut" class="muted" style="margin-top:10px;">Uses the demo wallet above.</div>
+            </div>
+        </section>
+
+        <section class="concept" id="ringsig">
+            <h2>2. Ring signatures: hiding the sender</h2>
+            <p>When you spend an output, Monero mixes your real input with decoys pulled from the chain, and signs in a way that proves "one of these outputs is being spent" without revealing which. A verifier sees a ring of plausible sources (currently 16) and cannot pick out the real one.</p>
+            <p>Below is a ring of outputs. One of them is really being spent. Click any to try to identify it:</p>
+            <div class="ring" id="ring"></div>
+            <div id="ringMsg" class="muted">Pick the real spender.</div>
+            <p style="margin-top:14px;">If the network cannot tell who is spending, how does it stop someone spending the same output twice? Each output, when spent, reveals a unique <strong>key image</strong> derived from its private key. The key image is deterministic, so a second spend of the same output produces the same key image and is rejected, yet it cannot be linked back to the output it came from. Privacy and double-spend protection at the same time.</p>
+            <div class="card">
+                <button type="button" id="spendOut">Spend a fresh output</button>
+                <button type="button" id="doubleSpend" disabled>Try to double-spend it</button>
+                <div id="kiOut" class="muted" style="margin-top:10px;">No outputs spent yet. Each "spend" computes a real key image with Monero's hash-to-point.</div>
+            </div>
+
+            <h3>How decoys are chosen</h3>
+            <p>Decoys are not picked uniformly. Real spends tend to be recent, so Monero samples decoys from a gamma distribution over output age that mimics real spending: mostly young outputs, with a long tail of older ones. That way your real input blends in. Sample the distribution:</p>
+            <div class="card">
+                <button type="button" id="decoyBtn">Sample decoys</button>
+                <div id="decoyOut" style="margin-top:10px;"></div>
+            </div>
+            <p class="muted" style="margin-top:14px;"><small>What's next: Monero is moving to <strong>Full-Chain Membership Proofs (FCMP++)</strong>, which drop decoys entirely and hide each spend among the <em>entire</em> set of outputs ever created. Same idea as a ring, but the anonymity set becomes the whole chain instead of 16.</small></p>
+        </section>
+
+        <section class="concept" id="ringct">
+            <h2>3. RingCT: hiding the amount</h2>
+            <p>Amounts are not written in the clear. Each is replaced by a <strong>Pedersen commitment</strong> <span class="mono">C = a·G + v·H</span>, where <span class="mono">v</span> is the amount, <span class="mono">a</span> is a random blinding factor, and <span class="mono">G</span> and <span class="mono">H</span> are two independent generators. The blinding makes <span class="mono">C</span> reveal nothing about <span class="mono">v</span>, yet commitments still <em>add</em>, so the network can verify that inputs and outputs balance without seeing a single amount.</p>
+            <p>This runs the real commitments live, using Monero's actual <span class="mono">H</span> generator. Set the amounts and build them:</p>
+
+            <div class="card">
+                <div class="step"><span class="label">Input (spent):</span> <input type="number" id="vin" value="10" min="0" style="width:90px;" aria-label="Input amount in XMR"> XMR</div>
+                <div class="step"><span class="label">Output 1:</span> <input type="number" id="vo1" value="7" min="0" style="width:90px;" aria-label="Output 1 amount in XMR"> XMR &nbsp;<span class="muted">+</span>&nbsp; <span class="label">Output 2 (change):</span> <input type="number" id="vo2" value="3" min="0" style="width:90px;" aria-label="Output 2 (change) amount in XMR"> XMR</div>
+                <button type="button" id="buildCommit">Build commitments</button>
+                <button type="button" id="reblind" disabled>Re-randomize blinding</button>
+                <div id="commitOut" class="muted" style="margin-top:10px;">No commitments yet.</div>
+            </div>
+            <p class="muted"><small>The hex commitments hide the amounts completely. Change an output so the totals no longer match and the balance check fails, exactly as the network would reject it. A <strong>Bulletproof</strong> range proof (not shown here) additionally proves each hidden amount is non-negative, blocking the "send -100" trick.</small></p>
+            <p>So the chain stays fully auditable for soundness, the supply is provable, while individual amounts stay private.</p>
+
+            <h3>Range proofs (Bulletproofs)</h3>
+            <p>Hiding amounts creates a new risk: a cheater could commit to a negative or absurdly large amount and break the supply. A <strong>range proof</strong> rules that out by proving each hidden amount is a normal non-negative number without revealing it. The idea: write the amount in binary, commit to each bit, and prove every committed bit is really 0 or 1. The bit commitments add up to the amount commitment:</p>
+            <div class="card">
+                <div class="step"><span class="label">Amount:</span> <input type="number" id="rpVal" value="42" min="0" max="255" style="width:90px;" aria-label="Amount to commit, 0 to 255"> <span class="muted">(0 to 255, shown as 8 bits)</span></div>
+                <button type="button" id="rpBtn">Commit to the bits</button>
+                <div id="rpOut" class="muted" style="margin-top:10px;"></div>
+            </div>
+            <p class="muted"><small>Committing to every bit separately would be large. <strong>Bulletproofs</strong> prove the same statement in a proof that grows only logarithmically with the range, which is why Monero transactions stay small.</small></p>
+        </section>
+
+        <section class="concept" id="transaction">
+            <h2>Putting it together: a whole transaction</h2>
+            <p>Each mechanism above does one job. A real Monero transaction uses all of them at once. This assembles one for real: it spends an input (hiding the sender with a ring and a key image), pays a recipient (hiding them with a stealth address), and hides the amounts (with commitments that still balance). Only the fee is public.</p>
+            <div class="card">
+                <button type="button" id="txBtn">Build a sample transaction</button>
+                <div id="txOut" class="muted" style="margin-top:10px;"></div>
+            </div>
+        </section>
+
+        <section class="concept" id="fungibility">
+            <h2>4. Fungibility: why all of this matters</h2>
+            <p>Put the three pieces together and a Monero output has no visible history: no traceable origin, no linked recipient, no amount trail. That means every XMR is identical to every other XMR.</p>
+            <p>On a transparent chain, coins carry their past. A coin that once touched a sanctioned address or a hack can be flagged, frozen, or refused by an exchange, even after passing through innocent hands. That is a loss of <strong>fungibility</strong>: not all units are worth the same in practice.</p>
+            <p>Monero restores the property cash always had. One unit is as good as any other, because nobody can tell them apart. For a currency, that is not a feature on the side. It is the difference between money you control and money that can be turned against you.</p>
+        </section>
+
+        <section class="concept" id="limits">
+            <h2>What Monero does not hide</h2>
+            <p>Strong privacy is not the same as invisibility, and being honest about the edges matters:</p>
+            <ul>
+                <li><strong>The fee is public.</strong> You saw it in the transaction above; fees let miners prioritize and verify.</li>
+                <li><strong>That a transaction happened, and roughly when.</strong> The chain shows a transaction occurred at a given time, just not who, whom, or how much.</li>
+                <li><strong>The number of inputs and outputs.</strong> The shape of a transaction is visible and can leak weak hints in some cases.</li>
+                <li><strong>Your IP address, unless you take care.</strong> Whoever you broadcast to could log your IP. Monero blunts this at the network layer with <strong>Dandelion++</strong>, which relays a new transaction along a random stem before broadcasting it widely, so the true origin is obscured. For stronger protection, use <strong>Tor</strong> (this site runs an onion service).</li>
+                <li><strong>On and off ramps.</strong> A KYC exchange knows the coins are yours when you buy or sell. On-chain privacy does not undo identity collected off-chain.</li>
+                <li><strong>Heuristic edge cases.</strong> Researchers study attacks like known-spent-output and timing analysis. Monero's defenses (larger rings, better decoy selection, and soon FCMP++) keep raising the bar, but no system is magic.</li>
+            </ul>
+            <p>None of this undermines the core: by default, the sender, recipient, and value of a payment stay private. Knowing the limits is how you use it well.</p>
+        </section>
+
+        <section class="concept" id="deeper">
+            <h2>Go deeper</h2>
+            <ul>
+                <li><a href="https://www.getmonero.org/resources/moneropedia/" target="_blank" rel="noopener noreferrer">Moneropedia</a>: the official concept glossary.</li>
+                <li><a href="https://www.getmonero.org/library/Zero-to-Monero-2-0-0.pdf" target="_blank" rel="noopener noreferrer">Zero to Monero</a>: the rigorous, math-complete reference (PDF).</li>
+                <li><a href="https://masteringmonero.com/" target="_blank" rel="noopener noreferrer">Mastering Monero</a>: a free, approachable book.</li>
+                <li><a href="https://monero.stackexchange.com/" target="_blank" rel="noopener noreferrer">Monero Stack Exchange</a>: questions and deep dives.</li>
+                <li>Try the real thing here: <a href="/monero-address-validator/">address validator</a>, <a href="/monero-mnemonic/">mnemonic tool</a>, <a href="/monero-integrated-address/">integrated address generator</a>.</li>
+            </ul>
+        </section>
+
+        <script src="/assets/xmr-address.js"></script>
+        <script src="/assets/ed25519.js"></script>
+        <script>
+            const hex = (b) => Array.from(b).map(x => x.toString(16).padStart(2, '0')).join('');
+            const shorten = (h) => h.length > 20 ? h.slice(0, 10) + '...' + h.slice(-10) : h;
+
+            // derivation_to_scalar(D, output_index=0): Hs(D || varint(0))
+            function Hs(pointBytes) {
+                const d = new Uint8Array(pointBytes.length + 1);
+                d.set(pointBytes, 0);
+                d[pointBytes.length] = 0;
+                return ed25519.reduce(moneroAddress.keccak256(d));
+            }
+            function buildAddress(spendPub, viewPub, prefix) {
+                const data = new Uint8Array(65);
+                data[0] = prefix; data.set(spendPub, 1); data.set(viewPub, 33);
+                const full = new Uint8Array(69);
+                full.set(data, 0);
+                full.set(moneroAddress.keccak256(data).subarray(0, 4), 65);
+                return moneroAddress.b58encode(full);
+            }
+
+            let wallet = null, payNum = 0;
+            const walletBox = document.getElementById('walletBox');
+            const payments = document.getElementById('payments');
+            const receiveBtn = document.getElementById('receive');
+
+            document.getElementById('genWallet').addEventListener('click', function () {
+                walletBox.innerHTML = 'Generating keys (real curve math, a moment)...';
+                receiveBtn.disabled = true;
+                payments.innerHTML = ''; payNum = 0;
+                setTimeout(function () {
+                    const a = ed25519.randomScalar(), b = ed25519.randomScalar();
+                    const A = ed25519.base(a), B = ed25519.base(b);
+                    const Aenc = ed25519.encode(A), Benc = ed25519.encode(B);
+                    wallet = { a, b, A, B, Aenc, Benc, address: buildAddress(Benc, Aenc, 18) };
+                    walletBox.innerHTML =
+                        '<div class="step"><span class="label">Your published address:</span><br/><span class="mono">' + wallet.address + '</span></div>' +
+                        '<div class="step"><span class="label">Public spend key B:</span> <span class="mono">' + shorten(hex(Benc)) + '</span></div>' +
+                        '<div class="step"><span class="label">Public view key A:</span> <span class="mono">' + shorten(hex(Aenc)) + '</span></div>' +
+                        '<div class="muted" style="margin-top:8px;">Now receive some payments and watch each land on a different one-time address.</div>';
+                    receiveBtn.disabled = false;
+                }, 25);
+            });
+
+            receiveBtn.addEventListener('click', function () {
+                if (!wallet) return;
+                receiveBtn.disabled = true;
+                const note = document.createElement('div');
+                note.className = 'muted';
+                note.textContent = 'Computing real elliptic-curve math...';
+                payments.prepend(note);
+                setTimeout(function () {
+                    const r = ed25519.randomScalar();
+                    const R = ed25519.base(r);
+                    const Renc = ed25519.encode(R);
+                    // sender side: 8 * r * A
+                    const Dsend = ed25519.mul8(ed25519.scalarmult(wallet.A, r));
+                    const Psend = ed25519.encode(ed25519.add(ed25519.base(Hs(ed25519.encode(Dsend))), wallet.B));
+                    // recipient side: 8 * a * R  (must match)
+                    const Drecv = ed25519.mul8(ed25519.scalarmult(R, wallet.a));
+                    const Precv = ed25519.encode(ed25519.add(ed25519.base(Hs(ed25519.encode(Drecv))), wallet.B));
+                    const match = hex(Psend) === hex(Precv);
+
+                    payNum++;
+                    note.remove();
+                    const card = document.createElement('div');
+                    card.className = 'card stealth-out';
+                    card.innerHTML =
+                        '<strong>Payment #' + payNum + '</strong>' +
+                        '<div class="step"><span class="label">Sender publishes R = r·G:</span><br/><span class="mono">' + shorten(hex(Renc)) + '</span></div>' +
+                        '<div class="step"><span class="label">Shared secret</span> (sender 8·r·A = recipient 8·a·R):<br/><span class="mono">' + shorten(hex(Dsend)) + '</span> ' +
+                            (hex(Dsend) === hex(Drecv) ? '<span class="ok">✓ both sides agree</span>' : '<span style="color:#e06">mismatch</span>') + '</div>' +
+                        '<div class="step"><span class="label">One-time address on chain</span> P = Hs(secret)·G + B:<br/><span class="mono">' + hex(Psend) + '</span></div>' +
+                        '<div class="' + (match ? 'ok' : '') + '">' + (match ? '✓ The recipient recognizes this output as theirs. It looks unrelated to the published address and to every other payment.' : '') + '</div>';
+                    payments.prepend(card);
+                    receiveBtn.disabled = false;
+                }, 25);
+            });
+
+            // Ring signature demo (illustrative).
+            const ring = document.getElementById('ring');
+            const ringMsg = document.getElementById('ringMsg');
+            function drawRing() {
+                ring.innerHTML = '';
+                for (let i = 0; i < 16; i++) {
+                    const s = document.createElement('span');
+                    const b = new Uint8Array(4); crypto.getRandomValues(b);
+                    s.textContent = 'out:' + hex(b);
+                    s.addEventListener('click', function () {
+                        ringMsg.innerHTML = '<span class="ok">Indistinguishable.</span> The signature proves one of the 16 is the real input, but nothing in it reveals which, not even to the network. <a href="#" id="reshuffle">Shuffle</a>.';
+                        document.getElementById('reshuffle').addEventListener('click', function (e) { e.preventDefault(); drawRing(); ringMsg.textContent = 'Pick the real spender.'; });
+                    });
+                    ring.appendChild(s);
+                }
+            }
+            drawRing();
+
+            // --- RingCT: real Pedersen commitments using Monero's H generator ---
+            const Hbytes = Uint8Array.from([0x8b,0x65,0x59,0x70,0x15,0x37,0x99,0xaf,0x2a,0xea,0xdc,0x9f,0xf1,0xad,0xd0,0xea,0x6c,0x72,0x51,0xd5,0x41,0x54,0xcf,0xa9,0x2c,0x17,0x3a,0x0d,0xd3,0x9c,0x1f,0x94]);
+            const Hpoint = ed25519.decode(Hbytes);
+            const IDENTITY_HEX = '0100000000000000000000000000000000000000000000000000000000000000';
+            function commit(v, a) { return ed25519.add(ed25519.base(a), ed25519.scalarmult(Hpoint, BigInt(v))); }
+
+            const commitOut = document.getElementById('commitOut');
+            const reblindBtn = document.getElementById('reblind');
+
+            function runCommitments() {
+                const vin = Math.max(0, parseInt(document.getElementById('vin').value || '0', 10));
+                const vo1 = Math.max(0, parseInt(document.getElementById('vo1').value || '0', 10));
+                const vo2 = Math.max(0, parseInt(document.getElementById('vo2').value || '0', 10));
+                commitOut.textContent = 'Computing real commitments...';
+                reblindBtn.disabled = true;
+                setTimeout(function () {
+                    // The prover chooses output blindings whose sum equals the input blinding,
+                    // so the G-parts cancel and only the amount (H) part decides the balance.
+                    const ao1 = ed25519.randomScalar();
+                    const ao2 = ed25519.randomScalar();
+                    const ain = (ao1 + ao2) % ed25519.ORDER;
+                    const Cin = commit(vin, ain);
+                    const Co1 = commit(vo1, ao1);
+                    const Co2 = commit(vo2, ao2);
+                    const diffHex = hex(ed25519.encode(ed25519.add(Cin, ed25519.negate(ed25519.add(Co1, Co2)))));
+                    const balanced = diffHex === IDENTITY_HEX;
+                    commitOut.innerHTML =
+                        '<div class="step"><span class="label">C(input):</span> <span class="mono">' + shorten(hex(ed25519.encode(Cin))) + '</span></div>' +
+                        '<div class="step"><span class="label">C(output 1):</span> <span class="mono">' + shorten(hex(ed25519.encode(Co1))) + '</span></div>' +
+                        '<div class="step"><span class="label">C(output 2):</span> <span class="mono">' + shorten(hex(ed25519.encode(Co2))) + '</span></div>' +
+                        '<div class="step muted">(the amounts appear nowhere in those commitments)</div>' +
+                        '<div class="step"><span class="label">Balance check</span> C(input) - C(output 1) - C(output 2):<br/><span class="mono">' + shorten(diffHex) + '</span></div>' +
+                        '<div style="' + (balanced ? 'color:#6fce6f' : 'color:#e06666') + '">' +
+                            (balanced
+                                ? '✓ The difference is the zero point. Inputs equal outputs, so no coins were created, and the network verified that without learning the amounts.'
+                                : '✗ The difference is not the zero point (' + vin + ' does not equal ' + (vo1 + vo2) + '). The network rejects this transaction.') +
+                        '</div>';
+                    reblindBtn.disabled = false;
+                }, 25);
+            }
+            document.getElementById('buildCommit').addEventListener('click', runCommitments);
+            reblindBtn.addEventListener('click', runCommitments);
+
+            // --- Key images: real Hp(P) and double-spend detection ---
+            const kiOut = document.getElementById('kiOut');
+            const spendBtn = document.getElementById('spendOut');
+            const dsBtn = document.getElementById('doubleSpend');
+            const seenImages = new Set();
+            let lastX = null, spendNum = 0;
+
+            function keyImage(x) {
+                const Penc = ed25519.encode(ed25519.base(x));            // output public key P = x·G
+                const Hp = ed25519.hashToPoint(moneroAddress.keccak256(Penc));
+                const Ienc = ed25519.encode(ed25519.scalarmult(Hp, x));  // key image I = x·Hp(P)
+                return { Penc: hex(Penc), Ienc: hex(Ienc) };
+            }
+            function renderSpend(title, Phex, Ihex, bad, msg) {
+                return '<div class="step"><strong>' + title + '</strong></div>' +
+                    '<div class="step"><span class="label">Output key  P = x·G:</span> <span class="mono">' + shorten(Phex) + '</span></div>' +
+                    '<div class="step"><span class="label">Key image  I = x·Hp(P):</span> <span class="mono">' + shorten(Ihex) + '</span></div>' +
+                    '<div style="color:' + (bad ? '#e06666' : '#6fce6f') + '">' + (bad ? '✗ ' : '✓ ') + msg + '</div>';
+            }
+            spendBtn.addEventListener('click', function () {
+                spendBtn.disabled = true; dsBtn.disabled = true;
+                kiOut.textContent = 'Computing the key image (real curve math)...';
+                setTimeout(function () {
+                    lastX = ed25519.randomScalar();
+                    const k = keyImage(lastX);
+                    seenImages.add(k.Ienc); spendNum++;
+                    kiOut.innerHTML = renderSpend('Spend #' + spendNum, k.Penc, k.Ienc, false,
+                        'Accepted. This key image has never appeared before, so it is a valid spend. Notice it looks unrelated to the output.');
+                    spendBtn.disabled = false; dsBtn.disabled = false;
+                }, 25);
+            });
+            dsBtn.addEventListener('click', function () {
+                if (lastX === null) return;
+                spendBtn.disabled = true; dsBtn.disabled = true;
+                kiOut.textContent = 'Recomputing the key image for the same output...';
+                setTimeout(function () {
+                    const k = keyImage(lastX);
+                    const dup = seenImages.has(k.Ienc);
+                    kiOut.innerHTML = renderSpend('Double-spend of the last output', k.Penc, k.Ienc, dup,
+                        'Rejected. The same output deterministically produces the same key image, which the network has already seen, so the double-spend is blocked. The key image still reveals nothing about which output it came from.');
+                    spendBtn.disabled = false; dsBtn.disabled = false;
+                }, 25);
+            });
+
+            // --- View keys: watch-only scanning ---
+            document.getElementById('scanBtn').addEventListener('click', function () {
+                const out = document.getElementById('scanOut'), btn = this;
+                if (!wallet) { out.innerHTML = '<span class="muted">Generate a demo wallet in the box above first.</span>'; return; }
+                btn.disabled = true; out.textContent = 'Building outputs and scanning with the view key...';
+                setTimeout(function () {
+                    const outs = [];
+                    for (let k = 0; k < 2; k++) {
+                        const r = ed25519.randomScalar();
+                        const D = ed25519.mul8(ed25519.scalarmult(wallet.A, r));
+                        const P = ed25519.encode(ed25519.add(ed25519.base(Hs(ed25519.encode(D))), wallet.B));
+                        outs.push({ R: ed25519.base(r), P: hex(P) });
+                    }
+                    outs.push({ R: ed25519.base(ed25519.randomScalar()), P: hex(ed25519.encode(ed25519.base(ed25519.randomScalar()))) });
+                    let html = '';
+                    outs.forEach(function (o, i) {
+                        const D = ed25519.mul8(ed25519.scalarmult(o.R, wallet.a));
+                        const cand = hex(ed25519.encode(ed25519.add(ed25519.base(Hs(ed25519.encode(D))), wallet.B)));
+                        const mine = cand === o.P;
+                        html += '<div class="step">Output ' + (i + 1) + ': <span class="mono">' + shorten(o.P) + '</span> &rarr; ' + (mine ? '<span class="ok">yours</span>' : '<span class="muted">not yours</span>') + '</div>';
+                    });
+                    html += '<div style="margin-top:8px;">The view key identified your incoming outputs. But spending one needs the one-time private key x = Hs(8·a·R) + <strong>b</strong>, which requires your private spend key. So a shared view key reveals income yet can never move funds.</div>';
+                    out.innerHTML = html;
+                    btn.disabled = false;
+                }, 25);
+            });
+
+            // --- Subaddresses: real derivation ---
+            function scalarToLe(n) { const o = new Uint8Array(32); for (let i = 0; i < 32; i++) { o[i] = Number(n & 0xffn); n >>= 8n; } return o; }
+            document.getElementById('subBtn').addEventListener('click', function () {
+                const out = document.getElementById('subOut'), btn = this;
+                if (!wallet) { out.innerHTML = '<span class="muted">Generate a demo wallet in the box above first.</span>'; return; }
+                const major = Math.max(0, parseInt(document.getElementById('subMajor').value || '0', 10));
+                const minor = Math.max(0, parseInt(document.getElementById('subMinor').value || '0', 10));
+                btn.disabled = true; out.textContent = 'Deriving subaddress...';
+                setTimeout(function () {
+                    if (major === 0 && minor === 0) { out.innerHTML = '<span class="muted">Index (0,0) is the main address itself. Try (0,1).</span>'; btn.disabled = false; return; }
+                    const data = new Uint8Array(48);
+                    const dom = 'SubAddr';
+                    for (let i = 0; i < 7; i++) data[i] = dom.charCodeAt(i);  // data[7] stays 0 (the SubAddr null byte)
+                    data.set(scalarToLe(wallet.a), 8);
+                    new DataView(data.buffer).setUint32(40, major, true);
+                    new DataView(data.buffer).setUint32(44, minor, true);
+                    const m = ed25519.reduce(moneroAddress.keccak256(data));
+                    const Dpt = ed25519.add(wallet.B, ed25519.base(m));   // subaddress spend pub = B + m·G
+                    const Cpt = ed25519.scalarmult(Dpt, wallet.a);        // subaddress view pub = a·D
+                    const sub = buildAddress(ed25519.encode(Dpt), ed25519.encode(Cpt), 42);
+                    out.innerHTML =
+                        '<div class="step"><span class="label">Main address:</span> <span class="mono">' + shorten(wallet.address) + '</span></div>' +
+                        '<div class="step"><span class="label">Subaddress (' + major + ', ' + minor + '):</span><br/><span class="mono">' + sub + '</span></div>' +
+                        '<div style="margin-top:8px;">Unrelated on-chain, but the same wallet, and your one view key still detects payments to it.</div>';
+                    btn.disabled = false;
+                }, 25);
+            });
+
+            // --- Decoy selection: gamma age-weighting (illustrative) ---
+            function gammaSample(shape, scale) {
+                function u() { const b = new Uint32Array(1); crypto.getRandomValues(b); return (b[0] + 0.5) / 4294967296; }
+                function normal() { return Math.sqrt(-2 * Math.log(u())) * Math.cos(2 * Math.PI * u()); }
+                const d = shape - 1 / 3, c = 1 / Math.sqrt(9 * d);
+                while (true) {
+                    let x, v;
+                    do { x = normal(); v = 1 + c * x; } while (v <= 0);
+                    v = v * v * v;
+                    const uu = u();
+                    if (uu < 1 - 0.0331 * x * x * x * x) return d * v * scale;
+                    if (Math.log(uu) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v * scale;
+                }
+            }
+            document.getElementById('decoyBtn').addEventListener('click', function () {
+                const out = document.getElementById('decoyOut');
+                const SHAPE = 19.28, RATE = 1.61, N = 2000;
+                const bins = new Array(10).fill(0);
+                const labels = ['<1d', '1-3d', '3-7d', '1-2w', '2-4w', '1-2mo', '2-4mo', '4-8mo', '8-16mo', '16mo+'];
+                const edges = [1, 3, 7, 14, 30, 60, 120, 240, 480];
+                for (let i = 0; i < N; i++) {
+                    const days = Math.exp(gammaSample(SHAPE, 1 / RATE)) / 86400;
+                    let b = edges.length;
+                    for (let e = 0; e < edges.length; e++) { if (days < edges[e]) { b = e; break; } }
+                    bins[b]++;
+                }
+                const max = Math.max.apply(null, bins);
+                let html = '<div class="muted">Ages of ' + N + ' sampled decoys:</div>';
+                for (let i = 0; i < bins.length; i++) {
+                    const pct = Math.max(1, Math.round(100 * bins[i] / max));
+                    html += '<div style="display:flex; align-items:center; gap:8px; margin:2px 0;"><span style="flex:0 0 52px; font-family:monospace; font-size:0.85em;">' + labels[i] + '</span><span style="flex:1 1 auto; min-width:0;"><span style="display:block; height:14px; width:' + pct + '%; background:#5271ff;"></span></span><span class="muted" style="flex:0 0 auto; font-size:0.85em;">' + bins[i] + '</span></div>';
+                }
+                html += '<div style="margin-top:8px;">Most decoys are recent, matching how people actually spend, with a realistic long tail. Your real output sits inside this same distribution, so it does not stand out.</div>';
+                out.innerHTML = html;
+            });
+
+            // --- Range proofs: bit commitments (real Pedersen) ---
+            document.getElementById('rpBtn').addEventListener('click', function () {
+                const out = document.getElementById('rpOut'), btn = this;
+                let v = parseInt(document.getElementById('rpVal').value || '0', 10);
+                if (isNaN(v) || v < 0) v = 0; if (v > 255) v = 255;
+                btn.disabled = true; out.textContent = 'Committing to each bit (real Pedersen commitments)...';
+                setTimeout(function () {
+                    const blinds = [];
+                    let sumA = 0n;
+                    for (let i = 0; i < 8; i++) { const ai = ed25519.randomScalar(); blinds.push(ai); sumA = (sumA + ai) % ed25519.ORDER; }
+                    const Cv = commit(v, sumA);
+                    let acc = [0n, 1n];
+                    for (let i = 0; i < 8; i++) acc = ed25519.add(acc, commit(((v >> i) & 1) * Math.pow(2, i), blinds[i]));
+                    const okMatch = hex(ed25519.encode(acc)) === hex(ed25519.encode(Cv));
+                    out.innerHTML =
+                        '<div class="step"><span class="label">Amount ' + v + ' in bits:</span> <span class="mono">' + v.toString(2).padStart(8, '0') + '</span></div>' +
+                        '<div class="step"><span class="label">Sum of the 8 bit-commitments:</span><br/><span class="mono">' + shorten(hex(ed25519.encode(acc))) + '</span></div>' +
+                        '<div class="step"><span class="label">Commitment to the amount:</span><br/><span class="mono">' + shorten(hex(ed25519.encode(Cv))) + '</span></div>' +
+                        '<div style="color:' + (okMatch ? '#6fce6f' : '#e06666') + '">' + (okMatch ? '✓ They match. The bits sum to the amount, and each committed bit can be proven to be 0 or 1, so the amount is provably in range without being revealed.' : '✗ mismatch') + '</div>';
+                    btn.disabled = false;
+                }, 25);
+            });
+
+            // --- Transaction: assemble a whole transaction (all real) ---
+            document.getElementById('txBtn').addEventListener('click', function () {
+                const out = document.getElementById('txOut'), btn = this;
+                btn.disabled = true; out.textContent = 'Assembling a transaction (real curve math)...';
+                setTimeout(function () {
+                    // 1) Sender owns an input; reveal its key image (hides which ring member is spent)
+                    const xin = ed25519.randomScalar();
+                    const Pin = ed25519.encode(ed25519.base(xin));
+                    const I = ed25519.encode(ed25519.scalarmult(ed25519.hashToPoint(moneroAddress.keccak256(Pin)), xin));
+                    // 2) Stealth output paying a recipient
+                    const A_r = ed25519.base(ed25519.randomScalar()), B_r = ed25519.base(ed25519.randomScalar());
+                    const r = ed25519.randomScalar(), R = ed25519.base(r);
+                    const Dr = ed25519.mul8(ed25519.scalarmult(A_r, r));
+                    const Pout = ed25519.encode(ed25519.add(ed25519.base(Hs(ed25519.encode(Dr))), B_r));
+                    // 3) Amounts: 10 in = 7 payment + 2 change + 1 fee (fee public, blinding 0)
+                    const ao1 = ed25519.randomScalar(), ao2 = ed25519.randomScalar();
+                    const ain = (ao1 + ao2) % ed25519.ORDER;
+                    const Cin = commit(10, ain), Cpay = commit(7, ao1), Cchg = commit(2, ao2), Cfee = commit(1, 0n);
+                    const outsTotal = ed25519.add(ed25519.add(Cpay, Cchg), Cfee);
+                    const balanced = hex(ed25519.encode(ed25519.add(Cin, ed25519.negate(outsTotal)))) === IDENTITY_HEX;
+                    out.innerHTML =
+                        '<div class="step"><strong>Input being spent (hidden in a ring of 16):</strong></div>' +
+                        '<div class="step"><span class="label">output key P:</span> <span class="mono">' + shorten(hex(Pin)) + '</span></div>' +
+                        '<div class="step"><span class="label">key image I:</span> <span class="mono">' + shorten(I) + '</span> <span class="muted">(blocks double-spends)</span></div>' +
+                        '<div class="step" style="margin-top:10px;"><strong>Output to the recipient (stealth):</strong></div>' +
+                        '<div class="step"><span class="label">tx public key R:</span> <span class="mono">' + shorten(hex(ed25519.encode(R))) + '</span></div>' +
+                        '<div class="step"><span class="label">one-time address P:</span> <span class="mono">' + shorten(hex(Pout)) + '</span></div>' +
+                        '<div class="step" style="margin-top:10px;"><strong>Amounts (hidden) and fee (public):</strong></div>' +
+                        '<div class="step"><span class="label">C(input):</span> <span class="mono">' + shorten(hex(ed25519.encode(Cin))) + '</span></div>' +
+                        '<div class="step"><span class="label">C(pay)+C(change)+fee:</span> <span class="mono">' + shorten(hex(ed25519.encode(outsTotal))) + '</span></div>' +
+                        '<div class="step"><span class="label">fee:</span> 1 XMR <span class="muted">(the only amount anyone can see)</span></div>' +
+                        '<div style="color:' + (balanced ? '#6fce6f' : '#e06666') + '; margin-top:8px;">' + (balanced ? '✓ The commitments balance (10 in = 7 + 2 + 1), so no coins were created, yet sender, recipient, and amounts are all hidden at once. Only the fee is visible.' : '✗ unbalanced') + '</div>';
+                    btn.disabled = false;
+                }, 25);
+            });
+        </script>
+        <hr/>
+        <p style="font-size: 0.9em; color: gray; text-align:center;">This page is for education. The demo keys it generates are illustration only and must never be used for real funds.</p>
+        <footer>
+            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>. This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>.</p>
+        </footer>
+    </body>
+</html>

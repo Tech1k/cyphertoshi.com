@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#5271ff">
+        <meta name="referrer" content="no-referrer">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
+        <link rel="canonical" href="https://cyphertoshi.com/passphrase-generator/"/>
+        <meta name="robots" content="index, follow">
+        <meta name="description" content="A simple, open-source, client-side Diceware passphrase generator using the EFF word list and your browser's secure random generator."/>
+        <meta name="author" content="Tech1k">
+        <title>Diceware Passphrase Generator</title>
+        <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="manifest" href="/site.webmanifest"/>
+        <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
+        <meta property="og:title" content="Diceware Passphrase Generator"/>
+        <meta property="og:description" content="A simple, open-source, client-side Diceware passphrase generator using the EFF word list and your browser's secure random generator."/>
+        <meta property="og:type" content="website"/>
+        <meta property="og:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta property="og:image:width" content="1200"/>
+        <meta property="og:image:height" content="630"/>
+        <meta property="og:url" content="https://cyphertoshi.com/passphrase-generator/"/>
+        <meta property="og:site_name" content="Diceware Passphrase Generator"/>
+        <meta name="twitter:card" content="summary_large_image"/>
+        <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta name="twitter:title" content="Diceware Passphrase Generator"/>
+        <meta name="twitter:description" content="A simple, open-source, client-side Diceware passphrase generator using the EFF word list and your browser's secure random generator."/>
+        <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
+        <link rel="stylesheet" href="/assets/tool.css?v=1">
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Diceware Passphrase Generator","description":"Generate strong Diceware passphrases from the EFF word list, fully in your browser.","applicationCategory":"SecurityApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/passphrase-generator/","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
+    </head>
+    <body id="main">
+        <h1>Diceware Passphrase Generator</h1>
+        <p>A simple, open-source, client-side passphrase generator. It picks words from the <a href="https://www.eff.org/dice" target="_blank" rel="noopener noreferrer">EFF long word list</a> (7776 words) using your browser's cryptographically secure random generator. Nothing leaves your browser, and it works offline.</p>
+
+        <div style="text-align:center;">
+            <h3>
+                <a href="/">Home</a> |
+                <a href="/links">Links</a> |
+                <a href="/notes">Notes</a> |
+                <a href="/tools">Toolkit</a> |
+                <a href="/contact">Contact</a>
+            </h3>
+        </div>
+        <hr/>
+
+        <form id="genForm">
+            <label for="words">Number of words:</label><br/>
+            <select id="words">
+                <option value="4">4 words (~52 bits)</option>
+                <option value="5">5 words (~65 bits)</option>
+                <option value="6" selected>6 words (~78 bits)</option>
+                <option value="7">7 words (~90 bits)</option>
+                <option value="8">8 words (~103 bits)</option>
+                <option value="10">10 words (~129 bits)</option>
+            </select>
+            <br/><br/>
+            <label for="sep">Separator:</label><br/>
+            <select id="sep">
+                <option value=" " selected>space</option>
+                <option value="-">hyphen</option>
+                <option value=".">period</option>
+            </select>
+            <br/><br/>
+            <input type="submit" value="Generate passphrase">
+        </form>
+
+        <div id="output" class="result"></div>
+
+        <script src="/assets/eff-wordlist.js"></script>
+        <script>
+            const form = document.getElementById('genForm');
+            const output = document.getElementById('output');
+            const N = effWordlist.length;            // 7776
+            const BITS = Math.log2(N);               // ~12.925 per word
+
+            const escapeHtml = (s) =>
+                String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+            // Uniform, bias-free index in [0, N) using the secure RNG (rejection sampling).
+            function randIndex() {
+                const limit = Math.floor(0x100000000 / N) * N;
+                const buf = new Uint32Array(1);
+                do { crypto.getRandomValues(buf); } while (buf[0] >= limit);
+                return buf[0] % N;
+            }
+            function strength(bits) {
+                if (bits < 50) return ['weak', '#e06666'];
+                if (bits < 70) return ['fair', '#e0a060'];
+                if (bits < 95) return ['strong', '#6fce6f'];
+                return ['very strong', '#6fce6f'];
+            }
+
+            function generate() {
+                const count = parseInt(document.getElementById('words').value, 10);
+                const sep = document.getElementById('sep').value;
+                const chosen = [];
+                for (let i = 0; i < count; i++) chosen.push(effWordlist[randIndex()]);
+                const phrase = chosen.join(sep);
+                const bits = count * BITS;
+                const [label, color] = strength(bits);
+                output.style.display = 'block';
+                output.innerHTML =
+                    '<p><strong>Your passphrase:</strong></p>' +
+                    '<code id="phraseOut" style="font-size:1.25em; word-break:break-word;">' + escapeHtml(phrase) + '</code>' +
+                    '<br/><br/><button type="button" onclick="copyPhrase()">Copy</button> ' +
+                    '<button type="button" onclick="generate()">Regenerate</button>' +
+                    '<p class="muted">About ' + Math.round(bits) + ' bits of entropy from ' + count + ' words. Strength: <span style="color:' + color + '">' + label + '</span>.</p>';
+            }
+            form.addEventListener('submit', function (e) { e.preventDefault(); generate(); });
+
+            function copyPhrase() {
+                navigator.clipboard.writeText(document.getElementById('phraseOut').innerText).then(() => {
+                    alert('Copied the passphrase to clipboard!');
+                });
+            }
+        </script>
+        <hr>
+        <section style="margin-top: 40px;">
+            <h2>FAQs</h2>
+
+            <h3>What is Diceware?</h3>
+            <p>Diceware is a method for building memorable, high-entropy passphrases by choosing random words from a fixed list. Each word from the EFF long list adds about 12.9 bits of entropy, so six words give roughly 78 bits, which is strong for most uses.</p>
+
+            <h3>Is the randomness actually secure?</h3>
+            <p>Yes. Words are chosen with <code>crypto.getRandomValues</code>, your browser's cryptographically secure random generator, using rejection sampling so every word is equally likely with no bias. If you want to remove all trust in software, you can still roll physical dice against the same word list.</p>
+
+            <h3>How many words should I use?</h3>
+            <p>Six words (~78 bits) is a solid default. Use seven or eight for high-value secrets like a master password or a wallet passphrase. More words means more security but more to type.</p>
+
+            <h3>Do you see or store the passphrase?</h3>
+            <p>No. This site is a static page that runs entirely client-side. The passphrase is generated in your browser and never sent anywhere. You can disconnect from the internet and it still works. Treat the result as a secret.</p>
+
+            <h3>Is this site open source?</h3>
+            <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/passphrase-generator" target="_blank" rel="noopener noreferrer">GitHub</a>. The word list is the EFF long list, used under CC BY 3.0 US.</p>
+        </section>
+        <hr/>
+        <p style="font-size: 0.9em; color: gray;">
+            Disclaimer: This tool is provided "as is" with no warranties. A passphrase is only as safe as the device that generates it; prefer a trusted, malware-free machine for high-value secrets.
+        </p>
+        <br/>
+        <hr/>
+        <footer>
+            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>. This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>.</p>
+        </footer>
+    </body>
+</html>

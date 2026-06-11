@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#5271ff">
+        <meta name="referrer" content="no-referrer">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
+        <link rel="canonical" href="https://cyphertoshi.com/unit-converter/"/>
+        <meta name="robots" content="index, follow">
+        <meta name="description" content="A simple, open-source, client-side converter between Monero, Bitcoin, and Litecoin denominations with exact, no-rounding precision."/>
+        <meta name="author" content="Tech1k">
+        <title>Crypto Unit Converter</title>
+        <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="manifest" href="/site.webmanifest"/>
+        <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
+        <meta property="og:title" content="Crypto Unit Converter"/>
+        <meta property="og:description" content="A simple, open-source, client-side converter between Monero, Bitcoin, and Litecoin denominations with exact, no-rounding precision."/>
+        <meta property="og:type" content="website"/>
+        <meta property="og:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta property="og:image:width" content="1200"/>
+        <meta property="og:image:height" content="630"/>
+        <meta property="og:url" content="https://cyphertoshi.com/unit-converter/"/>
+        <meta property="og:site_name" content="Crypto Unit Converter"/>
+        <meta name="twitter:card" content="summary_large_image"/>
+        <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta name="twitter:title" content="Crypto Unit Converter"/>
+        <meta name="twitter:description" content="A simple, open-source, client-side converter between Monero, Bitcoin, and Litecoin denominations with exact, no-rounding precision."/>
+        <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
+        <link rel="stylesheet" href="/assets/tool.css?v=1">
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Crypto Unit Converter","description":"Convert exactly between Monero, Bitcoin, and Litecoin denominations.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/unit-converter/","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
+    </head>
+    <body id="main">
+        <h1>Crypto Unit Converter</h1>
+        <p>A simple, open-source, client-side converter between the denominations of Monero, Bitcoin, and Litecoin. Type a value into any field and the rest update instantly. All math is done with exact integer arithmetic, so there is never any rounding error. Nothing leaves your browser.</p>
+
+        <div style="text-align:center;">
+            <h3>
+                <a href="/">Home</a> |
+                <a href="/links">Links</a> |
+                <a href="/notes">Notes</a> |
+                <a href="/tools">Toolkit</a> |
+                <a href="/contact">Contact</a>
+            </h3>
+        </div>
+        <hr/>
+
+        <label for="coin">Cryptocurrency:</label><br/>
+        <select id="coin">
+            <option value="monero" selected>Monero (XMR)</option>
+            <option value="bitcoin">Bitcoin (BTC)</option>
+            <option value="litecoin">Litecoin (LTC)</option>
+            <option value="custom">Custom</option>
+        </select>
+        <div id="customWrap" style="display:none; margin-top:10px;">
+            <label for="customName">Unit name (optional):</label><br/>
+            <input type="text" id="customName" placeholder="e.g. ETH" style="width:160px;">
+            <br/><br/>
+            <label for="customDec">Atomic-unit decimals:</label><br/>
+            <input type="number" id="customDec" value="18" min="0" max="50" style="width:120px;">
+            <br/><small>e.g. 18 for most ERC-20 tokens, 9 for SOL, 6 for USDC.</small>
+        </div>
+        <br/><br/>
+        <label for="prec">Decimal places (optional):</label><br/>
+        <input type="text" id="prec" inputmode="numeric" placeholder="exact" style="width:120px;" aria-label="Decimal places, leave blank for exact">
+        <br/><br/>
+        <div id="fields"></div>
+
+        <script>
+            // Each denomination is defined by how many decimal places it sits above the coin's
+            // smallest (atomic) unit: piconero for XMR, satoshi for BTC, litoshi for LTC.
+            const COINS = {
+                monero: [
+                    ['Monero (XMR)', 12],
+                    ['millinero (mXMR)', 9],
+                    ['micronero (uXMR)', 6],
+                    ['nanonero (nXMR)', 3],
+                    ['piconero (atomic)', 0]
+                ],
+                bitcoin: [
+                    ['Bitcoin (BTC)', 8],
+                    ['millibitcoin (mBTC)', 5],
+                    ['bit / microbitcoin (uBTC)', 2],
+                    ['satoshi (atomic)', 0]
+                ],
+                litecoin: [
+                    ['Litecoin (LTC)', 8],
+                    ['milli-LTC (mLTC)', 5],
+                    ['micro-LTC (uLTC)', 2],
+                    ['litoshi (atomic)', 0]
+                ]
+            };
+
+            const fields = document.getElementById('fields');
+            const coinSelect = document.getElementById('coin');
+            const precInput = document.getElementById('prec');
+
+            // Parse a decimal string in a unit with `decimals` places into an exact BigInt count
+            // of atomic units. Returns null for empty/invalid input. Anything finer than one
+            // atomic unit is truncated (you cannot have a fraction of an atomic unit).
+            function toAtomic(str, decimals) {
+                str = str.trim();
+                if (str === '' || str === '.' || !/^\d*\.?\d*$/.test(str)) return null;
+                let [ip, fp = ''] = str.split('.');
+                ip = ip || '0';
+                fp = (fp + '0'.repeat(decimals)).slice(0, decimals);
+                return BigInt(ip + fp);
+            }
+
+            // Format an atomic BigInt back into a decimal string for a unit with `decimals` places.
+            function fromAtomic(atomic, decimals) {
+                if (decimals === 0) return atomic.toString();
+                const s = atomic.toString().padStart(decimals + 1, '0');
+                const ip = s.slice(0, s.length - decimals);
+                const fp = s.slice(s.length - decimals).replace(/0+$/, '');
+                return fp ? ip + '.' + fp : ip;
+            }
+
+            // Optional fixed precision: blank means exact; a number N rounds to N decimal places.
+            function getPrec() {
+                const v = precInput.value.trim();
+                if (v === '' || !/^\d+$/.test(v)) return null;
+                return Math.min(50, parseInt(v, 10));
+            }
+            function fmtFixed(intVal, p) {
+                const s = intVal.toString();
+                if (p === 0) return s;
+                const padded = s.padStart(p + 1, '0');
+                return padded.slice(0, padded.length - p) + '.' + padded.slice(padded.length - p);
+            }
+            // Display an atomic amount, honoring the chosen precision (exact when none is set).
+            function fmtDisplay(atomic, decimals) {
+                const p = getPrec();
+                if (p === null) return fromAtomic(atomic, decimals);
+                let scaled;
+                if (p >= decimals) scaled = atomic * (10n ** BigInt(p - decimals));
+                else { const div = 10n ** BigInt(decimals - p); scaled = (atomic + div / 2n) / div; } // round half-up
+                return fmtFixed(scaled, p);
+            }
+            function spread(source) {
+                const atomic = toAtomic(source.value, Number(source.dataset.dec));
+                fields.querySelectorAll('input[data-dec]').forEach((other) => {
+                    if (other === source) return;
+                    other.value = (atomic === null) ? '' : fmtDisplay(atomic, Number(other.dataset.dec));
+                });
+            }
+            function onInput(e) { spread(e.target); }
+            precInput.addEventListener('input', function () {
+                let src = null;
+                for (const i of fields.querySelectorAll('input[data-dec]')) { if (i.value.trim() !== '') { src = i; break; } }
+                if (src) spread(src);
+            });
+
+            function renderUnits(units, prefix) {
+                fields.textContent = '';
+                units.forEach(([label, dec]) => {
+                    const id = prefix + '-' + dec;
+                    const row = document.createElement('div');
+                    row.style.marginBottom = '12px';
+                    const lab = document.createElement('label');
+                    lab.setAttribute('for', id);
+                    lab.textContent = label;
+                    const inp = document.createElement('input');
+                    inp.type = 'text';
+                    inp.id = id;
+                    inp.dataset.dec = dec;
+                    inp.inputMode = 'decimal';
+                    inp.autocomplete = 'off';
+                    inp.spellcheck = false;
+                    inp.placeholder = '0';
+                    inp.addEventListener('input', onInput);
+                    row.appendChild(lab);
+                    row.appendChild(document.createElement('br'));
+                    row.appendChild(inp);
+                    fields.appendChild(row);
+                });
+            }
+
+            // Build a custom coin's denominations: whole unit down to the atomic unit via the SI ladder.
+            function buildCustom() {
+                const dec = Math.max(0, Math.min(50, parseInt(document.getElementById('customDec').value || '0', 10)));
+                const name = document.getElementById('customName').value.trim() || 'unit';
+                const ladder = [['', 0], ['milli-', 3], ['micro-', 6], ['nano-', 9], ['pico-', 12], ['femto-', 15], ['atto-', 18]];
+                const units = [];
+                for (const [pre, k] of ladder) {
+                    const d = dec - k;
+                    if (d < 0) break;
+                    units.push([pre + name + (d === dec ? ' (whole)' : ''), d]);
+                    if (d === 0) break;
+                }
+                if (units.length === 0 || units[units.length - 1][1] !== 0) units.push([name + ' atomic unit', 0]);
+                return units;
+            }
+
+            function buildFields(coin) {
+                if (coin === 'custom') renderUnits(buildCustom(), 'custom');
+                else renderUnits(COINS[coin], coin);
+            }
+
+            coinSelect.addEventListener('change', function () {
+                document.getElementById('customWrap').style.display = this.value === 'custom' ? 'block' : 'none';
+                buildFields(this.value);
+            });
+            document.getElementById('customName').addEventListener('input', function () { if (coinSelect.value === 'custom') buildFields('custom'); });
+            document.getElementById('customDec').addEventListener('input', function () { if (coinSelect.value === 'custom') buildFields('custom'); });
+            buildFields(coinSelect.value);
+        </script>
+        <hr>
+        <section style="margin-top: 40px;">
+            <h2>FAQs</h2>
+
+            <h3>What is this site?</h3>
+            <p>This site converts between the different denominations of a single cryptocurrency, for example between XMR and piconero, or between BTC and satoshi. Pick a coin, type a value into any field, and every other denomination updates at once.</p>
+
+            <h3>Why is it more accurate than other converters?</h3>
+            <p>Many converters multiply by a decimal factor in floating point, which introduces tiny rounding errors at the precision crypto uses (12 decimals for Monero, 8 for Bitcoin and Litecoin). This tool converts everything to a whole number of atomic units (piconero, satoshi, litoshi) using exact integer arithmetic, so the result is always precise.</p>
+
+            <h3>What are the atomic units?</h3>
+            <p>The smallest indivisible unit of each coin: 1 XMR = 1,000,000,000,000 piconero, 1 BTC = 100,000,000 satoshi, and 1 LTC = 100,000,000 litoshi. Anything smaller than one atomic unit cannot exist, so finer input is truncated.</p>
+
+            <h3>Can I convert a coin that is not listed?</h3>
+            <p>Yes. Choose <strong>Custom</strong> and enter the coin's atomic-unit decimals (for example 18 for most ERC-20 tokens, 9 for SOL, 6 for USDC). The converter builds its whole-unit and smaller denominations automatically.</p>
+
+            <h3>Can it convert between coins, like XMR to BTC?</h3>
+            <p>No. That would require a live exchange rate, which means contacting a third party. This tool only converts between denominations of the same coin, entirely offline.</p>
+
+            <h3>Do you log anything I enter?</h3>
+            <p>No. This site is a static page that runs entirely client-side. Nothing you type is sent anywhere, so it works offline.</p>
+
+            <h3>Is this site open source?</h3>
+            <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/unit-converter" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+        </section>
+        <hr/>
+        <p style="font-size: 0.9em; color: gray;">
+            Disclaimer: This tool is provided "as is" with no warranties. Use at your own risk. Always double-check critical amounts before sending any funds.
+        </p>
+        <br/>
+        <hr/>
+        <footer>
+            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>. This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>.</p>
+        </footer>
+    </body>
+</html>

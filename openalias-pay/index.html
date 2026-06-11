@@ -12,6 +12,7 @@
         <meta name="author" content="Tech1k">
         <title>OpenAlias Pay</title>
         <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="manifest" href="/site.webmanifest"/>
         <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
         <meta property="og:title" content="OpenAlias Pay"/>
         <meta property="og:description" content="A simple, open-source, client-side tool to resolve an OpenAlias address and generate a payment URI and scannable QR code."/>
@@ -27,6 +28,7 @@
         <meta name="twitter:description" content="A simple, open-source, client-side tool to resolve an OpenAlias address and generate a payment URI and scannable QR code."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
         <link rel="stylesheet" href="/assets/tool.css?v=1">
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"OpenAlias Pay","description":"Resolve an OpenAlias address and generate a payment URI and QR code.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/openalias-pay/","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body id="main">
         <h1>OpenAlias Pay</h1>
@@ -36,9 +38,9 @@
         <div style="text-align:center;">
             <h3>
                 <a href="/">Home</a> |
-                <a href="/tools">Toolkit</a> |
                 <a href="/links">Links</a> |
                 <a href="/notes">Notes</a> |
+                <a href="/tools">Toolkit</a> |
                 <a href="/contact">Contact</a>
             </h3>
         </div>
@@ -230,7 +232,7 @@
             <p>OpenAlias relies on DNSSEC for integrity. This tool reports whether the record was DNSSEC-authenticated. If it was not, be cautious, as the result could have been tampered with in transit. You can also inspect a domain's records with the <a href="/openalias-checker/">OpenAlias checker</a>.</p>
 
             <h3>Do you log the addresses I look up?</h3>
-            <p>No. This site is hosted on GitHub Pages and runs entirely client-side. The DNS lookup is sent directly from your browser to the chosen resolver (Cloudflare or Google), which may log it per their policies; nothing is sent to this site.</p>
+            <p>No. This site is a static page that runs entirely client-side. The DNS lookup is sent directly from your browser to the chosen resolver (Cloudflare or Google), which may log it per their policies; nothing is sent to this site.</p>
 
             <h3>Is this site open source?</h3>
             <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/openalias-pay" target="_blank" rel="noopener noreferrer">GitHub</a>. QR codes are rendered with the open-source <a href="https://github.com/kazuhikoarase/qrcode-generator" target="_blank" rel="noopener noreferrer">qrcode-generator</a> library (MIT), self-hosted on this site.</p>

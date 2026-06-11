@@ -12,6 +12,7 @@
         <meta name="author" content="Tech1k">
         <title>Monero Address Validator</title>
         <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="manifest" href="/site.webmanifest"/>
         <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
         <meta property="og:title" content="Monero Address Validator"/>
         <meta property="og:description" content="A simple, open-source, client-side tool to validate Monero addresses, verify their checksum, and identify the address type and network."/>
@@ -27,6 +28,7 @@
         <meta name="twitter:description" content="A simple, open-source, client-side tool to validate Monero addresses, verify their checksum, and identify the address type and network."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
         <link rel="stylesheet" href="/assets/tool.css?v=1">
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Monero Address Validator","description":"Validate a Monero address and identify its type and network.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/monero-address-validator/","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body id="main">
         <h1>Monero Address Validator</h1>
@@ -35,9 +37,9 @@
         <div style="text-align:center;">
             <h3>
                 <a href="/">Home</a> |
-                <a href="/tools">Toolkit</a> |
                 <a href="/links">Links</a> |
                 <a href="/notes">Notes</a> |
+                <a href="/tools">Toolkit</a> |
                 <a href="/contact">Contact</a>
             </h3>
         </div>
@@ -98,7 +100,7 @@
             <p>A valid checksum only means the address is well-formed and was not mistyped. It does not verify ownership or that it is the address you intend to pay. Always confirm the address through a trusted channel before sending funds.</p>
 
             <h3>Do you log the addresses I check?</h3>
-            <p>No. This site is hosted on GitHub Pages and runs entirely client-side in your browser. No address is ever sent anywhere, so you can disconnect from the internet and it will still work.</p>
+            <p>No. This site is a static page that runs entirely client-side in your browser. No address is ever sent anywhere, so you can disconnect from the internet and it will still work.</p>
 
             <h3>Is this site open source?</h3>
             <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/monero-address-validator" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>

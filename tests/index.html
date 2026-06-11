@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#5271ff">
+        <meta name="referrer" content="no-referrer">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
+        <meta name="robots" content="noindex">
+        <meta name="description" content="Self-verifying test suite: runs Monero cryptographic test vectors against CypherToshi's in-browser code."/>
+        <meta name="author" content="Tech1k">
+        <title>Crypto Self-Test | CypherToshi</title>
+        <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="manifest" href="/site.webmanifest"/>
+        <link rel="stylesheet" href="/assets/tool.css?v=1">
+        <style>
+            table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+            td, th { text-align: left; padding: 6px 10px; border-bottom: 1px solid #4a4a4a; vertical-align: top; }
+            .pass { color: #6fce6f; font-weight: bold; }
+            .fail { color: #e06666; font-weight: bold; }
+            .name { font-family: monospace; }
+            #summary { font-size: 1.2em; margin: 14px 0; }
+        </style>
+    </head>
+    <body id="main">
+        <h1>Crypto Self-Test</h1>
+        <p>This page runs known-answer test vectors against the exact cryptographic code shipped on this site (<code>xmr-address.js</code>, <code>ed25519.js</code>, <code>monero-mnemonic.js</code>). The expected values come from the Monero project's own test vectors and reference implementations. Everything runs in your browser; nothing is sent anywhere.</p>
+        <div style="text-align:center;">
+            <h3>
+                <a href="/">Home</a> |
+                <a href="/links">Links</a> |
+                <a href="/notes">Notes</a> |
+                <a href="/tools">Toolkit</a> |
+                <a href="/contact">Contact</a>
+            </h3>
+        </div>
+        <hr/>
+        <div id="summary" class="muted">Running tests...</div>
+        <table id="results"><thead><tr><th>Result</th><th>Test</th></tr></thead><tbody></tbody></table>
+
+        <script src="/assets/monero-wordlist-en.js"></script>
+        <script src="/assets/xmr-address.js"></script>
+        <script src="/assets/ed25519.js"></script>
+        <script src="/assets/monero-mnemonic.js"></script>
+        <script>
+            const hex = (b) => Array.from(b).map(x => x.toString(16).padStart(2, '0')).join('');
+            const fromHex = (h) => { const a = new Uint8Array(h.length / 2); for (let i = 0; i < a.length; i++) a[i] = parseInt(h.substr(i * 2, 2), 16); return a; };
+            const strBytes = (s) => new TextEncoder().encode(s);
+            const IDENTITY = '0100000000000000000000000000000000000000000000000000000000000000';
+
+            // helpers reused from the tools (kept here so the page is self-contained)
+            function buildAddr(prefix, encSpend, encView) {
+                const data = new Uint8Array(65);
+                data[0] = prefix; data.set(encSpend, 1); data.set(encView, 33);
+                const full = new Uint8Array(69);
+                full.set(data, 0); full.set(moneroAddress.keccak256(data).subarray(0, 4), 65);
+                return moneroAddress.b58encode(full);
+            }
+
+            const DEV = '44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A';
+            const SEED = 'silk mocked cucumber lettuce hope adrenalin aching lush roles fuel revamp baptism wrist long tender teardrop midst pastry pigment equip frying inbound pinched ravine frying';
+
+            const TESTS = [
+                ['Keccak-256 of empty string', () => hex(moneroAddress.keccak256(new Uint8Array(0))) === 'c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470'],
+                ['Keccak-256 of "abc"', () => hex(moneroAddress.keccak256(strBytes('abc'))) === '4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45'],
+                ['Validate Monero dev address (Standard / Mainnet)', () => { const v = moneroAddress.validate(DEV); return v.valid && v.type === 'Standard' && v.network === 'Mainnet'; }],
+                ['Reject a tampered address', () => !moneroAddress.validate(DEV.slice(0, -1) + (DEV.slice(-1) === 'A' ? 'B' : 'A')).valid],
+                ['Integrated address (dev + payment id)', () => moneroAddress.integrate(DEV, fromHex('1234567890abcdef')).address === '4DrvGduF3ynBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVPm4Vc5sSG7ETzVkA3f'],
+                ['ed25519 hash-to-point matches Monero hash_to_ec vector', () => hex(ed25519.encode(ed25519.hashToPoint(moneroAddress.keccak256(fromHex('da66e9ba613919dec28ef367a125bb310d6d83fb9052e71034164b6dc4f392d0'))))) === '52b3f38753b4e13b74624862e253072cf12f745d43fcfafbe8c217701a6e5875'],
+                ['Key image matches Monero generate_key_image vector', () => { const pub = fromHex('e46b60ebfe610b8ba761032018471e5719bb77ea1cd945475c4a4abe7224bfd0'); const sec = ed25519.reduce(fromHex('981d477fb18897fa1f784c89721a9d600bf283f06b89cb018a077f41dcefef0f')); return hex(ed25519.encode(ed25519.scalarmult(ed25519.hashToPoint(moneroAddress.keccak256(pub)), sec))) === 'a637203ec41eab772532d30420eac80612fce8e44f1758bc7e2cb1bdda815887'; }],
+                ['Mnemonic decodes to the correct private spend key', () => hex(moneroMnemonic.decode(SEED).seed) === '930755a1918de1a087e68c37accc8160de9f625712425f1b276e7d0dd305120b'],
+                ['Mnemonic derives the correct address', () => moneroMnemonic.derive(moneroMnemonic.decode(SEED).seed, 53).address === 'A1y9sbVt8nqhZAVm3me1U18rUVXcjeNKuBd1oE2cTs8biA9cozPMeyYLhe77nPv12JA3ejJN3qprmREriit2fi6tJDi99RR'],
+                ['Reject a mnemonic with a bad checksum word', () => !!moneroMnemonic.decode(SEED.split(' ').slice(0, 24).concat(['abbey']).join(' ')).error],
+                ['Address derivation from keys (sanity vs monero-python)', () => { const a = ed25519.reduce(fromHex('6d9056aa2c096bfcd2f272759555e5764ba204dd362604a983fa3e0aafd35901')); const b = ed25519.reduce(fromHex('e0fe01d5794e240a26609250c0d7e01673219eececa3f499d5cfa20a75739b0a')); return buildAddr(18, ed25519.encode(ed25519.base(b)), ed25519.encode(ed25519.base(a))) === '47ewoP19TN7JEEnFKUJHAYhGxkeTRH82sf36giEp9AcNfDBfkAtRLX7A6rZz18bbNHPNV7ex6WYbMN3aKisFRJZ8Ebsmgef'; }],
+                ['Subaddress (0,1) matches monero-python vector', () => {
+                    const svk = fromHex('6d9056aa2c096bfcd2f272759555e5764ba204dd362604a983fa3e0aafd35901');
+                    const b = ed25519.reduce(fromHex('e0fe01d5794e240a26609250c0d7e01673219eececa3f499d5cfa20a75739b0a'));
+                    const a = ed25519.reduce(svk);
+                    const B = ed25519.base(b);
+                    const data = new Uint8Array(48);
+                    'SubAddr'.split('').forEach((c, i) => data[i] = c.charCodeAt(0)); // data[7] stays 0
+                    data.set(svk, 8);
+                    new DataView(data.buffer).setUint32(40, 0, true);
+                    new DataView(data.buffer).setUint32(44, 1, true);
+                    const m = ed25519.reduce(moneroAddress.keccak256(data));
+                    const D = ed25519.add(B, ed25519.base(m));
+                    const C = ed25519.scalarmult(D, a);
+                    return buildAddr(42, ed25519.encode(D), ed25519.encode(C)) === '84LooD7i35SFppgf4tQ453Vi3q5WexSUXaVgut69ro8MFnmHwuezAArEZTZyLr9fS6QotjqkSAxSF6d1aDgsPoX849izJ7m';
+                }],
+                ['Pedersen commitments are homomorphic: C(7)+C(3) = C(10)', () => {
+                    const H = ed25519.decode(fromHex('8b655970153799af2aeadc9ff1add0ea6c7251d54154cfa92c173a0dd39c1f94'));
+                    const commit = (v, a) => ed25519.add(ed25519.base(a), ed25519.scalarmult(H, BigInt(v)));
+                    const a1 = ed25519.randomScalar(), a2 = ed25519.randomScalar();
+                    return hex(ed25519.encode(ed25519.add(commit(7, a1), commit(3, a2)))) === hex(ed25519.encode(commit(10, (a1 + a2) % ed25519.ORDER)));
+                }],
+                ['Pedersen balance (10 = 7+3) resolves to the zero point', () => {
+                    const H = ed25519.decode(fromHex('8b655970153799af2aeadc9ff1add0ea6c7251d54154cfa92c173a0dd39c1f94'));
+                    const commit = (v, a) => ed25519.add(ed25519.base(a), ed25519.scalarmult(H, BigInt(v)));
+                    const a1 = ed25519.randomScalar(), a2 = ed25519.randomScalar();
+                    const diff = ed25519.add(commit(10, (a1 + a2) % ed25519.ORDER), ed25519.negate(ed25519.add(commit(7, a1), commit(3, a2))));
+                    return hex(ed25519.encode(diff)) === IDENTITY;
+                }]
+            ];
+
+            const tbody = document.querySelector('#results tbody');
+            let passed = 0;
+            TESTS.forEach(([name, fn]) => {
+                let ok = false, err = '';
+                try { ok = !!fn(); } catch (e) { err = ' (' + e.message + ')'; }
+                if (ok) passed++;
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td class="' + (ok ? 'pass' : 'fail') + '">' + (ok ? 'PASS' : 'FAIL') + '</td><td class="name">' + name + err + '</td>';
+                tbody.appendChild(tr);
+            });
+            const sum = document.getElementById('summary');
+            sum.className = passed === TESTS.length ? 'pass' : 'fail';
+            sum.textContent = passed + ' / ' + TESTS.length + ' tests passed' + (passed === TESTS.length ? '. All crypto verified in your browser.' : '. Something is wrong.');
+        </script>
+        <hr/>
+        <footer>
+            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>. This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>.</p>
+        </footer>
+    </body>
+</html>

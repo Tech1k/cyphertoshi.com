@@ -82,6 +82,20 @@ var moneroAddress = (function () {
         return Uint8Array.from(out);
     }
 
+    function b58encode(bytes) {
+        let out = '';
+        for (let i = 0; i < bytes.length; i += 8) {
+            const chunk = bytes.subarray(i, i + 8);
+            let num = 0n;
+            for (const b of chunk) num = (num << 8n) | BigInt(b);
+            const chars = ENC_SIZES[chunk.length];
+            let block = '';
+            for (let j = 0; j < chars; j++) { block = ALPHABET[Number(num % 58n)] + block; num /= 58n; }
+            out += block;
+        }
+        return out;
+    }
+
     const PREFIXES = {
         18: ['Standard', 'Mainnet'],   19: ['Integrated', 'Mainnet'],   42: ['Subaddress', 'Mainnet'],
         53: ['Standard', 'Testnet'],   54: ['Integrated', 'Testnet'],   63: ['Subaddress', 'Testnet'],
@@ -122,5 +136,28 @@ var moneroAddress = (function () {
         return result;
     }
 
-    return { validate: validate };
+    // Standard address prefix -> integrated address prefix, per network.
+    const INT_PREFIX = { 18: 19, 24: 25, 53: 54 };
+
+    // Build an integrated address from a Standard address + an 8-byte payment ID (Uint8Array).
+    // Returns { address, network } or { error }.
+    function integrate(addr, paymentId) {
+        const v = validate(addr);
+        if (!v.valid) return { error: 'invalid address (' + v.error + ')' };
+        if (v.type !== 'Standard') return { error: 'address must be a Standard address (got ' + v.type + ')' };
+        if (!(paymentId instanceof Uint8Array) || paymentId.length !== 8) return { error: 'payment ID must be 8 bytes' };
+
+        const raw = b58decode(addr.trim());
+        const body = new Uint8Array(73);
+        body[0] = INT_PREFIX[raw[0]];
+        body.set(raw.subarray(1, 65), 1); // public spend + view keys
+        body.set(paymentId, 65);
+        const checksum = keccak256(body).subarray(0, 4);
+        const full = new Uint8Array(77);
+        full.set(body, 0);
+        full.set(checksum, 73);
+        return { address: b58encode(full), network: v.network };
+    }
+
+    return { validate: validate, integrate: integrate, keccak256: keccak256, b58encode: b58encode };
 })();

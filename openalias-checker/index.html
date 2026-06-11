@@ -12,6 +12,7 @@
         <meta name="author" content="Tech1k">
         <title>OpenAlias Checker</title>
         <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="manifest" href="/site.webmanifest"/>
         <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
         <meta property="og:title" content="OpenAlias Checker"/>
         <meta property="og:description" content="A simple, open-source, client-side tool to check OpenAlias configurations."/>
@@ -27,6 +28,7 @@
         <meta name="twitter:description" content="A simple, open-source, client-side tool to check OpenAlias configurations."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
         <link rel="stylesheet" href="/assets/tool.css?v=1">
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"OpenAlias Checker","description":"Verify a domain's OpenAlias configuration in your browser.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/openalias-checker/","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body id="main">
         <h1>OpenAlias Domain Checker</h1>
@@ -36,9 +38,9 @@
         <div style="text-align:center;">
             <h3>
                 <a href="/">Home</a> |
-                <a href="/tools">Toolkit</a> |
                 <a href="/links">Links</a> |
                 <a href="/notes">Notes</a> |
+                <a href="/tools">Toolkit</a> |
                 <a href="/contact">Contact</a>
             </h3>
         </div>
@@ -175,7 +177,7 @@
             <p>Not all wallets currently support OpenAlias, but many popular ones for Monero, Bitcoin, and Litecoin do. You can find a list of compatible wallets <a href="/posts/openalias-wallets" target="_blank" rel="noopener noreferrer">here</a>. If your wallet doesn't support OpenAlias yet and you'd like it to, consider reaching out to the developers of the wallet to request integration!</p>
 
             <h3>Do you log the domains I check?</h3>
-            <p>No. This site is hosted on GitHub Pages and runs entirely client-side in your browser. However, the DNS resolvers used (Cloudflare or Google) may log your lookup request according to their policies.</p>
+            <p>No. This site is a static page that runs entirely client-side in your browser. However, the DNS resolvers used (Cloudflare or Google) may log your lookup request according to their policies.</p>
 
             <h3>Is this site open source?</h3>
             <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/openalias-checker" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>

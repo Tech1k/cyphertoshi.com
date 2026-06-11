@@ -1,0 +1,6 @@
+Contact: mailto:hello@tech1k.com
+Contact: https://cyphertoshi.com/contact
+Encryption: https://cyphertoshi.com/tech1k.txt
+Preferred-Languages: en
+Canonical: https://cyphertoshi.com/.well-known/security.txt
+Expires: 2027-06-10T00:00:00.000Z

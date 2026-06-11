@@ -1,0 +1,13 @@
+{
+  "name": "CypherToshi",
+  "short_name": "CypherToshi",
+  "description": "Privacy-first, open-source tools and guides for cypherpunks.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#333333",
+  "theme_color": "#5271ff",
+  "icons": [
+    { "src": "/assets/icon.png?v=1", "sizes": "256x256", "type": "image/png", "purpose": "any" }
+  ]
+}

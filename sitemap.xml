@@ -56,6 +56,41 @@
 		<priority>1.00</priority>
 	</url>
 	<url>
+		<loc>https://cyphertoshi.com/unit-converter/</loc>
+		<changefreq>weekly</changefreq>
+		<priority>1.00</priority>
+	</url>
+	<url>
+		<loc>https://cyphertoshi.com/monero-integrated-address/</loc>
+		<changefreq>weekly</changefreq>
+		<priority>1.00</priority>
+	</url>
+	<url>
+		<loc>https://cyphertoshi.com/monero-mnemonic/</loc>
+		<changefreq>weekly</changefreq>
+		<priority>1.00</priority>
+	</url>
+	<url>
+		<loc>https://cyphertoshi.com/how-monero-works/</loc>
+		<changefreq>monthly</changefreq>
+		<priority>1.00</priority>
+	</url>
+	<url>
+		<loc>https://cyphertoshi.com/passphrase-generator/</loc>
+		<changefreq>weekly</changefreq>
+		<priority>1.00</priority>
+	</url>
+	<url>
+		<loc>https://cyphertoshi.com/tor-config-generator/</loc>
+		<changefreq>weekly</changefreq>
+		<priority>1.00</priority>
+	</url>
+	<url>
+		<loc>https://cyphertoshi.com/ssh-hardening-generator/</loc>
+		<changefreq>weekly</changefreq>
+		<priority>1.00</priority>
+	</url>
+	<url>
 		<loc>https://cyphertoshi.com/posts/op-return-limits</loc>
 		<lastmod>2025-05-03</lastmod>
 		<changefreq>monthly</changefreq>

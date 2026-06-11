@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#5271ff">
+        <meta name="referrer" content="no-referrer">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
+        <link rel="canonical" href="https://cyphertoshi.com/monero-mnemonic/"/>
+        <meta name="robots" content="index, follow">
+        <meta name="description" content="A simple, open-source, client-side tool to validate a Monero 25-word seed and derive its private keys and primary address. Works fully offline."/>
+        <meta name="author" content="Tech1k">
+        <title>Monero Mnemonic Tool</title>
+        <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="manifest" href="/site.webmanifest"/>
+        <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
+        <meta property="og:title" content="Monero Mnemonic Tool"/>
+        <meta property="og:description" content="A simple, open-source, client-side tool to validate a Monero 25-word seed and derive its private keys and primary address. Works fully offline."/>
+        <meta property="og:type" content="website"/>
+        <meta property="og:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta property="og:image:width" content="1200"/>
+        <meta property="og:image:height" content="630"/>
+        <meta property="og:url" content="https://cyphertoshi.com/monero-mnemonic/"/>
+        <meta property="og:site_name" content="Monero Mnemonic Tool"/>
+        <meta name="twitter:card" content="summary_large_image"/>
+        <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta name="twitter:title" content="Monero Mnemonic Tool"/>
+        <meta name="twitter:description" content="A simple, open-source, client-side tool to validate a Monero 25-word seed and derive its private keys and primary address. Works fully offline."/>
+        <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
+        <link rel="stylesheet" href="/assets/tool.css?v=1">
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Monero Mnemonic Tool","description":"Validate a Monero 25-word seed and derive its keys and primary address.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/monero-mnemonic/","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
+    </head>
+    <body id="main">
+        <h1>Monero Mnemonic Tool</h1>
+        <p>A simple, open-source, client-side tool to validate a Monero 25-word seed and derive its private keys and primary address. Everything runs in your browser and works fully offline.</p>
+
+        <div style="text-align:center;">
+            <h3>
+                <a href="/">Home</a> |
+                <a href="/links">Links</a> |
+                <a href="/notes">Notes</a> |
+                <a href="/tools">Toolkit</a> |
+                <a href="/contact">Contact</a>
+            </h3>
+        </div>
+        <hr/>
+
+        <div style="border:1px solid #a33; background:#3a2a2a; padding:12px 14px; border-radius:4px; margin-bottom:18px;">
+            <strong>⚠️ Security warning:</strong> This tool derives <strong>private keys</strong> from your seed phrase, and anyone who has your seed controls your funds. Only use it on a trusted, offline device, and never enter a seed that holds real funds into an online browser. This page works entirely offline: you can save it and run it on an air-gapped machine.
+        </div>
+
+        <form id="seedForm">
+            <label for="mnemonicInput">25-word Monero seed:</label><br/>
+            <textarea id="mnemonicInput" rows="3" style="width:100%; max-width:520px; font-size:16px; box-sizing:border-box;" placeholder="word1 word2 word3 ... word25" required></textarea>
+            <br/><br/>
+            <label for="network">Network:</label><br/>
+            <select id="network">
+                <option value="18" selected>Mainnet (real XMR)</option>
+                <option value="24">Stagenet</option>
+                <option value="53">Testnet</option>
+            </select>
+            <br/><br/>
+            <input type="submit" value="Validate &amp; Derive">
+        </form>
+
+        <div id="output" class="result"></div>
+
+        <script src="/assets/monero-wordlist-en.js"></script>
+        <script src="/assets/xmr-address.js"></script>
+        <script src="/assets/monero-mnemonic.js"></script>
+        <script>
+            const form = document.getElementById('seedForm');
+            const output = document.getElementById('output');
+
+            const escapeHtml = (s) =>
+                String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+            const NETWORKS = { 18: 'Mainnet', 24: 'Stagenet', 53: 'Testnet' };
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                output.style.display = 'block';
+
+                const dec = moneroMnemonic.decode(document.getElementById('mnemonicInput').value);
+                if (dec.error) {
+                    output.innerHTML = `<span class="error">❌ Not a valid seed (${escapeHtml(dec.error)}).</span>`;
+                    return;
+                }
+
+                const prefix = Number(document.getElementById('network').value);
+                output.innerHTML = 'Deriving keys (this can take a moment)...';
+
+                // Defer the (heavy) elliptic-curve derivation so the status text paints first.
+                setTimeout(function () {
+                    let r;
+                    try {
+                        r = moneroMnemonic.derive(dec.seed, prefix);
+                    } catch (err) {
+                        output.innerHTML = `<span class="error">❌ Could not derive keys: ${escapeHtml(err.message)}</span>`;
+                        return;
+                    }
+
+                    let html = `<div class="valid"><strong>✅ Valid seed (${escapeHtml(NETWORKS[prefix])})</strong></div><br/>`;
+                    html += `<p><strong>Primary address:</strong></p>`;
+                    html += `<code id="addrOut" style="word-break: break-word;">${escapeHtml(r.address)}</code>`;
+                    html += `<br/><br/><button type="button" onclick="copyAddr()">Copy address</button>`;
+                    html += `<p style="margin-top:24px; color:#e0a0a0;"><strong>⚠️ Private keys (keep these secret):</strong></p>`;
+                    html += `<strong>Private spend key:</strong><br/><code style="word-break: break-word;">${escapeHtml(r.spendSecret)}</code><br/><br/>`;
+                    html += `<strong>Private view key:</strong><br/><code style="word-break: break-word;">${escapeHtml(r.viewSecret)}</code>`;
+                    html += `<p style="margin-top:24px;"><strong>Public keys:</strong></p>`;
+                    html += `<strong>Public spend key:</strong><br/><code style="word-break: break-word;">${escapeHtml(r.spendPublic)}</code><br/><br/>`;
+                    html += `<strong>Public view key:</strong><br/><code style="word-break: break-word;">${escapeHtml(r.viewPublic)}</code>`;
+                    html += `<p style="margin-top:24px;"><small>Tip: you can confirm the address with the <a href="/monero-address-validator/">Monero address validator</a> or turn it into a QR with the <a href="/payment-qr-generator/">payment QR generator</a>.</small></p>`;
+                    output.innerHTML = `<div class="valid">${html}</div>`;
+                }, 20);
+            });
+
+            function copyAddr() {
+                const text = document.getElementById('addrOut').innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Copied the primary address to clipboard!');
+                });
+            }
+        </script>
+        <hr>
+        <section style="margin-top: 40px;">
+            <h2>FAQs</h2>
+
+            <h3>What is this site?</h3>
+            <p>This site takes a Monero 25-word seed, checks its built-in checksum word, and derives the private spend and view keys, the public keys, and the primary address for the network you choose. It all happens in your browser.</p>
+
+            <h3>What is a Monero seed?</h3>
+            <p>Monero wallets use a 25-word mnemonic (its own word list, not BIP39). The first 24 words encode your 256-bit private spend key, and the 25th word is a checksum that guards against typos. From the spend key, the view key and address are derived deterministically.</p>
+
+            <h3>Is it safe to use?</h3>
+            <p>The math is correct and nothing is sent anywhere, but a seed grants full control of the funds it holds. Treat this like any seed handling: prefer an offline or air-gapped device, and never enter a live seed on a machine you do not trust. You can save this page and run it with no internet connection.</p>
+
+            <h3>How was the derivation verified?</h3>
+            <p>The whole pipeline (seed decode, Keccak-256 view key, ed25519 public keys, and Base58 address) was checked against a known Monero test vector so the derived address matches a real wallet's. The ed25519 math is a self-contained implementation with no third-party library.</p>
+
+            <h3>Does it support MyMonero 13-word seeds?</h3>
+            <p>No. This tool handles the standard Monero 25-word seed used by the official wallets. The 13-word MyMonero format is different and is not supported.</p>
+
+            <h3>Is this site open source?</h3>
+            <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/monero-mnemonic" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+        </section>
+        <hr/>
+        <p style="font-size: 0.9em; color: gray;">
+            Disclaimer: This tool is provided "as is" with no warranties. Use at your own risk. Keys derived here grant control of funds; handle them with appropriate care and prefer an offline device.
+        </p>
+        <br/>
+        <hr/>
+        <footer>
+            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>. This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>.</p>
+        </footer>
+    </body>
+</html>
