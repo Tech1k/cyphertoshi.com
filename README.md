@@ -21,7 +21,8 @@ The cryptographic code (Keccak-256, ed25519, and the Monero address, mnemonic, k
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+- Source code: [MIT](LICENSE).
+- Written content (guides, explainers, and other prose): [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). You are free to share and adapt it, with attribution to CypherToshi (Tech1k) and a link back.
 
 ## Credits
 

@@ -94,7 +94,7 @@
                 <div><strong>Who sent it</strong><br/><span class="muted">Ring signatures (today) / FCMP++ (next)</span></div>
                 <div><strong>How much</strong><br/><span class="muted">RingCT + Bulletproofs</span></div>
             </div>
-            <p>And because the history is hidden, every coin stays interchangeable. That property, <strong>fungibility</strong>, is the whole point, and we come back to it at the end.</p>
+            <p>And because the history is hidden, every coin stays interchangeable, so that <strong>1 XMR = 1 XMR</strong>. That property, <strong>fungibility</strong>, is the whole point, and we come back to it at the end.</p>
         </section>
 
         <section class="concept" id="stealth">
@@ -261,7 +261,7 @@
                         '<div class="step"><span class="label">Your published address:</span><br/><span class="mono">' + wallet.address + '</span></div>' +
                         '<div class="step"><span class="label">Public spend key B:</span> <span class="mono">' + shorten(hex(Benc)) + '</span></div>' +
                         '<div class="step"><span class="label">Public view key A:</span> <span class="mono">' + shorten(hex(Aenc)) + '</span></div>' +
-                        '<div class="muted" style="margin-top:8px;">Now receive some payments and watch each land on a different one-time address.</div>';
+                        '<div style="margin-top:8px;">Now click <strong>Receive a payment</strong> below a few times, and watch every one land on a different, unlinkable address.</div>';
                     receiveBtn.disabled = false;
                 }, 25);
             });
@@ -559,7 +559,7 @@
         <hr/>
         <p style="font-size: 0.9em; color: gray; text-align:center;">This page is for education. The demo keys it generates are illustration only and must never be used for real funds.</p>
         <footer>
-            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>. This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>.</p>
+            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>. This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>, with code under <a href="https://github.com/Tech1k/cyphertoshi.com/blob/master/LICENSE" target="_blank" rel="noopener">MIT</a> and words under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.</p>
         </footer>
     </body>
 </html>
