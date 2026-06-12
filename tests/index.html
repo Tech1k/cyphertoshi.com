@@ -12,10 +12,12 @@
         <title>Crypto Self-Test | CypherToshi</title>
         <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
         <link rel="manifest" href="/site.webmanifest"/>
+        <link rel="canonical" href="https://cyphertoshi.com/tests"/>
         <link rel="stylesheet" href="/assets/tool.css?v=1">
         <style>
             table { border-collapse: collapse; width: 100%; margin-top: 12px; }
             td, th { text-align: left; padding: 6px 10px; border-bottom: 1px solid #4a4a4a; vertical-align: top; }
+            tr:target td { background: #3a3a22; }
             .pass { color: #6fce6f; font-weight: bold; }
             .fail { color: #e06666; font-weight: bold; }
             .name { font-family: monospace; }
@@ -67,11 +69,11 @@
                 ['Reject a tampered address', () => !moneroAddress.validate(DEV.slice(0, -1) + (DEV.slice(-1) === 'A' ? 'B' : 'A')).valid],
                 ['Integrated address (dev + payment id)', () => moneroAddress.integrate(DEV, fromHex('1234567890abcdef')).address === '4DrvGduF3ynBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVPm4Vc5sSG7ETzVkA3f'],
                 ['ed25519 hash-to-point matches Monero hash_to_ec vector', () => hex(ed25519.encode(ed25519.hashToPoint(moneroAddress.keccak256(fromHex('da66e9ba613919dec28ef367a125bb310d6d83fb9052e71034164b6dc4f392d0'))))) === '52b3f38753b4e13b74624862e253072cf12f745d43fcfafbe8c217701a6e5875'],
-                ['Key image matches Monero generate_key_image vector', () => { const pub = fromHex('e46b60ebfe610b8ba761032018471e5719bb77ea1cd945475c4a4abe7224bfd0'); const sec = ed25519.reduce(fromHex('981d477fb18897fa1f784c89721a9d600bf283f06b89cb018a077f41dcefef0f')); return hex(ed25519.encode(ed25519.scalarmult(ed25519.hashToPoint(moneroAddress.keccak256(pub)), sec))) === 'a637203ec41eab772532d30420eac80612fce8e44f1758bc7e2cb1bdda815887'; }],
+                ['Key image matches Monero generate_key_image vector', () => { const pub = fromHex('e46b60ebfe610b8ba761032018471e5719bb77ea1cd945475c4a4abe7224bfd0'); const sec = ed25519.reduce(fromHex('981d477fb18897fa1f784c89721a9d600bf283f06b89cb018a077f41dcefef0f')); return hex(ed25519.encode(ed25519.scalarmult(ed25519.hashToPoint(moneroAddress.keccak256(pub)), sec))) === 'a637203ec41eab772532d30420eac80612fce8e44f1758bc7e2cb1bdda815887'; }, 'vector-key-image'],
                 ['Mnemonic decodes to the correct private spend key', () => hex(moneroMnemonic.decode(SEED).seed) === '930755a1918de1a087e68c37accc8160de9f625712425f1b276e7d0dd305120b'],
                 ['Mnemonic derives the correct address', () => moneroMnemonic.derive(moneroMnemonic.decode(SEED).seed, 53).address === 'A1y9sbVt8nqhZAVm3me1U18rUVXcjeNKuBd1oE2cTs8biA9cozPMeyYLhe77nPv12JA3ejJN3qprmREriit2fi6tJDi99RR'],
                 ['Reject a mnemonic with a bad checksum word', () => !!moneroMnemonic.decode(SEED.split(' ').slice(0, 24).concat(['abbey']).join(' ')).error],
-                ['Address derivation from keys (sanity vs monero-python)', () => { const a = ed25519.reduce(fromHex('6d9056aa2c096bfcd2f272759555e5764ba204dd362604a983fa3e0aafd35901')); const b = ed25519.reduce(fromHex('e0fe01d5794e240a26609250c0d7e01673219eececa3f499d5cfa20a75739b0a')); return buildAddr(18, ed25519.encode(ed25519.base(b)), ed25519.encode(ed25519.base(a))) === '47ewoP19TN7JEEnFKUJHAYhGxkeTRH82sf36giEp9AcNfDBfkAtRLX7A6rZz18bbNHPNV7ex6WYbMN3aKisFRJZ8Ebsmgef'; }],
+                ['Address derivation from keys (sanity vs monero-python)', () => { const a = ed25519.reduce(fromHex('6d9056aa2c096bfcd2f272759555e5764ba204dd362604a983fa3e0aafd35901')); const b = ed25519.reduce(fromHex('e0fe01d5794e240a26609250c0d7e01673219eececa3f499d5cfa20a75739b0a')); return buildAddr(18, ed25519.encode(ed25519.base(b)), ed25519.encode(ed25519.base(a))) === '47ewoP19TN7JEEnFKUJHAYhGxkeTRH82sf36giEp9AcNfDBfkAtRLX7A6rZz18bbNHPNV7ex6WYbMN3aKisFRJZ8Ebsmgef'; }, 'vector-address-derivation'],
                 ['Subaddress (0,1) matches monero-python vector', () => {
                     const svk = fromHex('6d9056aa2c096bfcd2f272759555e5764ba204dd362604a983fa3e0aafd35901');
                     const b = ed25519.reduce(fromHex('e0fe01d5794e240a26609250c0d7e01673219eececa3f499d5cfa20a75739b0a'));
@@ -86,13 +88,13 @@
                     const D = ed25519.add(B, ed25519.base(m));
                     const C = ed25519.scalarmult(D, a);
                     return buildAddr(42, ed25519.encode(D), ed25519.encode(C)) === '84LooD7i35SFppgf4tQ453Vi3q5WexSUXaVgut69ro8MFnmHwuezAArEZTZyLr9fS6QotjqkSAxSF6d1aDgsPoX849izJ7m';
-                }],
+                }, 'vector-subaddress'],
                 ['Pedersen commitments are homomorphic: C(7)+C(3) = C(10)', () => {
                     const H = ed25519.decode(fromHex('8b655970153799af2aeadc9ff1add0ea6c7251d54154cfa92c173a0dd39c1f94'));
                     const commit = (v, a) => ed25519.add(ed25519.base(a), ed25519.scalarmult(H, BigInt(v)));
                     const a1 = ed25519.randomScalar(), a2 = ed25519.randomScalar();
                     return hex(ed25519.encode(ed25519.add(commit(7, a1), commit(3, a2)))) === hex(ed25519.encode(commit(10, (a1 + a2) % ed25519.ORDER)));
-                }],
+                }, 'vector-pedersen'],
                 ['Pedersen balance (10 = 7+3) resolves to the zero point', () => {
                     const H = ed25519.decode(fromHex('8b655970153799af2aeadc9ff1add0ea6c7251d54154cfa92c173a0dd39c1f94'));
                     const commit = (v, a) => ed25519.add(ed25519.base(a), ed25519.scalarmult(H, BigInt(v)));
@@ -104,11 +106,12 @@
 
             const tbody = document.querySelector('#results tbody');
             let passed = 0;
-            TESTS.forEach(([name, fn]) => {
+            TESTS.forEach(([name, fn, id]) => {
                 let ok = false, err = '';
                 try { ok = !!fn(); } catch (e) { err = ' (' + e.message + ')'; }
                 if (ok) passed++;
                 const tr = document.createElement('tr');
+                if (id) tr.id = id;
                 tr.innerHTML = '<td class="' + (ok ? 'pass' : 'fail') + '">' + (ok ? 'PASS' : 'FAIL') + '</td><td class="name">' + name + err + '</td>';
                 tbody.appendChild(tr);
             });
@@ -118,7 +121,7 @@
         </script>
         <hr/>
         <footer>
-            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>. This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>, with code under <a href="https://github.com/Tech1k/cyphertoshi.com/blob/master/LICENSE" target="_blank" rel="noopener">MIT</a> and words under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.</p>
+            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>.<br/>This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>, with code under <a href="https://github.com/Tech1k/cyphertoshi.com/blob/master/LICENSE" target="_blank" rel="noopener">MIT</a> and words under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.<br/>You can <a href="/donate">support it</a> with Monero.</p>
         </footer>
     </body>
 </html>

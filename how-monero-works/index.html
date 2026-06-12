@@ -6,7 +6,7 @@
         <meta name="theme-color" content="#5271ff">
         <meta name="referrer" content="no-referrer">
         <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
-        <link rel="canonical" href="https://cyphertoshi.com/how-monero-works/"/>
+        <link rel="canonical" href="https://cyphertoshi.com/how-monero-works"/>
         <meta name="robots" content="index, follow">
         <meta name="description" content="An interactive, client-side explainer of how Monero protects privacy: stealth addresses computed live in your browser, ring signatures, RingCT, and why fungibility matters."/>
         <meta name="author" content="Tech1k">
@@ -20,7 +20,7 @@
         <meta property="og:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
         <meta property="og:image:width" content="1200"/>
         <meta property="og:image:height" content="630"/>
-        <meta property="og:url" content="https://cyphertoshi.com/how-monero-works/"/>
+        <meta property="og:url" content="https://cyphertoshi.com/how-monero-works"/>
         <meta property="og:site_name" content="How Monero Works"/>
         <meta name="twitter:card" content="summary_large_image"/>
         <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
@@ -39,6 +39,8 @@
             .ok { color: #6fce6f; }
             .mono { font-family: monospace; word-break: break-all; }
             .pill { display: inline-block; background: #3a3a4a; border-radius: 999px; padding: 2px 10px; font-size: 0.85em; margin: 2px; }
+            .verified { display: inline-block; margin-top: 12px; background: #1f3320; color: #7ddc7d; border: 1px solid #3a5a32; border-radius: 999px; padding: 3px 11px; font-size: 0.82em; text-decoration: none; }
+            .verified:hover { background: #264028; text-decoration: underline; }
             .three { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
             .three > div { flex: 1 1 180px; background: #2b2b2b; border: 1px solid #4a4a4a; border-radius: 6px; padding: 12px 14px; }
             .ledger { font-family: monospace; font-size: 0.9em; }
@@ -113,6 +115,7 @@
                 <button type="button" id="receive" disabled>Receive a payment</button>
                 <div id="walletBox" class="muted" style="margin-top:10px;">No wallet yet.</div>
                 <div id="payments" style="margin-top:10px;"></div>
+                <a class="verified" href="/tests/#vector-address-derivation">&#10003; Verified against Monero's address-derivation test vector</a>
             </div>
             <p class="muted"><small>The demo wallet's keys are random and for illustration only. Never use a browser-generated key for real funds.</small></p>
 
@@ -130,6 +133,7 @@
                 &nbsp;<label for="subMinor">Index:</label> <input type="number" id="subMinor" value="1" min="0" style="width:70px;">
                 <button type="button" id="subBtn">Derive subaddress</button>
                 <div id="subOut" class="muted" style="margin-top:10px;">Uses the demo wallet above.</div>
+                <a class="verified" href="/tests/#vector-subaddress">&#10003; Verified against Monero's subaddress test vector</a>
             </div>
         </section>
 
@@ -144,6 +148,7 @@
                 <button type="button" id="spendOut">Spend a fresh output</button>
                 <button type="button" id="doubleSpend" disabled>Try to double-spend it</button>
                 <div id="kiOut" class="muted" style="margin-top:10px;">No outputs spent yet. Each "spend" computes a real key image with Monero's hash-to-point.</div>
+                <a class="verified" href="/tests/#vector-key-image">&#10003; Verified against Monero's generate_key_image test vector</a>
             </div>
 
             <h3>How decoys are chosen</h3>
@@ -166,6 +171,7 @@
                 <button type="button" id="buildCommit">Build commitments</button>
                 <button type="button" id="reblind" disabled>Re-randomize blinding</button>
                 <div id="commitOut" class="muted" style="margin-top:10px;">No commitments yet.</div>
+                <a class="verified" href="/tests/#vector-pedersen">&#10003; Verified against Monero's Pedersen-commitment test vectors</a>
             </div>
             <p class="muted"><small>The hex commitments hide the amounts completely. Change an output so the totals no longer match and the balance check fails, exactly as the network would reject it. A <strong>Bulletproof</strong> range proof (not shown here) additionally proves each hidden amount is non-negative, blocking the "send -100" trick.</small></p>
             <p>So the chain stays fully auditable for soundness, the supply is provable, while individual amounts stay private.</p>
@@ -559,7 +565,7 @@
         <hr/>
         <p style="font-size: 0.9em; color: gray; text-align:center;">This page is for education. The demo keys it generates are illustration only and must never be used for real funds.</p>
         <footer>
-            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>. This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>, with code under <a href="https://github.com/Tech1k/cyphertoshi.com/blob/master/LICENSE" target="_blank" rel="noopener">MIT</a> and words under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.</p>
+            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>.<br/>This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>, with code under <a href="https://github.com/Tech1k/cyphertoshi.com/blob/master/LICENSE" target="_blank" rel="noopener">MIT</a> and words under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.<br/>You can <a href="/donate">support it</a> with Monero.</p>
         </footer>
     </body>
 </html>

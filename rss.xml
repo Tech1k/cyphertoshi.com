@@ -6,6 +6,13 @@
         <atom:link href="https://cyphertoshi.com/rss.xml" rel="self" type="application/rss+xml"/>
         <description>Updates and news from CypherToshi.</description>
         <item>
+            <title>New: How Monero Works, an interactive explainer</title>
+            <link>https://cyphertoshi.com/how-monero-works</link>
+            <description>An interactive explainer that runs real Monero cryptography in your browser: stealth addresses, view keys, key images, ring signatures, Pedersen commitments, and range proofs.</description>
+            <pubDate>Thu, 11 Jun 2026 18:00:00 UTC</pubDate>
+            <guid>https://cyphertoshi.com/how-monero-works</guid>
+        </item>
+        <item>
             <title>Scalability Constraints of Bitcoin (PDF)</title>
             <link>https://cyphertoshi.com/docs/scalability-constraints-of-bitcoin.pdf</link>
             <description>A technical analysis of Bitcoin's scalability limitations.</description>
