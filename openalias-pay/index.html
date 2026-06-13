@@ -21,28 +21,29 @@
         <meta property="og:image:width" content="1200"/>
         <meta property="og:image:height" content="630"/>
         <meta property="og:url" content="https://cyphertoshi.com/openalias-pay"/>
-        <meta property="og:site_name" content="OpenAlias Pay"/>
+        <meta property="og:site_name" content="CypherToshi"/>
         <meta name="twitter:card" content="summary_large_image"/>
         <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
         <meta name="twitter:title" content="OpenAlias Pay"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to resolve an OpenAlias address and generate a payment URI and scannable QR code."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=1">
-        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"OpenAlias Pay","description":"Resolve an OpenAlias address and generate a payment URI and QR code.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/openalias-pay/","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
+        <link rel="stylesheet" href="/assets/tool.css?v=2">
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"OpenAlias Pay","description":"Resolve an OpenAlias address and generate a payment URI and QR code.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/openalias-pay","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
-    <body id="main">
+    <body>
+        <main id="main">
         <h1>OpenAlias Pay</h1>
         <p>A simple, open-source, client-side tool to resolve an <a href="https://openalias.org/" target="_blank" rel="noopener noreferrer">OpenAlias</a> address into a cryptocurrency address and generate a payment URI and scannable QR code.</p>
         <p>Enter an OpenAlias address (e.g. <code>donate@getmonero.org</code> or <code>getmonero.org</code>):</p>
 
         <div style="text-align:center;">
-            <h3>
+            <nav class="sitenav" aria-label="Primary">
                 <a href="/">Home</a> |
                 <a href="/links">Links</a> |
                 <a href="/notes">Notes</a> |
                 <a href="/tools">Toolkit</a> |
                 <a href="/contact">Contact</a>
-            </h3>
+            </nav>
         </div>
         <hr/>
 
@@ -54,6 +55,7 @@
             <input type="text" id="amount" placeholder="e.g. 0.5">
             <br/><br/>
             <input type="submit" value="Resolve &amp; Generate">
+            <button type="button" id="copyLink">Copy link</button>
         </form>
 
         <div id="output" class="result"></div>
@@ -64,6 +66,10 @@
             const output = document.getElementById('output');
             let qrItems = [];
 
+            function copyFrom(id, btn) {
+                const t = document.getElementById(id).textContent;
+                navigator.clipboard.writeText(t).then(function () { const o = btn.textContent; btn.textContent = 'Copied!'; setTimeout(function () { btn.textContent = o; }, 1500); });
+            }
             const escapeHtml = (s) =>
                 String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
@@ -127,6 +133,8 @@
                 canvas.style.maxWidth = '100%';
                 canvas.style.height = 'auto';
                 canvas.style.imageRendering = 'pixelated';
+                canvas.setAttribute('role', 'img');
+                canvas.setAttribute('aria-label', 'Payment QR code');
                 return canvas;
             }
 
@@ -192,8 +200,8 @@
                         html += `<div style="margin-bottom: 28px;">`;
                         html += `<strong>Asset:</strong> ${escapeHtml(rec.asset.toUpperCase())}<br/>`;
                         if (rec.recipient_name) html += `<strong>Recipient:</strong> ${escapeHtml(rec.recipient_name)}<br/>`;
-                        html += `<strong>Address:</strong> <code style="word-break: break-word;">${escapeHtml(rec.recipient_address)}</code><br/><br/>`;
-                        html += `<strong>Payment URI:</strong><br/><code style="word-break: break-word;">${escapeHtml(uri)}</code><br/><br/>`;
+                        html += `<strong>Address:</strong> <code id="payAddr${i}" style="word-break: break-word;">${escapeHtml(rec.recipient_address)}</code> <button type="button" onclick="copyFrom('payAddr${i}', this)">Copy</button><br/><br/>`;
+                        html += `<strong>Payment URI:</strong><br/><code id="payUri${i}" style="word-break: break-word;">${escapeHtml(uri)}</code> <button type="button" onclick="copyFrom('payUri${i}', this)">Copy</button><br/><br/>`;
                         html += `<div id="qrBox${i}" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>`;
                         html += `<br/><br/><button type="button" onclick="downloadQR(${i})">Download QR (PNG)</button>`;
                         html += `</div>`;
@@ -211,6 +219,22 @@
                     output.innerHTML = `<span class="error">❌ Error resolving address: ${escapeHtml(err.message)}</span>`;
                 }
             });
+        
+            // Shareable deep link: ?alias=...&amount=...
+            (function () {
+                const lb = document.getElementById('copyLink');
+                const ff = document.getElementById('payForm');
+                if (lb) lb.addEventListener('click', function () {
+                    const a = document.getElementById('aliasInput').value.trim();
+                    const amt = document.getElementById('amount').value.trim();
+                    let q = a ? '?alias=' + encodeURIComponent(a) : '';
+                    if (a && amt) q += '&amount=' + encodeURIComponent(amt);
+                    navigator.clipboard.writeText(location.origin + location.pathname + q).then(function () { lb.textContent = 'Copied!'; setTimeout(function () { lb.textContent = 'Copy link'; }, 1500); });
+                });
+                const sp = new URLSearchParams(location.search);
+                const al = sp.get('alias');
+                if (al) { document.getElementById('aliasInput').value = al; const am = sp.get('amount'); if (am) document.getElementById('amount').value = am; if (ff.requestSubmit) ff.requestSubmit(); else ff.dispatchEvent(new Event('submit', { cancelable: true })); }
+            })();
         </script>
         <hr>
         <section style="margin-top: 40px;">
@@ -226,14 +250,16 @@
             <p>Monero, Bitcoin, and Litecoin get fully standard payment URIs. Other OpenAlias assets are still resolved and shown, using a best-effort URI format that not every wallet will recognize.</p>
 
             <h3>I already have the address. Can I just make a QR?</h3>
-            <p>Yes. Use the <a href="/payment-qr-generator/">Crypto Payment QR Generator</a> to build a payment URI and QR from an address you already have, with no DNS lookup.</p>
+            <p>Yes. Use the <a href="/payment-qr-generator">Crypto Payment QR Generator</a> to build a payment URI and QR from an address you already have, with no DNS lookup.</p>
 
             <h3>Should I trust the resolved address?</h3>
-            <p>OpenAlias relies on DNSSEC for integrity. This tool reports whether the record was DNSSEC-authenticated. If it was not, be cautious, as the result could have been tampered with in transit. You can also inspect a domain's records with the <a href="/openalias-checker/">OpenAlias checker</a>.</p>
+            <p>OpenAlias relies on DNSSEC for integrity. This tool reports whether the record was DNSSEC-authenticated. If it was not, be cautious, as the result could have been tampered with in transit. You can also inspect a domain's records with the <a href="/openalias-checker">OpenAlias checker</a>.</p>
 
             <h3>Do you log the addresses I look up?</h3>
             <p>No. This site is a static page that runs entirely client-side. The DNS lookup is sent directly from your browser to the chosen resolver (Cloudflare or Google), which may log it per their policies; nothing is sent to this site.</p>
 
+            <h3>Can I link to a prefilled payment?</h3>
+            <p>Yes. Add <code>?alias=donate@cyphertoshi.com</code> (optionally <code>&amp;amount=0.5</code>) to the URL, or use the <strong>Copy link</strong> button, and it resolves automatically on load.</p>
             <h3>Is this site open source?</h3>
             <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/openalias-pay" target="_blank" rel="noopener noreferrer">GitHub</a>. QR codes are rendered with the open-source <a href="https://github.com/kazuhikoarase/qrcode-generator" target="_blank" rel="noopener noreferrer">qrcode-generator</a> library (MIT), self-hosted on this site.</p>
         </section>
@@ -243,8 +269,9 @@
         </p>
         <br/>
         <hr/>
-        <footer>
-            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>.<br/>This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>, with code under <a href="https://github.com/Tech1k/cyphertoshi.com/blob/master/LICENSE" target="_blank" rel="noopener">MIT</a> and words under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.<br/>You can <a href="/donate">support it</a> with Monero.</p>
-        </footer>
+            <footer>
+                <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>.<br/>This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>, with code under <a href="https://github.com/Tech1k/cyphertoshi.com/blob/master/LICENSE" target="_blank" rel="noopener">MIT</a> and words under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.<br/>You can <a href="/donate">support it</a> with Monero.</p>
+            </footer>
+        </main>
     </body>
 </html>

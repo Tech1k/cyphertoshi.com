@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#5271ff">
+        <meta name="referrer" content="no-referrer">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
+        <link rel="canonical" href="https://cyphertoshi.com/payment-uri-decoder"/>
+        <meta name="robots" content="index, follow">
+        <meta name="description" content="A simple, open-source, client-side tool to decode Monero, Bitcoin, and Litecoin payment URIs into their address, amount, and other fields. Nothing leaves your browser."/>
+        <meta name="author" content="Tech1k">
+        <title>Crypto Payment URI Decoder</title>
+        <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
+        <link rel="manifest" href="/site.webmanifest"/>
+        <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
+        <meta property="og:title" content="Crypto Payment URI Decoder"/>
+        <meta property="og:description" content="A simple, open-source, client-side tool to decode Monero, Bitcoin, and Litecoin payment URIs into their address, amount, and other fields. Nothing leaves your browser."/>
+        <meta property="og:type" content="website"/>
+        <meta property="og:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta property="og:image:width" content="1200"/>
+        <meta property="og:image:height" content="630"/>
+        <meta property="og:url" content="https://cyphertoshi.com/payment-uri-decoder"/>
+        <meta property="og:site_name" content="CypherToshi"/>
+        <meta name="twitter:card" content="summary_large_image"/>
+        <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
+        <meta name="twitter:title" content="Crypto Payment URI Decoder"/>
+        <meta name="twitter:description" content="Decode Monero, Bitcoin, and Litecoin payment URIs into their address, amount, and other fields."/>
+        <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
+        <link rel="stylesheet" href="/assets/tool.css?v=2">
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Crypto Payment URI Decoder","description":"Decode Monero, Bitcoin, and Litecoin payment URIs into their fields.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/payment-uri-decoder","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
+    </head>
+    <body>
+        <main id="main">
+        <h1>Crypto Payment URI Decoder</h1>
+        <p>A simple, open-source, client-side tool to decode a payment URI (Monero, Bitcoin, Litecoin, and others) into its address, amount, and other fields. It is the inverse of the <a href="/payment-qr-generator">QR generator</a>. Nothing leaves your browser.</p>
+
+        <div style="text-align:center;">
+            <nav class="sitenav" aria-label="Primary">
+                <a href="/">Home</a> |
+                <a href="/links">Links</a> |
+                <a href="/notes">Notes</a> |
+                <a href="/tools">Toolkit</a> |
+                <a href="/contact">Contact</a>
+            </nav>
+        </div>
+        <hr/>
+
+        <form id="uriForm">
+            <label for="uriInput">Payment URI:</label><br/>
+            <input type="text" id="uriInput" placeholder="monero:8...?tx_amount=0.5&amp;recipient_name=CypherToshi" required>
+            <input type="submit" value="Decode URI">
+            <button type="button" id="copyLink">Copy link</button>
+        </form>
+
+        <div id="output" class="result"></div>
+
+        <script src="/assets/xmr-address.js"></script>
+        <script>
+            const form = document.getElementById('uriForm');
+            const output = document.getElementById('output');
+
+            const escapeHtml = (s) =>
+                String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+            // Friendly labels for known query keys across schemes.
+            const LABELS = {
+                tx_amount: 'Amount', amount: 'Amount',
+                tx_payment_id: 'Payment ID',
+                recipient_name: 'Recipient name', label: 'Label',
+                tx_description: 'Description', message: 'Message'
+            };
+            const UNITS = { monero: 'XMR', bitcoin: 'BTC', litecoin: 'LTC' };
+
+            function decodeComponent(v) {
+                try { return decodeURIComponent(v.replace(/\+/g, ' ')); } catch (e) { return v; }
+            }
+
+            function copyFrom(id, btn) {
+                const text = document.getElementById(id).textContent;
+                navigator.clipboard.writeText(text).then(function () {
+                    const original = btn.textContent;
+                    btn.textContent = 'Copied!';
+                    setTimeout(function () { btn.textContent = original; }, 1500);
+                });
+            }
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                output.style.display = 'block';
+                const raw = document.getElementById('uriInput').value.trim();
+
+                const colon = raw.indexOf(':');
+                if (colon === -1) {
+                    output.innerHTML = `<div class="error">❌ That does not look like a payment URI. It should start with a scheme like <code>monero:</code>, <code>bitcoin:</code>, or <code>litecoin:</code>.</div>`;
+                    return;
+                }
+                const scheme = raw.slice(0, colon).toLowerCase();
+                let rest = raw.slice(colon + 1);
+                // Some wallets prefix bitcoin URIs with // after the scheme.
+                if (rest.startsWith('//')) rest = rest.slice(2);
+                const qmark = rest.indexOf('?');
+                const address = decodeComponent(qmark === -1 ? rest : rest.slice(0, qmark));
+                const query = qmark === -1 ? '' : rest.slice(qmark + 1);
+
+                const unit = UNITS[scheme] || '';
+                let html = `<div class="valid"><strong>Decoded payment URI</strong><br/><br/>`;
+                html += `<strong>Scheme:</strong> ${escapeHtml(scheme)}${UNITS[scheme] ? ' (' + UNITS[scheme] + ')' : ''}<br/>`;
+                html += `<strong>Address:</strong> <code id="decodedAddr" style="word-break: break-word;">${escapeHtml(address)}</code> <button type="button" onclick="copyFrom('decodedAddr', this)">Copy</button><br/>`;
+
+                // Validate the Monero address against our own library.
+                if (scheme === 'monero' && address) {
+                    const v = moneroAddress.validate(address);
+                    if (v.valid) {
+                        html += `<strong>Address check:</strong> <span style="color:#6fce6f;">valid ${escapeHtml(v.type)} / ${escapeHtml(v.network)}</span><br/>`;
+                    } else {
+                        html += `<strong>Address check:</strong> <span style="color:#e06666;">invalid (${escapeHtml(v.error)})</span><br/>`;
+                    }
+                }
+
+                // Parse query parameters.
+                const params = [];
+                if (query) {
+                    query.split('&').forEach(function (pair) {
+                        if (!pair) return;
+                        const eq = pair.indexOf('=');
+                        const key = eq === -1 ? pair : pair.slice(0, eq);
+                        const val = eq === -1 ? '' : pair.slice(eq + 1);
+                        params.push([decodeComponent(key), decodeComponent(val)]);
+                    });
+                }
+
+                if (params.length) {
+                    html += `<br/>`;
+                    params.forEach(function (kv) {
+                        const key = kv[0], val = kv[1];
+                        const label = LABELS[key] || key;
+                        const isAmount = (key === 'tx_amount' || key === 'amount');
+                        const shown = isAmount && unit ? `${escapeHtml(val)} ${unit}` : escapeHtml(val);
+                        html += `<strong>${escapeHtml(label)}:</strong> <code style="word-break: break-word;">${shown}</code><br/>`;
+                    });
+                } else {
+                    html += `<br/><span class="muted">No extra fields (just an address).</span><br/>`;
+                }
+
+                html += `</div>`;
+                output.innerHTML = html;
+            });
+        
+            // Shareable deep link: ?uri=...
+            (function () {
+                const lb = document.getElementById('copyLink');
+                const ff = document.getElementById('uriForm');
+                if (lb) lb.addEventListener('click', function () {
+                    const val = document.getElementById('uriInput').value.trim();
+                    const url = location.origin + location.pathname + (val ? '?uri=' + encodeURIComponent(val) : '');
+                    navigator.clipboard.writeText(url).then(function () { lb.textContent = 'Copied!'; setTimeout(function () { lb.textContent = 'Copy link'; }, 1500); });
+                });
+                const p = new URLSearchParams(location.search).get('uri');
+                if (p) { document.getElementById('uriInput').value = p; if (ff.requestSubmit) ff.requestSubmit(); else ff.dispatchEvent(new Event('submit', { cancelable: true })); }
+            })();
+        </script>
+        <hr>
+        <section style="margin-top: 40px;">
+            <h2>FAQs</h2>
+
+            <h3>What is this site?</h3>
+            <p>This tool decodes a cryptocurrency payment URI, the kind of link encoded in a payment QR code, back into its human-readable parts: the address, the requested amount, and any label or description. Everything happens in your browser.</p>
+
+            <h3>What is a payment URI?</h3>
+            <p>A payment URI is a link like <code>monero:&lt;address&gt;?tx_amount=0.5</code> (or <code>bitcoin:&lt;address&gt;?amount=0.5</code> following BIP21). Wallets read these to pre-fill a payment. The amount, recipient name, payment ID, and description fields are optional.</p>
+
+            <h3>Which schemes are supported?</h3>
+            <p>Monero, Bitcoin, and Litecoin get friendly labels and amount units, and Monero addresses are checked against the same validator used elsewhere on this site. Any other scheme (for example <code>dogecoin:</code>) is still parsed and shown field by field.</p>
+
+            <h3>Does decoding verify the payment is safe?</h3>
+            <p>No. Decoding only reveals what the URI contains. For Monero it also confirms the address checksum, but a valid address is not proof of ownership. Always confirm a recipient through a trusted channel before sending funds.</p>
+
+            <h3>Do you log the URIs I decode?</h3>
+            <p>No. This site is a static page that runs entirely client-side in your browser. Nothing is sent anywhere, so you can disconnect from the internet and it will still work.</p>
+
+            <h3>Can I link to a prefilled decode?</h3>
+            <p>Yes. Add <code>?uri=...</code> to the URL (or use the <strong>Copy link</strong> button) and the URI is decoded automatically on load.</p>
+            <h3>Is this site open source?</h3>
+            <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/payment-uri-decoder" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+        </section>
+        <hr/>
+        <p style="font-size: 0.9em; color: gray;">
+            Disclaimer: This tool is provided "as is" with no warranties. Use at your own risk. Always double-check a recipient through a trusted source before sending any funds.
+        </p>
+        <br/>
+        <hr/>
+            <footer>
+                <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>.<br/>This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>, with code under <a href="https://github.com/Tech1k/cyphertoshi.com/blob/master/LICENSE" target="_blank" rel="noopener">MIT</a> and words under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.<br/>You can <a href="/donate">support it</a> with Monero.</p>
+            </footer>
+        </main>
+    </body>
+</html>

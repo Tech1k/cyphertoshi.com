@@ -21,28 +21,29 @@
         <meta property="og:image:width" content="1200"/>
         <meta property="og:image:height" content="630"/>
         <meta property="og:url" content="https://cyphertoshi.com/openalias-checker"/>
-        <meta property="og:site_name" content="OpenAlias Checker"/>
+        <meta property="og:site_name" content="CypherToshi"/>
         <meta name="twitter:card" content="summary_large_image"/>
         <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
         <meta name="twitter:title" content="OpenAlias Checker"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to check OpenAlias configurations."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=1">
-        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"OpenAlias Checker","description":"Verify a domain's OpenAlias configuration in your browser.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/openalias-checker/","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
+        <link rel="stylesheet" href="/assets/tool.css?v=2">
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"OpenAlias Checker","description":"Verify a domain's OpenAlias configuration in your browser.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/openalias-checker","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
-    <body id="main">
+    <body>
+        <main id="main">
         <h1>OpenAlias Domain Checker</h1>
         <p>A simple, open-source, client-side tool to check OpenAlias configurations.</p>
         <p>Enter a domain name (e.g. <code>getmonero.org</code>) to verify its OpenAlias configuration:</p>
 
         <div style="text-align:center;">
-            <h3>
+            <nav class="sitenav" aria-label="Primary">
                 <a href="/">Home</a> |
                 <a href="/links">Links</a> |
                 <a href="/notes">Notes</a> |
                 <a href="/tools">Toolkit</a> |
                 <a href="/contact">Contact</a>
-            </h3>
+            </nav>
         </div>
         <hr/>
 
@@ -50,6 +51,7 @@
             <label for="domainInput">Domain name:</label><br/>
             <input type="text" id="domainInput" placeholder="cyphertoshi.com" required>
             <input type="submit" value="Check OpenAlias">
+            <button type="button" id="copyLink">Copy link</button>
         </form>
 
         <div id="output" class="result"></div>
@@ -63,6 +65,10 @@
             return re.test(domain);
             };
 
+            function copyFrom(id, btn) {
+                const t = document.getElementById(id).textContent;
+                navigator.clipboard.writeText(t).then(function () { const o = btn.textContent; btn.textContent = 'Copied!'; setTimeout(function () { btn.textContent = o; }, 1500); });
+            }
             const escapeHtml = (s) =>
                 String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
@@ -136,7 +142,13 @@
                         oa1Records.forEach((rec, idx) => {
                             html += `<div><strong>oa1:</strong> ${escapeHtml(rec.oa1)}<br>`;
                             Object.keys(rec).forEach(k => {
-                                if (k !== 'oa1') html += `<strong>${escapeHtml(k)}:</strong> ${escapeHtml(rec[k])}<br>`;
+                                if (k === 'oa1') return;
+                                if (k === 'recipient_address') {
+                                    const aid = 'oaAddr' + idx;
+                                    html += `<strong>${escapeHtml(k)}:</strong> <code id="${aid}" style="word-break: break-word;">${escapeHtml(rec[k])}</code> <button type="button" onclick="copyFrom('${aid}', this)">Copy</button><br>`;
+                                } else {
+                                    html += `<strong>${escapeHtml(k)}:</strong> ${escapeHtml(rec[k])}<br>`;
+                                }
                             });
                             //html += `<hr>`;
                             html += '</div><br>';
@@ -158,6 +170,19 @@
                     output.innerHTML = `<span class="error">❌ Error checking domain: ${escapeHtml(err.message)}</span>`;
                 }
             });
+        
+            // Shareable deep link: ?domain=...
+            (function () {
+                const lb = document.getElementById('copyLink');
+                const ff = document.getElementById('checkForm');
+                if (lb) lb.addEventListener('click', function () {
+                    const val = document.getElementById('domainInput').value.trim();
+                    const url = location.origin + location.pathname + (val ? '?domain=' + encodeURIComponent(val) : '');
+                    navigator.clipboard.writeText(url).then(function () { lb.textContent = 'Copied!'; setTimeout(function () { lb.textContent = 'Copy link'; }, 1500); });
+                });
+                const p = new URLSearchParams(location.search).get('domain');
+                if (p) { document.getElementById('domainInput').value = p; if (ff.requestSubmit) ff.requestSubmit(); else ff.dispatchEvent(new Event('submit', { cancelable: true })); }
+            })();
         </script>
         <hr>
         <section style="margin-top: 40px;">
@@ -179,6 +204,8 @@
             <h3>Do you log the domains I check?</h3>
             <p>No. This site is a static page that runs entirely client-side in your browser. However, the DNS resolvers used (Cloudflare or Google) may log your lookup request according to their policies.</p>
 
+            <h3>Can I link to a prefilled lookup?</h3>
+            <p>Yes. Add <code>?domain=cyphertoshi.com</code> to the URL (or use the <strong>Copy link</strong> button) and the lookup runs automatically on load.</p>
             <h3>Is this site open source?</h3>
             <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/openalias-checker" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
         </section>
@@ -188,8 +215,9 @@
         </p>
         <br/>
         <hr/>
-        <footer>
-            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>.<br/>This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>, with code under <a href="https://github.com/Tech1k/cyphertoshi.com/blob/master/LICENSE" target="_blank" rel="noopener">MIT</a> and words under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.<br/>You can <a href="/donate">support it</a> with Monero.</p>
-        </footer>
+            <footer>
+                <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>.<br/>This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>, with code under <a href="https://github.com/Tech1k/cyphertoshi.com/blob/master/LICENSE" target="_blank" rel="noopener">MIT</a> and words under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.<br/>You can <a href="/donate">support it</a> with Monero.</p>
+            </footer>
+        </main>
     </body>
 </html>

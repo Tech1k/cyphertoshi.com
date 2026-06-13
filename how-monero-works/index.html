@@ -21,13 +21,13 @@
         <meta property="og:image:width" content="1200"/>
         <meta property="og:image:height" content="630"/>
         <meta property="og:url" content="https://cyphertoshi.com/how-monero-works"/>
-        <meta property="og:site_name" content="How Monero Works"/>
+        <meta property="og:site_name" content="CypherToshi"/>
         <meta name="twitter:card" content="summary_large_image"/>
         <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
         <meta name="twitter:title" content="How Monero Works"/>
         <meta name="twitter:description" content="An interactive, client-side explainer of how Monero protects privacy: stealth addresses, ring signatures, RingCT, and fungibility."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=1">
+        <link rel="stylesheet" href="/assets/tool.css?v=2">
         <style>
             #main { width: 70%; }
             @media (max-width: 992px) { #main { width: 90%; } }
@@ -52,20 +52,21 @@
             .step { margin: 8px 0; }
             .label { color: #8fb6ff; }
         </style>
-        <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"How Monero Works","description":"An interactive explainer of how Monero protects privacy: stealth addresses, ring signatures, key images, RingCT, and fungibility, with live cryptography.","url":"https://cyphertoshi.com/how-monero-works/","author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"How Monero Works","description":"An interactive explainer of how Monero protects privacy: stealth addresses, ring signatures, key images, RingCT, and fungibility, with live cryptography.","url":"https://cyphertoshi.com/how-monero-works","author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
-    <body id="main">
+    <body>
+        <main id="main">
         <h1>How Monero Works</h1>
-        <p class="lead">An interactive, plain-language tour of how Monero keeps payments private. The stealth-address section below runs the <strong>real elliptic-curve cryptography live in your browser</strong>, not an animation, and the code is checked against Monero's own <a href="/tests/">test vectors</a> that you can run yourself. Nothing leaves your device.</p>
+        <p class="lead">An interactive, plain-language tour of how Monero keeps payments private. The stealth-address section below runs the <strong>real elliptic-curve cryptography live in your browser</strong>, not an animation, and the code is checked against Monero's own <a href="/tests">test vectors</a> that you can run yourself. Nothing leaves your device.</p>
 
         <div style="text-align:center;">
-            <h3>
+            <nav class="sitenav" aria-label="Primary">
                 <a href="/">Home</a> |
                 <a href="/links">Links</a> |
                 <a href="/notes">Notes</a> |
                 <a href="/tools">Toolkit</a> |
                 <a href="/contact">Contact</a>
-            </h3>
+            </nav>
         </div>
         <hr/>
 
@@ -195,6 +196,17 @@
             </div>
         </section>
 
+        <section class="concept" id="cryptolog">
+            <h2>Crypto log</h2>
+            <p>Every demo above runs real cryptography on your device. This records the actual values it computed, in full, in the order they happened. Run any demo, then read exactly what it did.</p>
+            <div class="card">
+                <button type="button" id="clogClear">Clear log</button>
+                <pre id="clog" style="white-space:pre-wrap; word-break:break-all; max-height:340px; overflow:auto; margin-top:10px; font-size:0.82em; line-height:1.5;"></pre>
+                <div id="clogEmpty" class="muted">Nothing yet. Click a demo button above.</div>
+            </div>
+        </section>
+
+
         <section class="concept" id="fungibility">
             <h2>4. Fungibility: why all of this matters</h2>
             <p>Put the three pieces together and a Monero output has no visible history: no traceable origin, no linked recipient, no amount trail. That means every XMR is identical to every other XMR.</p>
@@ -223,7 +235,7 @@
                 <li><a href="https://www.getmonero.org/library/Zero-to-Monero-2-0-0.pdf" target="_blank" rel="noopener noreferrer">Zero to Monero</a>: the rigorous, math-complete reference (PDF).</li>
                 <li><a href="https://masteringmonero.com/" target="_blank" rel="noopener noreferrer">Mastering Monero</a>: a free, approachable book.</li>
                 <li><a href="https://monero.stackexchange.com/" target="_blank" rel="noopener noreferrer">Monero Stack Exchange</a>: questions and deep dives.</li>
-                <li>Try the real thing here: <a href="/monero-address-validator/">address validator</a>, <a href="/monero-mnemonic/">mnemonic tool</a>, <a href="/monero-integrated-address/">integrated address generator</a>.</li>
+                <li>Try the real thing here: <a href="/monero-address-validator">address validator</a>, <a href="/monero-mnemonic">mnemonic tool</a>, <a href="/monero-integrated-address">integrated address generator</a>.</li>
             </ul>
         </section>
 
@@ -232,6 +244,11 @@
         <script>
             const hex = (b) => Array.from(b).map(x => x.toString(16).padStart(2, '0')).join('');
             const shorten = (h) => h.length > 20 ? h.slice(0, 10) + '...' + h.slice(-10) : h;
+            const clogEl = document.getElementById('clog');
+            const clogEmpty = document.getElementById('clogEmpty');
+            function clog(line) { if (clogEmpty) clogEmpty.style.display = 'none'; clogEl.textContent += line + '\n'; clogEl.scrollTop = clogEl.scrollHeight; }
+            function clogHead(t) { clog((clogEl.textContent ? '\n' : '') + '== ' + t + ' =='); }
+            document.getElementById('clogClear').addEventListener('click', function () { clogEl.textContent = ''; if (clogEmpty) clogEmpty.style.display = ''; });
 
             // derivation_to_scalar(D, output_index=0): Hs(D || varint(0))
             function Hs(pointBytes) {
@@ -263,6 +280,13 @@
                     const A = ed25519.base(a), B = ed25519.base(b);
                     const Aenc = ed25519.encode(A), Benc = ed25519.encode(B);
                     wallet = { a, b, A, B, Aenc, Benc, address: buildAddress(Benc, Aenc, 18) };
+
+                    clogHead('wallet generation');
+                    clog('private spend key b = ' + hex(scalarToLe(b)));
+                    clog('private view key  a = ' + hex(scalarToLe(a)));
+                    clog('public spend key  B = b*G = ' + hex(Benc));
+                    clog('public view key   A = a*G = ' + hex(Aenc));
+                    clog('address = ' + wallet.address);
                     walletBox.innerHTML =
                         '<div class="step"><span class="label">Your published address:</span><br/><span class="mono">' + wallet.address + '</span></div>' +
                         '<div class="step"><span class="label">Public spend key B:</span> <span class="mono">' + shorten(hex(Benc)) + '</span></div>' +
@@ -292,6 +316,13 @@
                     const match = hex(Psend) === hex(Precv);
 
                     payNum++;
+
+                    clogHead('stealth payment #' + payNum);
+                    clog('tx private key r = ' + hex(scalarToLe(r)));
+                    clog('R = r*G = ' + hex(Renc));
+                    clog('shared secret 8*r*A = ' + hex(Dsend));
+                    clog('recipient    8*a*R = ' + hex(Drecv) + (match ? '  [equal]' : '  [MISMATCH]'));
+                    clog('one-time address P = Hs(secret)*G + B = ' + hex(Psend));
                     note.remove();
                     const card = document.createElement('div');
                     card.className = 'card stealth-out';
@@ -351,6 +382,12 @@
                     const Co2 = commit(vo2, ao2);
                     const diffHex = hex(ed25519.encode(ed25519.add(Cin, ed25519.negate(ed25519.add(Co1, Co2)))));
                     const balanced = diffHex === IDENTITY_HEX;
+
+                    clogHead('RingCT balance (' + vin + ' in, ' + vo1 + '+' + vo2 + ' out)');
+                    clog('C(input)    = ' + hex(ed25519.encode(Cin)));
+                    clog('C(output 1) = ' + hex(ed25519.encode(Co1)));
+                    clog('C(output 2) = ' + hex(ed25519.encode(Co2)));
+                    clog('C(in)-C(o1)-C(o2) = ' + diffHex + (balanced ? '  [zero point: balanced]' : '  [nonzero: rejected]'));
                     commitOut.innerHTML =
                         '<div class="step"><span class="label">C(input):</span> <span class="mono">' + shorten(hex(ed25519.encode(Cin))) + '</span></div>' +
                         '<div class="step"><span class="label">C(output 1):</span> <span class="mono">' + shorten(hex(ed25519.encode(Co1))) + '</span></div>' +
@@ -394,6 +431,11 @@
                     lastX = ed25519.randomScalar();
                     const k = keyImage(lastX);
                     seenImages.add(k.Ienc); spendNum++;
+
+                    clogHead('spend #' + spendNum + ' (key image)');
+                    clog('private key x = ' + hex(scalarToLe(lastX)));
+                    clog('output key P = x*G = ' + k.Penc);
+                    clog('key image I = x*Hp(P) = ' + k.Ienc);
                     kiOut.innerHTML = renderSpend('Spend #' + spendNum, k.Penc, k.Ienc, false,
                         'Accepted. This key image has never appeared before, so it is a valid spend. Notice it looks unrelated to the output.');
                     spendBtn.disabled = false; dsBtn.disabled = false;
@@ -406,6 +448,9 @@
                 setTimeout(function () {
                     const k = keyImage(lastX);
                     const dup = seenImages.has(k.Ienc);
+
+                    clogHead('double-spend attempt');
+                    clog('same x -> same key image I = ' + k.Ienc + (dup ? '  [already seen: rejected]' : ''));
                     kiOut.innerHTML = renderSpend('Double-spend of the last output', k.Penc, k.Ienc, dup,
                         'Rejected. The same output deterministically produces the same key image, which the network has already seen, so the double-spend is blocked. The key image still reveals nothing about which output it came from.');
                     spendBtn.disabled = false; dsBtn.disabled = false;
@@ -434,6 +479,9 @@
                         html += '<div class="step">Output ' + (i + 1) + ': <span class="mono">' + shorten(o.P) + '</span> &rarr; ' + (mine ? '<span class="ok">yours</span>' : '<span class="muted">not yours</span>') + '</div>';
                     });
                     html += '<div style="margin-top:8px;">The view key identified your incoming outputs. But spending one needs the one-time private key x = Hs(8·a·R) + <strong>b</strong>, which requires your private spend key. So a shared view key reveals income yet can never move funds.</div>';
+
+                    clogHead('view-key scan');
+                    clog('scanned ' + outs.length + ' outputs with view key a, recomputed P for each, matched the wallet-owned ones');
                     out.innerHTML = html;
                     btn.disabled = false;
                 }, 25);
@@ -459,6 +507,12 @@
                     const Dpt = ed25519.add(wallet.B, ed25519.base(m));   // subaddress spend pub = B + m·G
                     const Cpt = ed25519.scalarmult(Dpt, wallet.a);        // subaddress view pub = a·D
                     const sub = buildAddress(ed25519.encode(Dpt), ed25519.encode(Cpt), 42);
+
+                    clogHead('subaddress (' + major + ', ' + minor + ')');
+                    clog('m = Hs("SubAddr" || a || major || minor)');
+                    clog('subaddr spend D = B + m*G = ' + hex(ed25519.encode(Dpt)));
+                    clog('subaddr view  C = a*D = ' + hex(ed25519.encode(Cpt)));
+                    clog('subaddress = ' + sub);
                     out.innerHTML =
                         '<div class="step"><span class="label">Main address:</span> <span class="mono">' + shorten(wallet.address) + '</span></div>' +
                         '<div class="step"><span class="label">Subaddress (' + major + ', ' + minor + '):</span><br/><span class="mono">' + sub + '</span></div>' +
@@ -500,6 +554,9 @@
                     html += '<div style="display:flex; align-items:center; gap:8px; margin:2px 0;"><span style="flex:0 0 52px; font-family:monospace; font-size:0.85em;">' + labels[i] + '</span><span style="flex:1 1 auto; min-width:0;"><span style="display:block; height:14px; width:' + pct + '%; background:#5271ff;"></span></span><span class="muted" style="flex:0 0 auto; font-size:0.85em;">' + bins[i] + '</span></div>';
                 }
                 html += '<div style="margin-top:8px;">Most decoys are recent, matching how people actually spend, with a realistic long tail. Your real output sits inside this same distribution, so it does not stand out.</div>';
+
+                clogHead('decoy selection');
+                clog('sampled ' + N + ' decoy ages from a gamma distribution (shape ' + SHAPE + ', rate ' + RATE + ')');
                 out.innerHTML = html;
             });
 
@@ -517,6 +574,11 @@
                     let acc = [0n, 1n];
                     for (let i = 0; i < 8; i++) acc = ed25519.add(acc, commit(((v >> i) & 1) * Math.pow(2, i), blinds[i]));
                     const okMatch = hex(ed25519.encode(acc)) === hex(ed25519.encode(Cv));
+
+                    clogHead('range proof (amount ' + v + ')');
+                    clog('bits = ' + v.toString(2).padStart(8, '0'));
+                    clog('sum of 8 bit-commitments = ' + hex(ed25519.encode(acc)));
+                    clog('commitment to the amount = ' + hex(ed25519.encode(Cv)) + (okMatch ? '  [match]' : '  [mismatch]'));
                     out.innerHTML =
                         '<div class="step"><span class="label">Amount ' + v + ' in bits:</span> <span class="mono">' + v.toString(2).padStart(8, '0') + '</span></div>' +
                         '<div class="step"><span class="label">Sum of the 8 bit-commitments:</span><br/><span class="mono">' + shorten(hex(ed25519.encode(acc))) + '</span></div>' +
@@ -546,6 +608,14 @@
                     const Cin = commit(10, ain), Cpay = commit(7, ao1), Cchg = commit(2, ao2), Cfee = commit(1, 0n);
                     const outsTotal = ed25519.add(ed25519.add(Cpay, Cchg), Cfee);
                     const balanced = hex(ed25519.encode(ed25519.add(Cin, ed25519.negate(outsTotal)))) === IDENTITY_HEX;
+
+                    clogHead('full transaction');
+                    clog('input output key P = ' + hex(Pin));
+                    clog('input key image I = ' + I);
+                    clog('tx public key R = ' + hex(ed25519.encode(R)));
+                    clog('stealth output P = ' + hex(Pout));
+                    clog('C(input) = ' + hex(ed25519.encode(Cin)));
+                    clog('C(outs)  = ' + hex(ed25519.encode(outsTotal)) + (balanced ? '  [balanced]' : '  [unbalanced]'));
                     out.innerHTML =
                         '<div class="step"><strong>Input being spent (hidden in a ring of 16):</strong></div>' +
                         '<div class="step"><span class="label">output key P:</span> <span class="mono">' + shorten(hex(Pin)) + '</span></div>' +
@@ -564,8 +634,9 @@
         </script>
         <hr/>
         <p style="font-size: 0.9em; color: gray; text-align:center;">This page is for education. The demo keys it generates are illustration only and must never be used for real funds.</p>
-        <footer>
-            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>.<br/>This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>, with code under <a href="https://github.com/Tech1k/cyphertoshi.com/blob/master/LICENSE" target="_blank" rel="noopener">MIT</a> and words under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.<br/>You can <a href="/donate">support it</a> with Monero.</p>
-        </footer>
+            <footer>
+                <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>.<br/>This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>, with code under <a href="https://github.com/Tech1k/cyphertoshi.com/blob/master/LICENSE" target="_blank" rel="noopener">MIT</a> and words under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.<br/>You can <a href="/donate">support it</a> with Monero.</p>
+            </footer>
+        </main>
     </body>
 </html>

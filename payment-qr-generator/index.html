@@ -21,27 +21,28 @@
         <meta property="og:image:width" content="1200"/>
         <meta property="og:image:height" content="630"/>
         <meta property="og:url" content="https://cyphertoshi.com/payment-qr-generator"/>
-        <meta property="og:site_name" content="Crypto Payment QR Generator"/>
+        <meta property="og:site_name" content="CypherToshi"/>
         <meta name="twitter:card" content="summary_large_image"/>
         <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
         <meta name="twitter:title" content="Crypto Payment QR Generator"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to generate Monero, Bitcoin, and Litecoin payment URIs and scannable QR codes."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=1">
-        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Crypto Payment QR Generator","description":"Generate Monero, Bitcoin, and Litecoin payment URIs and scannable QR codes.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/payment-qr-generator/","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
+        <link rel="stylesheet" href="/assets/tool.css?v=2">
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Crypto Payment QR Generator","description":"Generate Monero, Bitcoin, and Litecoin payment URIs and scannable QR codes.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/payment-qr-generator","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
-    <body id="main">
+    <body>
+        <main id="main">
         <h1>Crypto Payment QR Generator</h1>
         <p>A simple, open-source, client-side tool to generate a payment URI and scannable QR code for Monero, Bitcoin, or Litecoin. Nothing leaves your browser.</p>
 
         <div style="text-align:center;">
-            <h3>
+            <nav class="sitenav" aria-label="Primary">
                 <a href="/">Home</a> |
                 <a href="/links">Links</a> |
                 <a href="/notes">Notes</a> |
                 <a href="/tools">Toolkit</a> |
                 <a href="/contact">Contact</a>
-            </h3>
+            </nav>
         </div>
         <hr/>
 
@@ -137,6 +138,8 @@
                 canvas.style.maxWidth = '100%';
                 canvas.style.height = 'auto';
                 canvas.style.imageRendering = 'pixelated';
+                canvas.setAttribute('role', 'img');
+                canvas.setAttribute('aria-label', 'Payment QR code');
                 return canvas;
             }
 
@@ -332,7 +335,7 @@
             <p>A payment URI is a link like <code>monero:&lt;address&gt;?tx_amount=0.5</code> (or <code>bitcoin:&lt;address&gt;?amount=0.5</code> following BIP21). Wallets recognize these to pre-fill a payment. The amount, name, and description fields are optional.</p>
 
             <h3>Does it check that my address is valid?</h3>
-            <p>It runs a sanity check and warns you if something looks off. Monero addresses are fully checksum-verified; Bitcoin and Litecoin get a looser format check. The warning never blocks you, so always double-check the address yourself. You can also fully verify a Monero address with the <a href="/monero-address-validator/">Monero address validator</a>.</p>
+            <p>It runs a sanity check and warns you if something looks off. Monero addresses are fully checksum-verified; Bitcoin and Litecoin get a looser format check. The warning never blocks you, so always double-check the address yourself. You can also fully verify a Monero address with the <a href="/monero-address-validator">Monero address validator</a>.</p>
 
             <h3>Is the amount in whole coins?</h3>
             <p>Yes. Enter the amount in whole units (XMR, BTC, or LTC), e.g. <code>0.5</code>, not in atomic units like piconero or satoshis.</p>
@@ -350,11 +353,13 @@
             <p>Yes. After you generate a QR, use the <strong>Copy link</strong> button to get a URL that opens this page pre-filled and ready to scan. Hand it to someone and they land on a ready payment. You can also build one by hand with URL parameters, e.g. <code>?coin=monero&amp;address=...&amp;amount=0.1&amp;label=Name&amp;message=Note</code>.</p>
 
             <h3>Can I pay an OpenAlias address?</h3>
-            <p>Yes. Use <a href="/openalias-pay/">OpenAlias Pay</a>, which resolves an OpenAlias name (like <code>donate@getmonero.org</code>) to its address and builds the QR for you.</p>
+            <p>Yes. Use <a href="/openalias-pay">OpenAlias Pay</a>, which resolves an OpenAlias name (like <code>donate@getmonero.org</code>) to its address and builds the QR for you.</p>
 
             <h3>Do you log anything I enter?</h3>
             <p>No. This site is a static page that runs entirely client-side. The address, amount, and QR are generated in your browser and never sent anywhere, so it works offline.</p>
 
+            <h3>Can I share a prefilled QR link?</h3>
+            <p>Yes. Use the <strong>Copy link</strong> button after generating a QR to get a URL that reopens the tool with the coin, address, amount, and other fields prefilled.</p>
             <h3>Is this site open source?</h3>
             <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/payment-qr-generator" target="_blank" rel="noopener noreferrer">GitHub</a>. QR codes are rendered with the open-source <a href="https://github.com/kazuhikoarase/qrcode-generator" target="_blank" rel="noopener noreferrer">qrcode-generator</a> library (MIT), self-hosted on this site.</p>
         </section>
@@ -364,8 +369,9 @@
         </p>
         <br/>
         <hr/>
-        <footer>
-            <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>.<br/>This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>, with code under <a href="https://github.com/Tech1k/cyphertoshi.com/blob/master/LICENSE" target="_blank" rel="noopener">MIT</a> and words under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.<br/>You can <a href="/donate">support it</a> with Monero.</p>
-        </footer>
+            <footer>
+                <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>.<br/>This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>, with code under <a href="https://github.com/Tech1k/cyphertoshi.com/blob/master/LICENSE" target="_blank" rel="noopener">MIT</a> and words under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.<br/>You can <a href="/donate">support it</a> with Monero.</p>
+            </footer>
+        </main>
     </body>
 </html>

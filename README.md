@@ -12,8 +12,8 @@ Live on the clearnet and Tor:
 - How Monero Works: an interactive explainer with live cryptography
 - Monero: address validator, integrated address generator, mnemonic tool, node config generator
 - OpenAlias: checker, generator, pay
-- Crypto: payment QR generator, unit converter
-- Security and self-hosting: Diceware passphrase generator, Tor config generator, SSH hardening generator
+- Crypto: payment QR generator, payment URI decoder, unit converter
+- Security and self-hosting: file checksum verifier, Diceware passphrase generator, Tor config generator, SSH hardening generator
 
 ## Verifying the cryptography
 
@@ -28,6 +28,7 @@ The cryptographic code (Keccak-256, ed25519, and the Monero address, mnemonic, k
 
 - EFF long word list (EFF, CC BY 3.0 US)
 - qrcode-generator (Kazuhiko Arase, MIT)
+- BLAKE2b ported from blakejs (dcposch, public domain)
 - Inter font (SIL Open Font License)
 - Monero English word list and test vectors (The Monero Project)
 - ed25519 hash-to-point ported from mininero (The Monero Project)
