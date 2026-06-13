@@ -28,11 +28,15 @@
         <meta name="twitter:description" content="Support CypherToshi with Monero. Send to the OpenAlias donate@cyphertoshi.com or scan the QR code."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
         <link rel="stylesheet" href="/assets/tool.css?v=3">
+        <style>
+            #main { width: 50%; }
+            @media (max-width: 992px) { #main { width: 85%; } }
+        </style>
     </head>
     <body>
         <main id="main">
         <h1>Support CypherToshi</h1>
-        <p>Everything here is free, open-source, and runs entirely in your browser. If the tools and guides are useful to you, a Monero tip helps keep the site online and ad-free. Thank you.</p>
+        <p>Everything here is free, open-source, and runs entirely in your browser. If the tools and guides are useful to you, a Monero tip helps keep it online. Thank you.</p>
 
         <div style="text-align:center;">
             <nav class="sitenav" aria-label="Primary">
@@ -50,8 +54,20 @@
             <p><strong>Monero address:</strong></p>
             <p><code id="addr" style="word-break: break-word;"><a href="monero:89Dz4DkAskRDH6BMnQheh3iVpiRNzjLZA5qq7EPto5zaduDrQ5T3fB9UU1qU6p8acN52QvMLXLa65e6xTTNkiC7fN8FrtQK">89Dz4DkAskRDH6BMnQheh3iVpiRNzjLZA5qq7EPto5zaduDrQ5T3fB9UU1qU6p8acN52QvMLXLa65e6xTTNkiC7fN8FrtQK</a></code></p>
             <p><button type="button" class="copy" onclick="copyFrom('addr', this)">Copy address</button></p>
-            <p>Or scan to pay from a mobile wallet:</p>
+            <p>Or scan it with a mobile wallet:</p>
             <div id="qrBox" style="display:inline-block; line-height:0; max-width:200px; overflow-x:auto;"></div>
+        </section>
+        <section>
+            <h2>What your support does</h2>
+            <p>There are no ads, trackers, or paywalls here, and there never will be. Tips go toward hosting and the time spent building and maintaining everything here. Anything is appreciated, and nothing on this site is ever locked behind a donation.</p>
+        </section>
+        <section>
+            <h2>Other ways to help</h2>
+            <ul>
+                <li class="listlink">Share the site, or a specific tool, with someone who would find it useful.</li>
+                <li class="listlink">Report a bug or suggest a tool on the <a href="/contact">contact page</a>.</li>
+                <li class="listlink">Read, audit, or improve the code on <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">GitHub</a>.</li>
+            </ul>
         </section>
         <hr/>
             <footer>
