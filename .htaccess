@@ -13,13 +13,11 @@ AddDefaultCharset utf-8
 </IfModule>
 
 <IfModule mod_headers.c>
+    # X-Frame-Options, Permissions-Policy and HSTS are set by the host already; only add what it doesn't.
     Header set X-Content-Type-Options "nosniff"
     Header set Referrer-Policy "no-referrer"
-    Header set X-Frame-Options "DENY"
     Header set Cross-Origin-Opener-Policy "same-origin"
-    Header set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
     <If "%{HTTP_HOST} !~ /\.onion$/">
-        Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains"
         Header set Onion-Location "expr=http://d7w3gz2atjwmvxtjr32j4rwskgro7vsyxvzt4l2bivcrtbos3drkjcqd.onion%{REQUEST_URI}"
     </If>
 </IfModule>
