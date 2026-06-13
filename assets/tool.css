@@ -16,7 +16,7 @@ a {
 }
 
 a:visited {
-    color: darkcyan;
+    color: #7a9cc4;
 }
 
 #main {
@@ -75,16 +75,33 @@ pre.result {
 	font-family: monospace;
 }
 
-input[type="submit"] {
-	padding: 10px 15px;
-	font-size: 16px;
+input[type="submit"], button[type="button"] {
+	font-family: inherit;
+	background-color: #0f5ea4;
+	border: 1px solid #0f5ea4;
+	color: #ffffff;
+	font-weight: bold;
+	border-radius: 4px;
+	padding: 0.6em 1.1em;
+	font-size: 1rem;
 	cursor: pointer;
+	transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-button[type="button"] {
-	padding: 10px 15px;
-	font-size: 16px;
-	cursor: pointer;
+input[type="submit"]:hover, button[type="button"]:hover {
+	background-color: #0c4f8a;
+	border-color: #0c4f8a;
+}
+
+input[type="submit"]:disabled, button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+button.copy {
+	padding: 0.3em 0.8em;
+	font-size: 0.85em;
+	font-weight: normal;
 }
 
 .result {

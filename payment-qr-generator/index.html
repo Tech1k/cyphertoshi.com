@@ -27,7 +27,7 @@
         <meta name="twitter:title" content="Crypto Payment QR Generator"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to generate Monero, Bitcoin, and Litecoin payment URIs and scannable QR codes."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=2">
+        <link rel="stylesheet" href="/assets/tool.css?v=3">
         <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Crypto Payment QR Generator","description":"Generate Monero, Bitcoin, and Litecoin payment URIs and scannable QR codes.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/payment-qr-generator","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body>
@@ -230,14 +230,14 @@
                     warnHtml +
                     `<p><strong>Payment URI:</strong></p>` +
                     `<code id="uriOut" style="word-break: break-word;">${escapeHtml(uri)}</code>` +
-                    `<br/><br/><button type="button" onclick="copyURI()">Copy URI</button>` +
+                    `<br/><br/><button type="button" class="copy" onclick="copyURI()">Copy URI</button>` +
                     `<p><strong>QR code</strong> (scan with a compatible wallet):</p>` +
                     `<div id="qrBox" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>` +
-                    `<br/><br/><button type="button" onclick="downloadQR()">Download QR (PNG)</button> ` +
-                    `<button type="button" onclick="copyQRImage()">Copy QR</button>` +
+                    `<br/><br/><button type="button" class="copy" onclick="downloadQR()">Download QR (PNG)</button> ` +
+                    `<button type="button" class="copy" onclick="copyQRImage()">Copy QR</button>` +
                     `<p><strong>Shareable link</strong> (opens this page pre-filled and ready to scan):</p>` +
                     `<code id="shareOut" style="word-break: break-word;">${escapeHtml(shareUrl)}</code>` +
-                    `<br/><br/><button type="button" onclick="copyShareLink()">Copy link</button>`;
+                    `<br/><br/><button type="button" class="copy" onclick="copyShareLink()">Copy link</button>`;
                 document.getElementById('qrBox').appendChild(canvas);
                 if (wantLogo) drawLogo(canvas, ICONS[coin]);
             });

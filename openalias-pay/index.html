@@ -27,7 +27,7 @@
         <meta name="twitter:title" content="OpenAlias Pay"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to resolve an OpenAlias address and generate a payment URI and scannable QR code."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=2">
+        <link rel="stylesheet" href="/assets/tool.css?v=3">
         <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"OpenAlias Pay","description":"Resolve an OpenAlias address and generate a payment URI and QR code.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/openalias-pay","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body>
@@ -55,7 +55,7 @@
             <input type="text" id="amount" placeholder="e.g. 0.5">
             <br/><br/>
             <input type="submit" value="Resolve &amp; Generate">
-            <button type="button" id="copyLink">Copy link</button>
+            <button type="button" class="copy" id="copyLink">Copy link</button>
         </form>
 
         <div id="output" class="result"></div>
@@ -200,10 +200,10 @@
                         html += `<div style="margin-bottom: 28px;">`;
                         html += `<strong>Asset:</strong> ${escapeHtml(rec.asset.toUpperCase())}<br/>`;
                         if (rec.recipient_name) html += `<strong>Recipient:</strong> ${escapeHtml(rec.recipient_name)}<br/>`;
-                        html += `<strong>Address:</strong> <code id="payAddr${i}" style="word-break: break-word;">${escapeHtml(rec.recipient_address)}</code> <button type="button" onclick="copyFrom('payAddr${i}', this)">Copy</button><br/><br/>`;
-                        html += `<strong>Payment URI:</strong><br/><code id="payUri${i}" style="word-break: break-word;">${escapeHtml(uri)}</code> <button type="button" onclick="copyFrom('payUri${i}', this)">Copy</button><br/><br/>`;
+                        html += `<strong>Address:</strong> <code id="payAddr${i}" style="word-break: break-word;">${escapeHtml(rec.recipient_address)}</code> <button type="button" class="copy" onclick="copyFrom('payAddr${i}', this)">Copy</button><br/><br/>`;
+                        html += `<strong>Payment URI:</strong><br/><code id="payUri${i}" style="word-break: break-word;">${escapeHtml(uri)}</code> <button type="button" class="copy" onclick="copyFrom('payUri${i}', this)">Copy</button><br/><br/>`;
                         html += `<div id="qrBox${i}" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>`;
-                        html += `<br/><br/><button type="button" onclick="downloadQR(${i})">Download QR (PNG)</button>`;
+                        html += `<br/><br/><button type="button" class="copy" onclick="downloadQR(${i})">Download QR (PNG)</button>`;
                         html += `</div>`;
                     });
 

@@ -42,7 +42,7 @@ var moneroMnemonic = (function () {
         return { seed: out };
     }
 
-    // --- ed25519 reference (BigInt) ---
+    // ed25519 reference (BigInt)
     const Q = (1n << 255n) - 19n;
     const ORDER = (1n << 252n) + 27742317777372353535851937790883648493n;
     function mod(a, m) { a %= m; return a < 0n ? a + m : a; }

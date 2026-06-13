@@ -27,7 +27,7 @@
         <meta name="twitter:title" content="Monero Node Config Generator"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to generate a monerod.conf configuration file for running your own Monero node."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=2">
+        <link rel="stylesheet" href="/assets/tool.css?v=3">
         <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Monero Node Config Generator","description":"Generate a monerod.conf configuration for your Monero node.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/monero-node-config-generator","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body>
@@ -314,8 +314,8 @@
 
                 output.innerHTML = '<p><strong>Your monerod.conf:</strong></p>' +
                     '<pre class="result" id="confOutput" style="display:block;">' + escapeHtml(conf) + '</pre>' +
-                    '<button type="button" onclick="copyToClipboard()">Copy config</button> ' +
-                    '<button type="button" onclick="downloadConf()">Download monerod.conf</button>' +
+                    '<button type="button" class="copy" onclick="copyToClipboard()">Copy config</button> ' +
+                    '<button type="button" class="copy" onclick="downloadConf()">Download monerod.conf</button>' +
                     '<p>Save this as <code>monerod.conf</code> and start your node with ' +
                     '<code>monerod --config-file /path/to/monerod.conf</code>. ' +
                     'If you run a public node, remember to open your P2P (and restricted RPC) port on your firewall/router.</p>';

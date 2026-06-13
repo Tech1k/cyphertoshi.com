@@ -27,7 +27,7 @@
         <meta name="twitter:title" content="File Checksum Verifier"/>
         <meta name="twitter:description" content="Compute SHA-256, SHA-384, SHA-512, and BLAKE2b checksums of a file and compare to a published hash."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=2">
+        <link rel="stylesheet" href="/assets/tool.css?v=3">
         <style>
             #drop { border: 2px dashed #4a4a4a; border-radius: 8px; padding: 26px 16px; text-align: center; color: #aaa; cursor: pointer; }
             #drop.over { border-color: #5271ff; color: #ddd; background: #2b2b33; }
@@ -65,10 +65,10 @@
         <div id="fileInfo" class="muted" style="margin-top:12px;"></div>
 
         <div id="results" style="display:none;">
-            <div class="hashrow" id="row-sha256"><span class="algo">SHA-256</span><br/><code id="hash-sha256"></code> <button type="button" onclick="copyHash('sha256', this)">Copy</button></div>
-            <div class="hashrow" id="row-sha384"><span class="algo">SHA-384</span><br/><code id="hash-sha384"></code> <button type="button" onclick="copyHash('sha384', this)">Copy</button></div>
-            <div class="hashrow" id="row-sha512"><span class="algo">SHA-512</span><br/><code id="hash-sha512"></code> <button type="button" onclick="copyHash('sha512', this)">Copy</button></div>
-            <div class="hashrow" id="row-blake2b"><span class="algo">BLAKE2b-512</span><br/><code id="hash-blake2b"></code> <button type="button" onclick="copyHash('blake2b', this)">Copy</button></div>
+            <div class="hashrow" id="row-sha256"><span class="algo">SHA-256</span><br/><code id="hash-sha256"></code> <button type="button" class="copy" onclick="copyHash('sha256', this)">Copy</button></div>
+            <div class="hashrow" id="row-sha384"><span class="algo">SHA-384</span><br/><code id="hash-sha384"></code> <button type="button" class="copy" onclick="copyHash('sha384', this)">Copy</button></div>
+            <div class="hashrow" id="row-sha512"><span class="algo">SHA-512</span><br/><code id="hash-sha512"></code> <button type="button" class="copy" onclick="copyHash('sha512', this)">Copy</button></div>
+            <div class="hashrow" id="row-blake2b"><span class="algo">BLAKE2b-512</span><br/><code id="hash-blake2b"></code> <button type="button" class="copy" onclick="copyHash('blake2b', this)">Copy</button></div>
 
             <hr/>
             <label for="compareInput"><strong>Compare to a published hash:</strong></label><br/>

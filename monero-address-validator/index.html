@@ -27,7 +27,7 @@
         <meta name="twitter:title" content="Monero Address Validator"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to validate Monero addresses, verify their checksum, and identify the address type and network."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=2">
+        <link rel="stylesheet" href="/assets/tool.css?v=3">
         <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Monero Address Validator","description":"Validate a Monero address and identify its type and network.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/monero-address-validator","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body>
@@ -50,7 +50,7 @@
             <label for="addrInput">Monero address:</label><br/>
             <input type="text" id="addrInput" placeholder="4... / 8... / 5... (stagenet) / 9... (testnet)" required>
             <input type="submit" value="Validate Address">
-            <button type="button" id="copyLink">Copy link</button>
+            <button type="button" class="copy" id="copyLink">Copy link</button>
         </form>
 
         <div id="output" class="result"></div>

@@ -27,7 +27,7 @@
         <meta name="twitter:title" content="SSH Hardening Generator"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to generate a hardened sshd_config for your SSH server."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=2">
+        <link rel="stylesheet" href="/assets/tool.css?v=3">
         <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"SSH Hardening Generator","description":"Generate a hardened sshd_config for your SSH server.","applicationCategory":"SecurityApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/ssh-hardening-generator","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body>
@@ -144,8 +144,8 @@
                 output.innerHTML =
                     '<p><strong>Your sshd_config:</strong></p>' +
                     '<pre class="result" id="confOutput" style="display:block; white-space:pre-wrap;">' + escapeHtml(conf) + '</pre>' +
-                    '<button type="button" onclick="copyConf()">Copy config</button> ' +
-                    '<button type="button" onclick="downloadConf()">Download sshd_config</button>' +
+                    '<button type="button" class="copy" onclick="copyConf()">Copy config</button> ' +
+                    '<button type="button" class="copy" onclick="downloadConf()">Download sshd_config</button>' +
                     '<p><strong>Important:</strong> before reloading SSH, open a second session and confirm you can still log in (especially after disabling passwords). A lockout is hard to undo on a remote machine. Place this in <code>/etc/ssh/sshd_config</code> or a drop-in under <code>/etc/ssh/sshd_config.d/</code>.</p>';
             });
 

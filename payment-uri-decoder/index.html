@@ -27,7 +27,7 @@
         <meta name="twitter:title" content="Crypto Payment URI Decoder"/>
         <meta name="twitter:description" content="Decode Monero, Bitcoin, and Litecoin payment URIs into their address, amount, and other fields."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=2">
+        <link rel="stylesheet" href="/assets/tool.css?v=3">
         <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Crypto Payment URI Decoder","description":"Decode Monero, Bitcoin, and Litecoin payment URIs into their fields.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/payment-uri-decoder","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body>
@@ -50,7 +50,7 @@
             <label for="uriInput">Payment URI:</label><br/>
             <input type="text" id="uriInput" placeholder="monero:8...?tx_amount=0.5&amp;recipient_name=CypherToshi" required>
             <input type="submit" value="Decode URI">
-            <button type="button" id="copyLink">Copy link</button>
+            <button type="button" class="copy" id="copyLink">Copy link</button>
         </form>
 
         <div id="output" class="result"></div>
@@ -106,7 +106,7 @@
                 const unit = UNITS[scheme] || '';
                 let html = `<div class="valid"><strong>Decoded payment URI</strong><br/><br/>`;
                 html += `<strong>Scheme:</strong> ${escapeHtml(scheme)}${UNITS[scheme] ? ' (' + UNITS[scheme] + ')' : ''}<br/>`;
-                html += `<strong>Address:</strong> <code id="decodedAddr" style="word-break: break-word;">${escapeHtml(address)}</code> <button type="button" onclick="copyFrom('decodedAddr', this)">Copy</button><br/>`;
+                html += `<strong>Address:</strong> <code id="decodedAddr" style="word-break: break-word;">${escapeHtml(address)}</code> <button type="button" class="copy" onclick="copyFrom('decodedAddr', this)">Copy</button><br/>`;
 
                 // Validate the Monero address against our own library.
                 if (scheme === 'monero' && address) {

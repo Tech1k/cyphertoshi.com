@@ -27,7 +27,7 @@
         <meta name="twitter:title" content="Diceware Passphrase Generator"/>
         <meta name="twitter:description" content="A simple, open-source, client-side Diceware passphrase generator using the EFF word list and your browser's secure random generator."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=2">
+        <link rel="stylesheet" href="/assets/tool.css?v=3">
         <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Diceware Passphrase Generator","description":"Generate strong Diceware passphrases from the EFF word list, fully in your browser.","applicationCategory":"SecurityApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/passphrase-generator","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body>
@@ -105,7 +105,7 @@
                 output.innerHTML =
                     '<p><strong>Your passphrase:</strong></p>' +
                     '<code id="phraseOut" style="font-size:1.25em; word-break:break-word;">' + escapeHtml(phrase) + '</code>' +
-                    '<br/><br/><button type="button" onclick="copyPhrase()">Copy</button> ' +
+                    '<br/><br/><button type="button" class="copy" onclick="copyPhrase()">Copy</button> ' +
                     '<button type="button" onclick="generate()">Regenerate</button>' +
                     '<p class="muted">About ' + Math.round(bits) + ' bits of entropy from ' + count + ' words. Strength: <span style="color:' + color + '">' + label + '</span>.</p>';
             }

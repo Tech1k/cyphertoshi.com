@@ -27,7 +27,7 @@
         <meta name="twitter:title" content="Monero Mnemonic Tool"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to validate a Monero 25-word seed and derive its private keys and primary address. Works fully offline."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=2">
+        <link rel="stylesheet" href="/assets/tool.css?v=3">
         <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Monero Mnemonic Tool","description":"Validate a Monero 25-word seed and derive its keys and primary address.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/monero-mnemonic","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body>
@@ -104,7 +104,7 @@
                     let html = `<div class="valid"><strong>✅ Valid seed (${escapeHtml(NETWORKS[prefix])})</strong></div><br/>`;
                     html += `<p><strong>Primary address:</strong></p>`;
                     html += `<code id="addrOut" style="word-break: break-word;">${escapeHtml(r.address)}</code>`;
-                    html += `<br/><br/><button type="button" onclick="copyAddr()">Copy address</button>`;
+                    html += `<br/><br/><button type="button" class="copy" onclick="copyAddr()">Copy address</button>`;
                     html += `<p style="margin-top:24px; color:#e0a0a0;"><strong>⚠️ Private keys (keep these secret):</strong></p>`;
                     html += `<strong>Private spend key:</strong><br/><code style="word-break: break-word;">${escapeHtml(r.spendSecret)}</code><br/><br/>`;
                     html += `<strong>Private view key:</strong><br/><code style="word-break: break-word;">${escapeHtml(r.viewSecret)}</code>`;

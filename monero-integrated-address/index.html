@@ -27,7 +27,7 @@
         <meta name="twitter:title" content="Monero Integrated Address Generator"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to generate a Monero integrated address from a standard address and an 8-byte payment ID."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=2">
+        <link rel="stylesheet" href="/assets/tool.css?v=3">
         <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Monero Integrated Address Generator","description":"Create a Monero integrated address from a standard address and a payment ID.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/monero-integrated-address","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body>
@@ -157,12 +157,12 @@
                     `<div class="valid"><strong>✅ Integrated address (${escapeHtml(res.network)})</strong></div><br/>` +
                     `<p><strong>Integrated address:</strong></p>` +
                     `<code id="intOut" style="word-break: break-word;">${escapeHtml(integrated)}</code>` +
-                    `<br/><br/><button type="button" onclick="copyAddr()">Copy address</button>` +
+                    `<br/><br/><button type="button" class="copy" onclick="copyAddr()">Copy address</button>` +
                     `<p><strong>Payment ID used:</strong> <code style="word-break: break-word;">${escapeHtml(pidHex)}</code></p>` +
                     `<p><strong>QR code</strong> (scan with a compatible wallet):</p>` +
                     `<div id="qrBox" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>` +
-                    `<br/><br/><button type="button" onclick="downloadQR()">Download QR (PNG)</button> ` +
-                    `<button type="button" onclick="copyQRImage()">Copy QR</button>`;
+                    `<br/><br/><button type="button" class="copy" onclick="downloadQR()">Download QR (PNG)</button> ` +
+                    `<button type="button" class="copy" onclick="copyQRImage()">Copy QR</button>`;
                 document.getElementById('qrBox').appendChild(canvas);
                 drawLogo(canvas, '/assets/monero.png');
             });

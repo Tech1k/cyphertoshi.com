@@ -27,7 +27,7 @@
         <meta name="twitter:title" content="OpenAlias Checker"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to check OpenAlias configurations."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=2">
+        <link rel="stylesheet" href="/assets/tool.css?v=3">
         <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"OpenAlias Checker","description":"Verify a domain's OpenAlias configuration in your browser.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/openalias-checker","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body>
@@ -51,7 +51,7 @@
             <label for="domainInput">Domain name:</label><br/>
             <input type="text" id="domainInput" placeholder="cyphertoshi.com" required>
             <input type="submit" value="Check OpenAlias">
-            <button type="button" id="copyLink">Copy link</button>
+            <button type="button" class="copy" id="copyLink">Copy link</button>
         </form>
 
         <div id="output" class="result"></div>
@@ -145,7 +145,7 @@
                                 if (k === 'oa1') return;
                                 if (k === 'recipient_address') {
                                     const aid = 'oaAddr' + idx;
-                                    html += `<strong>${escapeHtml(k)}:</strong> <code id="${aid}" style="word-break: break-word;">${escapeHtml(rec[k])}</code> <button type="button" onclick="copyFrom('${aid}', this)">Copy</button><br>`;
+                                    html += `<strong>${escapeHtml(k)}:</strong> <code id="${aid}" style="word-break: break-word;">${escapeHtml(rec[k])}</code> <button type="button" class="copy" onclick="copyFrom('${aid}', this)">Copy</button><br>`;
                                 } else {
                                     html += `<strong>${escapeHtml(k)}:</strong> ${escapeHtml(rec[k])}<br>`;
                                 }

@@ -27,7 +27,7 @@
         <meta name="twitter:title" content="Support | CypherToshi"/>
         <meta name="twitter:description" content="Support CypherToshi with Monero. Send to the OpenAlias donate@cyphertoshi.com or scan the QR code."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=2">
+        <link rel="stylesheet" href="/assets/tool.css?v=3">
     </head>
     <body>
         <main id="main">
@@ -45,11 +45,11 @@
         </div>
         <hr/>
         <section>
-            <p><strong>OpenAlias:</strong> <code id="alias">donate@cyphertoshi.com</code> <button type="button" onclick="copyFrom('alias', this)">Copy</button></p>
-            <p>Type the alias into any <a href="/posts/openalias-wallets">OpenAlias-aware wallet</a> and it resolves to the address below. You can <a href="/openalias-checker">verify it yourself</a> first.</p>
+            <p><strong>OpenAlias:</strong> <code id="alias">donate@cyphertoshi.com</code> <button type="button" class="copy" onclick="copyFrom('alias', this)">Copy</button></p>
+            <p>Type the alias into any <a href="/posts/openalias-wallets">OpenAlias-aware wallet</a> and it resolves to the address below. You can <a href="/openalias-checker?domain=donate%40cyphertoshi.com">verify it yourself</a> first.</p>
             <p><strong>Monero address:</strong></p>
             <p><code id="addr" style="word-break: break-word;"><a href="monero:89Dz4DkAskRDH6BMnQheh3iVpiRNzjLZA5qq7EPto5zaduDrQ5T3fB9UU1qU6p8acN52QvMLXLa65e6xTTNkiC7fN8FrtQK">89Dz4DkAskRDH6BMnQheh3iVpiRNzjLZA5qq7EPto5zaduDrQ5T3fB9UU1qU6p8acN52QvMLXLa65e6xTTNkiC7fN8FrtQK</a></code></p>
-            <p><button type="button" onclick="copyFrom('addr', this)">Copy address</button></p>
+            <p><button type="button" class="copy" onclick="copyFrom('addr', this)">Copy address</button></p>
             <p>Or scan to pay from a mobile wallet:</p>
             <div id="qrBox" style="display:inline-block; line-height:0; max-width:200px; overflow-x:auto;"></div>
         </section>

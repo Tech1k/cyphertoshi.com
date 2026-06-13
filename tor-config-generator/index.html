@@ -27,7 +27,7 @@
         <meta name="twitter:title" content="Tor Config Generator"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to generate a torrc configuration for a Tor client, relay, bridge, or onion service."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=2">
+        <link rel="stylesheet" href="/assets/tool.css?v=3">
         <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Tor Config Generator","description":"Generate a torrc configuration for a Tor client, relay, bridge, or onion service.","applicationCategory":"SecurityApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/tor-config-generator","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body>
@@ -180,8 +180,8 @@
                 output.innerHTML =
                     '<p><strong>Your torrc:</strong></p>' +
                     '<pre class="result" id="confOutput" style="display:block; white-space:pre-wrap;">' + escapeHtml(conf) + '</pre>' +
-                    '<button type="button" onclick="copyConf()">Copy config</button> ' +
-                    '<button type="button" onclick="downloadConf()">Download torrc</button>' +
+                    '<button type="button" class="copy" onclick="copyConf()">Copy config</button> ' +
+                    '<button type="button" class="copy" onclick="downloadConf()">Download torrc</button>' +
                     '<p>Save this as your <code>torrc</code> (often <code>/etc/tor/torrc</code>) and restart Tor. For onion services, Tor creates the hostname file in the service directory on first start. See the <a href="https://2019.www.torproject.org/docs/tor-manual.html.en" target="_blank" rel="noopener noreferrer">Tor manual</a> for every option.</p>';
             });
 
