@@ -15,7 +15,7 @@ var coinSVG = {
     }
 };
 
-function qrToSVG(qr, coinKey, customHref) {
+function qrToSVG(qr, coinKey, customHref, transparent) {
     var count = qr.getModuleCount(), margin = 4, dim = count + margin * 2;
     var d = '';
     for (var r = 0; r < count; r++)
@@ -30,8 +30,9 @@ function qrToSVG(qr, coinKey, customHref) {
         var coin = coinKey && coinSVG[coinKey];
         if (coin) logo = '<svg x="' + pos + '" y="' + pos + '" width="' + sz + '" height="' + sz + '" viewBox="' + coin.vb + '">' + coin.inner + '</svg>';
     }
+    var bg = transparent ? '' : '<rect width="' + dim + '" height="' + dim + '" fill="#ffffff"/>';
     return '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ' + dim + ' ' + dim + '">' +
-        '<rect width="' + dim + '" height="' + dim + '" fill="#ffffff"/>' +
+        bg +
         '<path fill="#000000" shape-rendering="crispEdges" d="' + d + '"/>' + logo +
         '</svg>';
 }

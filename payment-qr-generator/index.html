@@ -28,6 +28,9 @@
         <meta name="twitter:description" content="A simple, open-source, client-side tool to generate Monero, Bitcoin, and Litecoin payment URIs and scannable QR codes."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
         <link rel="stylesheet" href="/assets/tool.css?v=3">
+        <style>
+            .qr-checker { background-color: #fff; background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 16px 16px; background-position: 0 0, 0 8px, 8px -8px, -8px 0; }
+        </style>
         <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Crypto Payment QR Generator","description":"Generate Monero, Bitcoin, and Litecoin payment URIs and scannable QR codes.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/payment-qr-generator","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body>
@@ -77,6 +80,8 @@
             <label for="logoFile">Or upload your own center icon (optional, PNG/JPG/WebP):</label><br/>
             <input type="file" id="logoFile" accept="image/png,image/jpeg,image/webp">
             <br/><br/>
+            <label class="check"><input type="checkbox" id="transparent"> Transparent background (export only; needs a light surface to scan)</label>
+            <br/><br/>
             <input type="submit" value="Generate Payment QR">
         </form>
 
@@ -88,7 +93,7 @@
         <script>
             const form = document.getElementById('payForm');
             const output = document.getElementById('output');
-            let lastCanvas = null, lastScheme = '', lastCoinKey = null, lastCustomHref = null, customIcon = null;
+            let lastCanvas = null, lastScheme = '', lastCoinKey = null, lastCustomHref = null, customIcon = null, lastTransparent = false;
 
             const escapeHtml = (s) =>
                 String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -123,7 +128,7 @@
             }
 
             // Render a QR code to a <canvas> (CSP-clean: draws modules, no image loading).
-            function renderQRCanvas(uri, ecc) {
+            function renderQRCanvas(uri, ecc, transparent) {
                 const qr = qrcode(0, ecc || 'M');
                 qr.addData(uri);
                 qr.make();
@@ -133,8 +138,10 @@
                 const canvas = document.createElement('canvas');
                 canvas.width = canvas.height = size;
                 const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, size, size);
+                if (!transparent) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, size, size);
+                }
                 ctx.fillStyle = '#000000';
                 for (let r = 0; r < count; r++)
                     for (let c = 0; c < count; c++)
@@ -239,10 +246,11 @@
                 const useCustom = !!(customIcon && customIcon.bitmap);
                 const wantCoinLogo = document.getElementById('logo').checked && !!ICONS[coin] && !useCustom;
                 const wantLogo = useCustom || wantCoinLogo;
+                const transparent = document.getElementById('transparent').checked;
 
                 let canvas;
                 try {
-                    canvas = renderQRCanvas(uri, wantLogo ? 'H' : 'M');
+                    canvas = renderQRCanvas(uri, wantLogo ? 'H' : 'M', transparent);
                 } catch (err) {
                     output.innerHTML = `<span class="error">❌ Could not generate a QR code: ${escapeHtml(err.message)}</span>`;
                     return;
@@ -251,6 +259,7 @@
                 lastScheme = s.scheme;
                 lastCoinKey = wantCoinLogo ? coin : null;
                 lastCustomHref = useCustom ? customIcon.dataURL : null;
+                lastTransparent = transparent;
 
                 const warn = addressWarning(coin, address);
                 const warnHtml = warn ? `<div class="error">⚠️ ${escapeHtml(warn)}</div><br/>` : '';
@@ -261,7 +270,7 @@
                     `<code id="uriOut" style="word-break: break-word;">${escapeHtml(uri)}</code>` +
                     `<br/><br/><button type="button" class="copy" onclick="copyURI()">Copy URI</button>` +
                     `<p><strong>QR code</strong> (scan with a compatible wallet):</p>` +
-                    `<div id="qrBox" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>` +
+                    `<div id="qrBox" class="${transparent ? 'qr-checker' : ''}" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>` +
                     `<br/><br/><button type="button" class="copy" onclick="downloadQR()">Download QR (PNG)</button> ` +
                     `<button type="button" class="copy" onclick="copyQRImage()">Copy QR</button> <button type="button" class="copy" onclick="downloadSVG()">Download SVG</button>` +
                     `<p><strong>Shareable link</strong> (opens this page pre-filled and ready to scan):</p>` +
@@ -310,7 +319,7 @@
 
             function downloadSVG() {
                 if (!lastCanvas || !lastCanvas._qr) return;
-                downloadSVGString(qrToSVG(lastCanvas._qr, lastCoinKey, lastCustomHref), (lastScheme || 'payment') + '-payment-qr.svg');
+                downloadSVGString(qrToSVG(lastCanvas._qr, lastCoinKey, lastCustomHref, lastTransparent), (lastScheme || 'payment') + '-payment-qr.svg');
             }
 
             function downloadQR() {
