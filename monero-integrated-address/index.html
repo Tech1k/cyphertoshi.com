@@ -59,6 +59,7 @@
         <div id="output" class="result"></div>
 
         <script src="/assets/qrcode.js"></script>
+        <script src="/assets/qr-export.js"></script>
         <script src="/assets/xmr-address.js"></script>
         <script>
             const form = document.getElementById('intForm');
@@ -95,6 +96,7 @@
                 canvas.style.height = 'auto';
                 canvas.setAttribute('role', 'img');
                 canvas.setAttribute('aria-label', 'Payment QR code');
+                canvas._qr = qr;
                 return canvas;
             }
 
@@ -159,7 +161,7 @@
                     `<p><strong>QR code</strong> (scan with a compatible wallet):</p>` +
                     `<div id="qrBox" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>` +
                     `<br/><br/><button type="button" class="copy" onclick="downloadQR()">Download QR (PNG)</button> ` +
-                    `<button type="button" class="copy" onclick="copyQRImage()">Copy QR</button>`;
+                    `<button type="button" class="copy" onclick="copyQRImage()">Copy QR</button> <button type="button" class="copy" onclick="downloadSVG()">Download SVG</button>`;
                 document.getElementById('qrBox').appendChild(canvas);
                 drawLogo(canvas, '/assets/monero.png?v=2');
             });
@@ -169,6 +171,11 @@
                 navigator.clipboard.writeText(text).then(() => {
                     alert('Copied the integrated address to clipboard!');
                 });
+            }
+
+            function downloadSVG() {
+                if (!lastCanvas || !lastCanvas._qr) return;
+                downloadSVGString(qrToSVG(lastCanvas._qr, 'monero'), 'monero-integrated-address-qr.svg');
             }
 
             function downloadQR() {

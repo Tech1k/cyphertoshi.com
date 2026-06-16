@@ -61,6 +61,7 @@
         <div id="output" class="result"></div>
 
         <script src="/assets/qrcode.js"></script>
+        <script src="/assets/qr-export.js"></script>
         <script>
             const form = document.getElementById('payForm');
             const output = document.getElementById('output');
@@ -134,7 +135,14 @@
                 canvas.style.height = 'auto';
                 canvas.setAttribute('role', 'img');
                 canvas.setAttribute('aria-label', 'Payment QR code');
+                canvas._qr = qr;
                 return canvas;
+            }
+
+            function downloadSVG(i) {
+                const item = qrItems[i];
+                if (!item || !item.canvas._qr) return;
+                downloadSVGString(qrToSVG(item.canvas._qr, null), 'openalias-' + (item.asset || 'payment') + '-qr.svg');
             }
 
             function downloadQR(i) {
@@ -202,7 +210,7 @@
                         html += `<strong>Address:</strong> <code id="payAddr${i}" style="word-break: break-word;">${escapeHtml(rec.recipient_address)}</code> <button type="button" class="copy" onclick="copyFrom('payAddr${i}', this)">Copy</button><br/><br/>`;
                         html += `<strong>Payment URI:</strong><br/><code id="payUri${i}" style="word-break: break-word;">${escapeHtml(uri)}</code> <button type="button" class="copy" onclick="copyFrom('payUri${i}', this)">Copy</button><br/><br/>`;
                         html += `<div id="qrBox${i}" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>`;
-                        html += `<br/><br/><button type="button" class="copy" onclick="downloadQR(${i})">Download QR (PNG)</button>`;
+                        html += `<br/><br/><button type="button" class="copy" onclick="downloadQR(${i})">Download QR (PNG)</button> <button type="button" class="copy" onclick="downloadSVG(${i})">Download SVG</button>`;
                         html += `</div>`;
                     });
 

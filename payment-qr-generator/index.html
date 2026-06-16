@@ -74,17 +74,21 @@
             <br/><br/>
             <label class="check"><input type="checkbox" id="logo" checked> Add the coin logo to the center of the QR (predefined coins only)</label>
             <br/><br/>
+            <label for="logoFile">Or upload your own center icon (optional, PNG/JPG/WebP):</label><br/>
+            <input type="file" id="logoFile" accept="image/png,image/jpeg,image/webp">
+            <br/><br/>
             <input type="submit" value="Generate Payment QR">
         </form>
 
         <div id="output" class="result"></div>
 
         <script src="/assets/qrcode.js"></script>
+        <script src="/assets/qr-export.js"></script>
         <script src="/assets/xmr-address.js"></script>
         <script>
             const form = document.getElementById('payForm');
             const output = document.getElementById('output');
-            let lastCanvas = null, lastScheme = '';
+            let lastCanvas = null, lastScheme = '', lastCoinKey = null, lastCustomHref = null, customIcon = null;
 
             const escapeHtml = (s) =>
                 String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -139,6 +143,7 @@
                 canvas.style.height = 'auto';
                 canvas.setAttribute('role', 'img');
                 canvas.setAttribute('aria-label', 'Payment QR code');
+                canvas._qr = qr;
                 return canvas;
             }
 
@@ -160,6 +165,29 @@
 
             document.getElementById('coin').addEventListener('change', function () {
                 document.getElementById('customWrap').style.display = this.value === 'custom' ? 'block' : 'none';
+            });
+
+            // Draw an already-decoded image (ImageBitmap) centered. createImageBitmap avoids an
+            // <img> load, so the upload never touches the CSP and the canvas stays untainted.
+            function drawLogoBitmap(canvas, bmp) {
+                const ctx = canvas.getContext('2d');
+                const sz = canvas.width;
+                const logo = Math.round(sz * 0.22);
+                const pos = Math.round((sz - logo) / 2);
+                ctx.drawImage(bmp, pos, pos, logo, logo);
+            }
+
+            document.getElementById('logoFile').addEventListener('change', function () {
+                const file = this.files && this.files[0];
+                if (!file) { customIcon = null; return; }
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    customIcon = { dataURL: e.target.result, bitmap: null };
+                    if (window.createImageBitmap) {
+                        createImageBitmap(file).then(function (bmp) { if (customIcon) customIcon.bitmap = bmp; }).catch(function () {});
+                    }
+                };
+                reader.readAsDataURL(file);
             });
 
             // Best-effort address sanity check. Monero gets a real checksum (via the shared
@@ -208,7 +236,9 @@
                 }
 
                 const uri = buildURI(s, address, amount, name, desc);
-                const wantLogo = document.getElementById('logo').checked && !!ICONS[coin];
+                const useCustom = !!(customIcon && customIcon.bitmap);
+                const wantCoinLogo = document.getElementById('logo').checked && !!ICONS[coin] && !useCustom;
+                const wantLogo = useCustom || wantCoinLogo;
 
                 let canvas;
                 try {
@@ -219,6 +249,8 @@
                 }
                 lastCanvas = canvas;
                 lastScheme = s.scheme;
+                lastCoinKey = wantCoinLogo ? coin : null;
+                lastCustomHref = useCustom ? customIcon.dataURL : null;
 
                 const warn = addressWarning(coin, address);
                 const warnHtml = warn ? `<div class="error">⚠️ ${escapeHtml(warn)}</div><br/>` : '';
@@ -231,12 +263,13 @@
                     `<p><strong>QR code</strong> (scan with a compatible wallet):</p>` +
                     `<div id="qrBox" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>` +
                     `<br/><br/><button type="button" class="copy" onclick="downloadQR()">Download QR (PNG)</button> ` +
-                    `<button type="button" class="copy" onclick="copyQRImage()">Copy QR</button>` +
+                    `<button type="button" class="copy" onclick="copyQRImage()">Copy QR</button> <button type="button" class="copy" onclick="downloadSVG()">Download SVG</button>` +
                     `<p><strong>Shareable link</strong> (opens this page pre-filled and ready to scan):</p>` +
                     `<code id="shareOut" style="word-break: break-word;">${escapeHtml(shareUrl)}</code>` +
                     `<br/><br/><button type="button" class="copy" onclick="copyShareLink()">Copy link</button>`;
                 document.getElementById('qrBox').appendChild(canvas);
-                if (wantLogo) drawLogo(canvas, ICONS[coin]);
+                if (useCustom) drawLogoBitmap(canvas, customIcon.bitmap);
+                else if (wantCoinLogo) drawLogo(canvas, ICONS[coin]);
             });
 
             function copyURI() {
@@ -273,6 +306,11 @@
                 navigator.clipboard.writeText(text).then(() => {
                     alert('Copied a shareable payment link to clipboard!');
                 });
+            }
+
+            function downloadSVG() {
+                if (!lastCanvas || !lastCanvas._qr) return;
+                downloadSVGString(qrToSVG(lastCanvas._qr, lastCoinKey, lastCustomHref), (lastScheme || 'payment') + '-payment-qr.svg');
             }
 
             function downloadQR() {
@@ -344,7 +382,7 @@
             <p>Yes. Use the <strong>Download QR (PNG)</strong> button to save the QR as an image you can share or print, or <strong>Copy QR</strong> to copy it straight to your clipboard. A center logo, if enabled, is included in the saved image.</p>
 
             <h3>Can I put the coin logo in the QR?</h3>
-            <p>Yes. Leave <strong>Add the coin logo to the center of the QR</strong> checked (on by default for Monero, Bitcoin, and Litecoin). The code switches to higher error correction when a logo is shown, so it still scans reliably. Uncheck it for a plain code. Custom coins have no logo.</p>
+            <p>Yes. Leave <strong>Add the coin logo to the center of the QR</strong> checked (on by default for Monero, Bitcoin, and Litecoin). The code switches to higher error correction when a logo is shown, so it still scans reliably. Uncheck it for a plain code. You can also upload your own center icon to use instead, which works for any coin and never leaves your browser.</p>
 
             <h3>Can I pre-fill or share a payment link?</h3>
             <p>Yes. After you generate a QR, use the <strong>Copy link</strong> button to get a URL that opens this page pre-filled and ready to scan. Hand it to someone and they land on a ready payment. You can also build one by hand with URL parameters, e.g. <code>?coin=monero&amp;address=...&amp;amount=0.1&amp;label=Name&amp;message=Note</code>.</p>
