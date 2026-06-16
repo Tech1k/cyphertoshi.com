@@ -132,7 +132,6 @@
                         if (qr.isDark(r, c)) ctx.fillRect((c + margin) * cell, (r + margin) * cell, cell, cell);
                 canvas.style.maxWidth = '100%';
                 canvas.style.height = 'auto';
-                canvas.style.imageRendering = 'pixelated';
                 canvas.setAttribute('role', 'img');
                 canvas.setAttribute('aria-label', 'Payment QR code');
                 return canvas;

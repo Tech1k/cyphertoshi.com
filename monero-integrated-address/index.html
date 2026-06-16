@@ -93,7 +93,6 @@
                         if (qr.isDark(r, c)) ctx.fillRect((c + margin) * cell, (r + margin) * cell, cell, cell);
                 canvas.style.maxWidth = '100%';
                 canvas.style.height = 'auto';
-                canvas.style.imageRendering = 'pixelated';
                 canvas.setAttribute('role', 'img');
                 canvas.setAttribute('aria-label', 'Payment QR code');
                 return canvas;
@@ -109,8 +108,6 @@
                     const pad = Math.round(logo * 0.16);
                     const box = logo + pad * 2;
                     const pos = Math.round((sz - box) / 2);
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(pos, pos, box, box);
                     ctx.drawImage(img, pos + pad, pos + pad, logo, logo);
                 };
                 img.src = url;
@@ -164,7 +161,7 @@
                     `<br/><br/><button type="button" class="copy" onclick="downloadQR()">Download QR (PNG)</button> ` +
                     `<button type="button" class="copy" onclick="copyQRImage()">Copy QR</button>`;
                 document.getElementById('qrBox').appendChild(canvas);
-                drawLogo(canvas, '/assets/monero.png');
+                drawLogo(canvas, '/assets/monero.png?v=2');
             });
 
             function copyAddr() {
