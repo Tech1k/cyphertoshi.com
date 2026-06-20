@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="theme-color" content="#5271ff">
+        <meta name="theme-color" content="#6b86ff">
         <meta name="referrer" content="no-referrer">
         <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
         <link rel="canonical" href="https://cyphertoshi.com/passphrase-generator"/>
@@ -27,7 +27,7 @@
         <meta name="twitter:title" content="Diceware Passphrase Generator"/>
         <meta name="twitter:description" content="A simple, open-source, client-side Diceware passphrase generator using the EFF word list and your browser's secure random generator."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=3">
+        <link rel="stylesheet" href="/assets/tool.css?v=4">
         <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Diceware Passphrase Generator","description":"Generate strong Diceware passphrases from the EFF word list, fully in your browser.","applicationCategory":"SecurityApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/passphrase-generator","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body>
@@ -87,10 +87,10 @@
                 return buf[0] % N;
             }
             function strength(bits) {
-                if (bits < 50) return ['weak', '#e06666'];
-                if (bits < 70) return ['fair', '#e0a060'];
-                if (bits < 95) return ['strong', '#6fce6f'];
-                return ['very strong', '#6fce6f'];
+                if (bits < 50) return ['weak', 'var(--bad)'];
+                if (bits < 70) return ['fair', 'var(--warn)'];
+                if (bits < 95) return ['strong', 'var(--ok)'];
+                return ['very strong', 'var(--ok)'];
             }
 
             function generate() {
@@ -137,7 +137,7 @@
             <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/passphrase-generator" target="_blank" rel="noopener noreferrer">GitHub</a>. The word list is the EFF long list, used under CC BY 3.0 US.</p>
         </section>
         <hr/>
-        <p style="font-size: 0.9em; color: gray;">
+        <p style="font-size: 0.9em; color: var(--muted);">
             Disclaimer: This tool is provided "as is" with no warranties. A passphrase is only as safe as the device that generates it; prefer a trusted, malware-free machine for high-value secrets.
         </p>
         <br/>

@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="theme-color" content="#5271ff">
+        <meta name="theme-color" content="#6b86ff">
         <meta name="referrer" content="no-referrer">
         <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
         <link rel="canonical" href="https://cyphertoshi.com/checksum-verifier"/>
@@ -27,18 +27,18 @@
         <meta name="twitter:title" content="File Checksum Verifier"/>
         <meta name="twitter:description" content="Compute SHA-256, SHA-384, SHA-512, and BLAKE2b checksums of a file and compare to a published hash."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=3">
+        <link rel="stylesheet" href="/assets/tool.css?v=4">
         <style>
-            #drop { border: 2px dashed #4a4a4a; border-radius: 8px; padding: 26px 16px; text-align: center; color: #aaa; cursor: pointer; }
-            #drop.over { border-color: #5271ff; color: #ddd; background: #2b2b33; }
+            #drop { border: 2px dashed var(--border); border-radius: 8px; padding: 26px 16px; text-align: center; color: var(--muted); cursor: pointer; }
+            #drop.over { border-color: var(--accent); color: var(--text); background: var(--surface); }
             .hashrow { margin: 12px 0; }
-            .hashrow .algo { color: #8fb6ff; font-weight: bold; }
+            .hashrow .algo { color: var(--accent-soft); font-weight: bold; }
             .hashrow code { word-break: break-word; display: inline-block; }
-            .hashrow.match { background: #1f3320; border-left: 3px solid #6fce6f; padding: 6px 10px; border-radius: 4px; }
-            .muted { color: #aaa; }
+            .hashrow.match { background: var(--ok-bg); border-left: 3px solid var(--ok); padding: 6px 10px; border-radius: 4px; }
+            .muted { color: var(--muted); }
             #compareStatus { font-weight: bold; margin-top: 10px; }
-            .ok { color: #6fce6f; }
-            .bad { color: #e06666; }
+            .ok { color: var(--ok); }
+            .bad { color: var(--bad); }
         </style>
         <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"File Checksum Verifier","description":"Compute SHA-256, SHA-384, SHA-512, and BLAKE2b checksums of a file and compare to a published hash.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/checksum-verifier","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
@@ -59,7 +59,7 @@
         <hr/>
 
         <div id="drop">
-            <p style="margin:0;">Drag a file here, or <label for="fileInput" style="color:#5271ff; cursor:pointer; text-decoration:underline;">choose a file</label>.</p>
+            <p style="margin:0;">Drag a file here, or <label for="fileInput" style="color:var(--accent); cursor:pointer; text-decoration:underline;">choose a file</label>.</p>
             <input type="file" id="fileInput" style="display:none;">
         </div>
         <div id="fileInfo" class="muted" style="margin-top:12px;"></div>
@@ -220,7 +220,7 @@
             <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/checksum-verifier" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
         </section>
         <hr/>
-        <p style="font-size: 0.9em; color: gray;">
+        <p style="font-size: 0.9em; color: var(--muted);">
             Disclaimer: This tool is provided "as is" with no warranties. A matching checksum confirms integrity, not authenticity. Verify the publisher's signature for full assurance.
         </p>
         <br/>

@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="theme-color" content="#5271ff">
+        <meta name="theme-color" content="#6b86ff">
         <meta name="referrer" content="no-referrer">
         <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
         <meta name="robots" content="noindex">
@@ -13,18 +13,18 @@
         <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
         <link rel="manifest" href="/site.webmanifest"/>
         <link rel="canonical" href="https://cyphertoshi.com/tests"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=3">
+        <link rel="stylesheet" href="/assets/tool.css?v=4">
         <style>
             table { border-collapse: collapse; width: 100%; margin-top: 12px; }
-            td, th { text-align: left; padding: 6px 10px; border-bottom: 1px solid #4a4a4a; vertical-align: top; }
-            tr:target td { background: #3a3a22; }
+            td, th { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+            tr:target td { background: var(--accent-bg); }
             details { margin-top: 4px; }
-            summary { cursor: pointer; color: #8fb6ff; font-size: 0.85em; }
+            summary { cursor: pointer; color: var(--accent-soft); font-size: 0.85em; }
             .kv { font-family: monospace; font-size: 0.8em; word-break: break-all; margin: 3px 0; }
-            .kv .k { color: #aaa; display: inline-block; min-width: 72px; vertical-align: top; }
-            code.pass { color: #6fce6f; } code.fail { color: #e06666; }
-            .pass { color: #6fce6f; font-weight: bold; }
-            .fail { color: #e06666; font-weight: bold; }
+            .kv .k { color: var(--muted); display: inline-block; min-width: 72px; vertical-align: top; }
+            code.pass { color: var(--ok); } code.fail { color: var(--bad); }
+            .pass { color: var(--ok); font-weight: bold; }
+            .fail { color: var(--bad); font-weight: bold; }
             .name { font-family: monospace; }
             #summary { font-size: 1.2em; margin: 14px 0; }
         </style>

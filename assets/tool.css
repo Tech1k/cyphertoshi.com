@@ -5,110 +5,197 @@
   font-style: normal;
 }
 
+:root {
+    color-scheme: dark;
+
+    --bg:        #14161b;
+    --surface:   #232730;
+    --card:      #1c1f27;
+    --border:    #2a2e37;
+    --border2:   #353b46;
+    --text:      #e6e8ec;
+    --muted:     #9aa0ab;
+
+    --accent:     #6b86ff;
+    --accent-soft:#9db2ff;
+    --accent-bg:  rgba(107, 134, 255, 0.13);
+    --btn:        #5066d6;
+    --on-accent:  #ffffff;
+
+    --ok:   #4fbf75; --ok-bg:   rgba(79, 191, 117, 0.13);
+    --bad:  #ef6b6b; --bad-bg:  rgba(239, 107, 107, 0.13);
+    --warn: #e0894f; --warn-bg: rgba(224, 137, 79, 0.13);
+
+    --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, 'SF Mono', 'JetBrains Mono', 'DejaVu Sans Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+
+    --r: 10px;
+    --r-sm: 7px;
+    --pill: 999px;
+    --maxw: 760px;
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        color-scheme: light;
+
+        --bg:        #f7f7f7;
+        --surface:   #f4f5f7;
+        --card:      #ffffff;
+        --border:    #e5e5e5;
+        --border2:   #d8dbe0;
+        --text:      #1b1d23;
+        --muted:     #6b6b6b;
+
+        --accent:     #4561eb;
+        --accent-soft:#2f49c9;
+        --accent-bg:  rgba(69, 97, 235, 0.10);
+        --btn:        #3f57e0;
+
+        --ok:   #1f6b38; --ok-bg:   rgba(31, 107, 56, 0.12);
+        --bad:  #b52a2a; --bad-bg:  rgba(181, 42, 42, 0.10);
+        --warn: #a04a25; --warn-bg: rgba(160, 74, 37, 0.10);
+    }
+}
+
+* { box-sizing: border-box; }
+
 body {
-	font-family: 'Inter', sans-serif !important;
-	color: whitesmoke;
-	background: #333333;
+    margin: 0;
+    font-family: var(--font);
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
 }
 
-a {
-    color: lightblue;
-}
+a, a:visited { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
 
-a:visited {
-    color: #7a9cc4;
-}
+code, pre { font-family: var(--mono); }
+
+hr { border: none; border-top: 1px solid var(--border); }
 
 #main {
-	margin: auto;
-	width: 65%;
+    width: 90%;
+    max-width: var(--maxw);
+    margin: 24px auto 64px;
 }
+
+.center { text-align: center; }
 
 .sitenav {
-	display: block;
-	font-size: 1.17em;
-	font-weight: bold;
-	margin: 1em 0;
+    display: block;
+    font-size: 1.1em;
+    font-weight: 600;
+    margin: 1em 0;
+    color: var(--muted);
+}
+.sitenav a { color: var(--muted); }
+.sitenav a:hover { color: var(--text); text-decoration: none; }
+
+#curpage {
+    color: var(--accent) !important;
+    text-decoration: underline;
 }
 
-@media (max-width: 992px) {
-	#main {
-		width: 85%;
-	}
-	#navlink {
-		margin-right: auto;
-	}
-}
+.listlink { margin-bottom: 8px; }
 
-input[type="text"], input[type="number"], select {
-	padding: 10px;
-	font-size: 16px;
-	width: 250px;
-	max-width: 100%;
-	box-sizing: border-box;
+footer p { color: var(--muted); }
+footer a, footer a:visited { color: var(--accent); }
+
+/* ---- Form controls ---- */
+input[type="text"], input[type="number"], select, textarea {
+    padding: 0.55em 0.7em;
+    font-size: 16px;
+    width: 250px;
+    max-width: 100%;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border2);
+    border-radius: var(--r-sm);
+    font-family: inherit;
 }
+input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-bg);
+}
+input::placeholder, textarea::placeholder { color: var(--muted); }
 
 input[type="checkbox"] {
-	width: 16px;
-	height: 16px;
-	vertical-align: middle;
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    accent-color: var(--accent);
 }
 
 label.check {
-	display: inline-block;
-	cursor: pointer;
+    display: inline-block;
+    cursor: pointer;
 }
 
 fieldset {
-	border: 1px solid #666;
-	margin: 0 0 20px 0;
-	padding: 15px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    margin: 0 0 20px 0;
+    padding: 15px;
 }
 
 legend {
-	font-weight: bold;
-	padding: 0 6px;
+    font-weight: 600;
+    padding: 0 6px;
 }
 
 pre.result {
-	white-space: pre-wrap;
-	font-family: monospace;
+    white-space: pre-wrap;
+    font-family: var(--mono);
 }
 
+/* ---- Buttons ---- */
 input[type="submit"], button[type="button"] {
-	font-family: inherit;
-	background-color: #0f5ea4;
-	border: 1px solid #0f5ea4;
-	color: #ffffff;
-	font-weight: bold;
-	border-radius: 4px;
-	padding: 0.6em 1.1em;
-	font-size: 1rem;
-	cursor: pointer;
-	transition: background-color 0.2s ease, border-color 0.2s ease;
+    font-family: inherit;
+    background: var(--btn);
+    border: 1px solid var(--btn);
+    color: var(--on-accent);
+    font-weight: 600;
+    border-radius: var(--r-sm);
+    padding: 0.55em 1.1em;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: filter 0.15s ease;
 }
-
-input[type="submit"]:hover, button[type="button"]:hover {
-	background-color: #0c4f8a;
-	border-color: #0c4f8a;
-}
-
-input[type="submit"]:disabled, button:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
-}
+input[type="submit"]:hover, button[type="button"]:hover { filter: brightness(1.1); }
+input[type="submit"]:disabled, button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 button.copy {
-	padding: 0.3em 0.8em;
-	font-size: 0.85em;
-	font-weight: normal;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border2);
+    border-radius: var(--pill);
+    padding: 0.25em 0.8em;
+    font-size: 0.8em;
+    font-weight: 400;
 }
+button.copy:hover { background: var(--accent-bg); border-color: var(--accent); filter: none; }
 
+/* ---- Result panel ---- */
 .result {
-	display: none;
-	margin-top: 20px;
-	padding: 15px;
-	background-color: #4c4c4c;
-	border: 1px solid #ddd;
-	word-break: break-word;
+    display: none;
+    margin-top: 20px;
+    padding: 15px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    word-break: break-word;
+}
+.valid { color: var(--text); }
+.error { color: var(--text); }
+
+/* QR tile: always a framed white tile so the code is defined and scans in both themes. */
+.qr-tile {
+    background: #ffffff;
+    border: 1px solid var(--border2);
+    border-radius: var(--r-sm);
+    padding: 8px;
 }

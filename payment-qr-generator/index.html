@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="theme-color" content="#5271ff">
+        <meta name="theme-color" content="#6b86ff">
         <meta name="referrer" content="no-referrer">
         <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
         <link rel="canonical" href="https://cyphertoshi.com/payment-qr-generator"/>
@@ -27,7 +27,7 @@
         <meta name="twitter:title" content="Crypto Payment QR Generator"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to generate Monero, Bitcoin, and Litecoin payment URIs and scannable QR codes."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=3">
+        <link rel="stylesheet" href="/assets/tool.css?v=4">
         <style>
             .qr-checker { background-color: #fff; background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 16px 16px; background-position: 0 0, 0 8px, 8px -8px, -8px 0; }
         </style>
@@ -175,7 +175,7 @@
             });
 
             // Draw an already-decoded image (ImageBitmap) centered. createImageBitmap avoids an
-            // <img> load, so the upload never touches the CSP and the canvas stays untainted.
+            // image-element load, so the upload never touches the CSP and the canvas stays untainted.
             function drawLogoBitmap(canvas, bmp) {
                 const ctx = canvas.getContext('2d');
                 const sz = canvas.width;
@@ -270,7 +270,7 @@
                     `<code id="uriOut" style="word-break: break-word;">${escapeHtml(uri)}</code>` +
                     `<br/><br/><button type="button" class="copy" onclick="copyURI()">Copy URI</button>` +
                     `<p><strong>QR code</strong> (scan with a compatible wallet):</p>` +
-                    `<div id="qrBox" class="${transparent ? 'qr-checker' : ''}" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>` +
+                    `<div id="qrBox" class="${transparent ? 'qr-checker' : 'qr-tile'}" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>` +
                     `<br/><br/><button type="button" class="copy" onclick="downloadQR()">Download QR (PNG)</button> ` +
                     `<button type="button" class="copy" onclick="copyQRImage()">Copy QR</button> <button type="button" class="copy" onclick="downloadSVG()">Download SVG</button>` +
                     `<p><strong>Shareable link</strong> (opens this page pre-filled and ready to scan):</p>` +
@@ -408,7 +408,7 @@
             <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/payment-qr-generator" target="_blank" rel="noopener noreferrer">GitHub</a>. QR codes are rendered with the open-source <a href="https://github.com/kazuhikoarase/qrcode-generator" target="_blank" rel="noopener noreferrer">qrcode-generator</a> library (MIT), self-hosted on this site.</p>
         </section>
         <hr/>
-        <p style="font-size: 0.9em; color: gray;">
+        <p style="font-size: 0.9em; color: var(--muted);">
             Disclaimer: This tool is provided "as is" with no warranties. Use at your own risk. Always double-check the address and amount before sending any funds.
         </p>
         <br/>

@@ -3,19 +3,19 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="theme-color" content="#5271ff">
+        <meta name="theme-color" content="#6b86ff">
         <meta name="referrer" content="no-referrer">
         <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
         <link rel="canonical" href="https://cyphertoshi.com/donate"/>
         <meta name="robots" content="index, follow">
-        <meta name="description" content="Support CypherToshi with Monero. Send to the OpenAlias donate@cyphertoshi.com or scan the QR code. Free, open-source, and client-side."/>
+        <meta name="description" content="Support CypherToshi with Monero, Bitcoin, or Litecoin. Send to the OpenAlias donate@cyphertoshi.com or scan a QR code. Free, open-source, and client-side."/>
         <meta name="author" content="Tech1k">
         <title>Support | CypherToshi</title>
         <link rel="shortcut icon" href="/assets/favicon.png?v=3"/>
         <link rel="manifest" href="/site.webmanifest"/>
         <link rel="apple-touch-icon" href="/assets/icon.png?v=1"/>
         <meta property="og:title" content="Support | CypherToshi"/>
-        <meta property="og:description" content="Support CypherToshi with Monero. Send to the OpenAlias donate@cyphertoshi.com or scan the QR code. Free, open-source, and client-side."/>
+        <meta property="og:description" content="Support CypherToshi with Monero, Bitcoin, or Litecoin. Send to the OpenAlias donate@cyphertoshi.com or scan a QR code. Free, open-source, and client-side."/>
         <meta property="og:type" content="website"/>
         <meta property="og:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
         <meta property="og:image:width" content="1200"/>
@@ -25,18 +25,14 @@
         <meta name="twitter:card" content="summary_large_image"/>
         <meta name="twitter:image" content="https://cyphertoshi.com/assets/og-banner.png?v=1"/>
         <meta name="twitter:title" content="Support | CypherToshi"/>
-        <meta name="twitter:description" content="Support CypherToshi with Monero. Send to the OpenAlias donate@cyphertoshi.com or scan the QR code."/>
+        <meta name="twitter:description" content="Support CypherToshi with Monero, Bitcoin, or Litecoin. Send to the OpenAlias donate@cyphertoshi.com or scan a QR code."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=3">
-        <style>
-            #main { width: 50%; }
-            @media (max-width: 992px) { #main { width: 85%; } }
-        </style>
+        <link rel="stylesheet" href="/assets/tool.css?v=4">
     </head>
     <body>
         <main id="main">
         <h1>Support CypherToshi</h1>
-        <p>Everything here is free, open-source, and runs entirely in your browser. If the tools and guides are useful to you, a Monero tip helps keep it online. Thank you.</p>
+        <p>Everything here is free, open-source, and runs entirely in your browser. If the tools and guides are useful to you, a tip helps keep it online. Monero is preferred, but Bitcoin and Litecoin work too. Thank you.</p>
 
         <div style="text-align:center;">
             <nav class="sitenav" aria-label="Primary">
@@ -50,12 +46,25 @@
         <hr/>
         <section>
             <p><strong>OpenAlias:</strong> <code id="alias">donate@cyphertoshi.com</code> <button type="button" class="copy" onclick="copyFrom('alias', this)">Copy</button></p>
-            <p>Type the alias into any <a href="/posts/openalias-wallets">OpenAlias-aware wallet</a> and it resolves to the address below. You can <a href="/openalias-checker?domain=donate%40cyphertoshi.com">verify it yourself</a> first.</p>
-            <p><strong>Monero address:</strong></p>
-            <p><code id="addr" style="word-break: break-word;"><a href="monero:89Dz4DkAskRDH6BMnQheh3iVpiRNzjLZA5qq7EPto5zaduDrQ5T3fB9UU1qU6p8acN52QvMLXLa65e6xTTNkiC7fN8FrtQK">89Dz4DkAskRDH6BMnQheh3iVpiRNzjLZA5qq7EPto5zaduDrQ5T3fB9UU1qU6p8acN52QvMLXLa65e6xTTNkiC7fN8FrtQK</a></code></p>
-            <p><button type="button" class="copy" onclick="copyFrom('addr', this)">Copy address</button></p>
-            <p>Or scan it with a mobile wallet:</p>
-            <div id="qrBox" style="display:inline-block; line-height:0; max-width:200px; overflow-x:auto;"></div>
+            <p>Type the alias into any <a href="/posts/openalias-wallets">OpenAlias-aware wallet</a> and it resolves to the matching address below for Monero, Bitcoin, or Litecoin. You can <a href="/openalias-checker?domain=donate%40cyphertoshi.com">verify it yourself</a> first.</p>
+        </section>
+        <section>
+            <h2>Monero (XMR)</h2>
+            <p><code id="addrXmr" style="word-break: break-word;"><a href="monero:89Dz4DkAskRDH6BMnQheh3iVpiRNzjLZA5qq7EPto5zaduDrQ5T3fB9UU1qU6p8acN52QvMLXLa65e6xTTNkiC7fN8FrtQK">89Dz4DkAskRDH6BMnQheh3iVpiRNzjLZA5qq7EPto5zaduDrQ5T3fB9UU1qU6p8acN52QvMLXLa65e6xTTNkiC7fN8FrtQK</a></code></p>
+            <p><button type="button" class="copy" onclick="copyFrom('addrXmr', this)">Copy address</button></p>
+            <div id="qrXmr" class="qr-tile" style="display:inline-block; line-height:0; max-width:200px; overflow-x:auto;"></div>
+        </section>
+        <section>
+            <h2>Bitcoin (BTC)</h2>
+            <p><code id="addrBtc" style="word-break: break-word;"><a href="bitcoin:bc1qs69d78e4wg8h00mq7zmydlcfxytn5nzasjdceq">bc1qs69d78e4wg8h00mq7zmydlcfxytn5nzasjdceq</a></code></p>
+            <p><button type="button" class="copy" onclick="copyFrom('addrBtc', this)">Copy address</button></p>
+            <div id="qrBtc" class="qr-tile" style="display:inline-block; line-height:0; max-width:200px; overflow-x:auto;"></div>
+        </section>
+        <section>
+            <h2>Litecoin (LTC)</h2>
+            <p><code id="addrLtc" style="word-break: break-word;"><a href="litecoin:ltc1qesqzfuwfsdx8t3dmgnh2f79eflhav7qyrs7urn">ltc1qesqzfuwfsdx8t3dmgnh2f79eflhav7qyrs7urn</a></code></p>
+            <p><button type="button" class="copy" onclick="copyFrom('addrLtc', this)">Copy address</button></p>
+            <div id="qrLtc" class="qr-tile" style="display:inline-block; line-height:0; max-width:200px; overflow-x:auto;"></div>
         </section>
         <section>
             <h2>What your support does</h2>
@@ -76,8 +85,15 @@
 
         <script src="/assets/qrcode.js"></script>
         <script>
-            const ADDR = '89Dz4DkAskRDH6BMnQheh3iVpiRNzjLZA5qq7EPto5zaduDrQ5T3fB9UU1qU6p8acN52QvMLXLa65e6xTTNkiC7fN8FrtQK';
-            const URI = 'monero:' + ADDR + '?recipient_name=CypherToshi&tx_description=' + encodeURIComponent('Donation to CypherToshi');
+            const NOTE = encodeURIComponent('Donation to CypherToshi');
+            const COINS = [
+                { box: 'qrXmr', name: 'Monero', logo: '/assets/monero.png?v=2',
+                  uri: 'monero:89Dz4DkAskRDH6BMnQheh3iVpiRNzjLZA5qq7EPto5zaduDrQ5T3fB9UU1qU6p8acN52QvMLXLa65e6xTTNkiC7fN8FrtQK?recipient_name=CypherToshi&tx_description=' + NOTE },
+                { box: 'qrBtc', name: 'Bitcoin', logo: '/assets/bitcoin.png?v=2',
+                  uri: 'bitcoin:bc1qs69d78e4wg8h00mq7zmydlcfxytn5nzasjdceq?label=CypherToshi&message=' + NOTE },
+                { box: 'qrLtc', name: 'Litecoin', logo: '/assets/litecoin.png?v=2',
+                  uri: 'litecoin:ltc1qesqzfuwfsdx8t3dmgnh2f79eflhav7qyrs7urn?label=CypherToshi&message=' + NOTE }
+            ];
 
             // Render a QR to a <canvas> (CSP-clean: draws modules, no image loading).
             function renderQRCanvas(uri, ecc) {
@@ -103,7 +119,7 @@
                 return canvas;
             }
 
-            // Center the Monero logo in the QR. Same-origin image, high error correction.
+            // Center the coin logo in the QR. Same-origin image, high error correction.
             function drawLogo(canvas, url) {
                 const img = new Image();
                 img.onload = function () {
@@ -128,9 +144,12 @@
             }
 
             (function () {
-                const canvas = renderQRCanvas(URI, 'H');
-                drawLogo(canvas, '/assets/monero.png?v=2');
-                document.getElementById('qrBox').appendChild(canvas);
+                COINS.forEach(function (coin) {
+                    const canvas = renderQRCanvas(coin.uri, 'H');
+                    canvas.setAttribute('aria-label', coin.name + ' payment QR code');
+                    drawLogo(canvas, coin.logo);
+                    document.getElementById(coin.box).appendChild(canvas);
+                });
             })();
         </script>
         </main>

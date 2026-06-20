@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="theme-color" content="#5271ff">
+        <meta name="theme-color" content="#6b86ff">
         <meta name="referrer" content="no-referrer">
         <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src https://cloudflare-dns.com https://dns.google; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
         <link rel="canonical" href="https://cyphertoshi.com/openalias-pay"/>
@@ -27,7 +27,7 @@
         <meta name="twitter:title" content="OpenAlias Pay"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to resolve an OpenAlias address and generate a payment URI and scannable QR code."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=3">
+        <link rel="stylesheet" href="/assets/tool.css?v=4">
         <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"OpenAlias Pay","description":"Resolve an OpenAlias address and generate a payment URI and QR code.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/openalias-pay","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body>
@@ -209,7 +209,7 @@
                         if (rec.recipient_name) html += `<strong>Recipient:</strong> ${escapeHtml(rec.recipient_name)}<br/>`;
                         html += `<strong>Address:</strong> <code id="payAddr${i}" style="word-break: break-word;">${escapeHtml(rec.recipient_address)}</code> <button type="button" class="copy" onclick="copyFrom('payAddr${i}', this)">Copy</button><br/><br/>`;
                         html += `<strong>Payment URI:</strong><br/><code id="payUri${i}" style="word-break: break-word;">${escapeHtml(uri)}</code> <button type="button" class="copy" onclick="copyFrom('payUri${i}', this)">Copy</button><br/><br/>`;
-                        html += `<div id="qrBox${i}" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>`;
+                        html += `<div id="qrBox${i}" class="qr-tile" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>`;
                         html += `<br/><br/><button type="button" class="copy" onclick="downloadQR(${i})">Download QR (PNG)</button> <button type="button" class="copy" onclick="downloadSVG(${i})">Download SVG</button>`;
                         html += `</div>`;
                     });
@@ -271,7 +271,7 @@
             <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/openalias-pay" target="_blank" rel="noopener noreferrer">GitHub</a>. QR codes are rendered with the open-source <a href="https://github.com/kazuhikoarase/qrcode-generator" target="_blank" rel="noopener noreferrer">qrcode-generator</a> library (MIT), self-hosted on this site.</p>
         </section>
         <hr/>
-        <p style="font-size: 0.9em; color: gray;">
+        <p style="font-size: 0.9em; color: var(--muted);">
             Disclaimer: This tool is provided "as is" with no warranties. Use at your own risk. Always confirm a resolved address through a trusted channel before sending any funds.
         </p>
         <br/>

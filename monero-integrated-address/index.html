@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="theme-color" content="#5271ff">
+        <meta name="theme-color" content="#6b86ff">
         <meta name="referrer" content="no-referrer">
         <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
         <link rel="canonical" href="https://cyphertoshi.com/monero-integrated-address"/>
@@ -27,7 +27,7 @@
         <meta name="twitter:title" content="Monero Integrated Address Generator"/>
         <meta name="twitter:description" content="A simple, open-source, client-side tool to generate a Monero integrated address from a standard address and an 8-byte payment ID."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=3">
+        <link rel="stylesheet" href="/assets/tool.css?v=4">
         <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Monero Integrated Address Generator","description":"Create a Monero integrated address from a standard address and a payment ID.","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://cyphertoshi.com/monero-integrated-address","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
     <body>
@@ -159,7 +159,7 @@
                     `<br/><br/><button type="button" class="copy" onclick="copyAddr()">Copy address</button>` +
                     `<p><strong>Payment ID used:</strong> <code style="word-break: break-word;">${escapeHtml(pidHex)}</code></p>` +
                     `<p><strong>QR code</strong> (scan with a compatible wallet):</p>` +
-                    `<div id="qrBox" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>` +
+                    `<div id="qrBox" class="qr-tile" style="display:inline-block; line-height:0; max-width:100%; overflow-x:auto;"></div>` +
                     `<br/><br/><button type="button" class="copy" onclick="downloadQR()">Download QR (PNG)</button> ` +
                     `<button type="button" class="copy" onclick="copyQRImage()">Copy QR</button> <button type="button" class="copy" onclick="downloadSVG()">Download SVG</button>`;
                 document.getElementById('qrBox').appendChild(canvas);
@@ -229,7 +229,7 @@
             <p>Yes! You can find the full source code on <a href="https://github.com/Tech1k/cyphertoshi.com/tree/master/monero-integrated-address" target="_blank" rel="noopener noreferrer">GitHub</a>. QR codes are rendered with the open-source <a href="https://github.com/kazuhikoarase/qrcode-generator" target="_blank" rel="noopener noreferrer">qrcode-generator</a> library (MIT), self-hosted on this site.</p>
         </section>
         <hr/>
-        <p style="font-size: 0.9em; color: gray;">
+        <p style="font-size: 0.9em; color: var(--muted);">
             Disclaimer: This tool is provided "as is" with no warranties. Use at your own risk. Always double-check the generated address before sharing it or receiving funds.
         </p>
         <br/>

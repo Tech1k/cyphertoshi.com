@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="theme-color" content="#5271ff">
+        <meta name="theme-color" content="#6b86ff">
         <meta name="referrer" content="no-referrer">
         <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
         <link rel="canonical" href="https://cyphertoshi.com/how-monero-works"/>
@@ -27,30 +27,30 @@
         <meta name="twitter:title" content="How Monero Works"/>
         <meta name="twitter:description" content="An interactive, client-side explainer of how Monero protects privacy: stealth addresses, ring signatures, RingCT, and fungibility."/>
         <link rel="alternate" type="application/rss+xml" title="CypherToshi RSS" href="/rss.xml"/>
-        <link rel="stylesheet" href="/assets/tool.css?v=3">
+        <link rel="stylesheet" href="/assets/tool.css?v=4">
         <style>
             #main { width: 70%; }
             @media (max-width: 992px) { #main { width: 90%; } }
             .lead { font-size: 1.15em; line-height: 1.5; }
             section.concept { margin: 48px 0; }
-            .concept h2 { border-bottom: 1px solid #555; padding-bottom: 6px; }
-            .card { background: #2b2b2b; border: 1px solid #4a4a4a; border-radius: 6px; padding: 16px 18px; margin: 14px 0; }
-            .muted { color: #aaa; }
-            .ok { color: #6fce6f; }
+            .concept h2 { border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+            .card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 16px 18px; margin: 14px 0; }
+            .muted { color: var(--muted); }
+            .ok { color: var(--ok); }
             .mono { font-family: monospace; word-break: break-all; }
-            .pill { display: inline-block; background: #3a3a4a; border-radius: 999px; padding: 2px 10px; font-size: 0.85em; margin: 2px; }
-            .verified { display: inline-block; margin-top: 12px; background: #1f3320; color: #7ddc7d; border: 1px solid #3a5a32; border-radius: 999px; padding: 3px 11px; font-size: 0.82em; text-decoration: none; }
-            .verified:hover { background: #264028; text-decoration: underline; }
+            .pill { display: inline-block; background: var(--surface); border-radius: 999px; padding: 2px 10px; font-size: 0.85em; margin: 2px; }
+            .verified { display: inline-block; margin-top: 12px; background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok); border-radius: 999px; padding: 3px 11px; font-size: 0.82em; text-decoration: none; }
+            .verified:hover { background: var(--ok-bg); text-decoration: underline; }
             .three { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
-            .three > div { flex: 1 1 180px; background: #2b2b2b; border: 1px solid #4a4a4a; border-radius: 6px; padding: 12px 14px; }
+            .three > div { flex: 1 1 180px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; }
             .ledger { font-family: monospace; font-size: 0.9em; }
-            .hide { color: #777; }
+            .hide { color: var(--muted); }
             button { padding: 9px 14px; font-size: 15px; cursor: pointer; margin: 4px 6px 4px 0; }
             .ring { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
-            .ring span { padding: 8px 12px; border: 1px solid #4a4a4a; border-radius: 6px; background: #2b2b2b; cursor: pointer; font-family: monospace; }
+            .ring span { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); cursor: pointer; font-family: monospace; }
             .stealth-out { font-family: monospace; font-size: 0.9em; }
             .step { margin: 8px 0; }
-            .label { color: #8fb6ff; }
+            .label { color: var(--accent-soft); }
         </style>
         <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"How Monero Works","description":"An interactive explainer of how Monero protects privacy: stealth addresses, ring signatures, key images, RingCT, and fungibility, with live cryptography.","url":"https://cyphertoshi.com/how-monero-works","author":{"@type":"Person","name":"Tech1k","url":"https://tech1k.com"}}</script>
     </head>
@@ -330,7 +330,7 @@
                         '<strong>Payment #' + payNum + '</strong>' +
                         '<div class="step"><span class="label">Sender publishes R = r·G:</span><br/><span class="mono">' + shorten(hex(Renc)) + '</span></div>' +
                         '<div class="step"><span class="label">Shared secret</span> (sender 8·r·A = recipient 8·a·R):<br/><span class="mono">' + shorten(hex(Dsend)) + '</span> ' +
-                            (hex(Dsend) === hex(Drecv) ? '<span class="ok">✓ both sides agree</span>' : '<span style="color:#e06">mismatch</span>') + '</div>' +
+                            (hex(Dsend) === hex(Drecv) ? '<span class="ok">✓ both sides agree</span>' : '<span style="color:var(--bad)">mismatch</span>') + '</div>' +
                         '<div class="step"><span class="label">One-time address on chain</span> P = Hs(secret)·G + B:<br/><span class="mono">' + hex(Psend) + '</span></div>' +
                         '<div class="' + (match ? 'ok' : '') + '">' + (match ? '✓ The recipient recognizes this output as theirs. It looks unrelated to the published address and to every other payment.' : '') + '</div>';
                     payments.prepend(card);
@@ -394,7 +394,7 @@
                         '<div class="step"><span class="label">C(output 2):</span> <span class="mono">' + shorten(hex(ed25519.encode(Co2))) + '</span></div>' +
                         '<div class="step muted">(the amounts appear nowhere in those commitments)</div>' +
                         '<div class="step"><span class="label">Balance check</span> C(input) - C(output 1) - C(output 2):<br/><span class="mono">' + shorten(diffHex) + '</span></div>' +
-                        '<div style="' + (balanced ? 'color:#6fce6f' : 'color:#e06666') + '">' +
+                        '<div style="' + (balanced ? 'color:var(--ok)' : 'color:var(--bad)') + '">' +
                             (balanced
                                 ? '✓ The difference is the zero point. Inputs equal outputs, so no coins were created, and the network verified that without learning the amounts.'
                                 : '✗ The difference is not the zero point (' + vin + ' does not equal ' + (vo1 + vo2) + '). The network rejects this transaction.') +
@@ -422,7 +422,7 @@
                 return '<div class="step"><strong>' + title + '</strong></div>' +
                     '<div class="step"><span class="label">Output key  P = x·G:</span> <span class="mono">' + shorten(Phex) + '</span></div>' +
                     '<div class="step"><span class="label">Key image  I = x·Hp(P):</span> <span class="mono">' + shorten(Ihex) + '</span></div>' +
-                    '<div style="color:' + (bad ? '#e06666' : '#6fce6f') + '">' + (bad ? '✗ ' : '✓ ') + msg + '</div>';
+                    '<div style="color:' + (bad ? 'var(--bad)' : 'var(--ok)') + '">' + (bad ? '✗ ' : '✓ ') + msg + '</div>';
             }
             spendBtn.addEventListener('click', function () {
                 spendBtn.disabled = true; dsBtn.disabled = true;
@@ -551,7 +551,7 @@
                 let html = '<div class="muted">Ages of ' + N + ' sampled decoys:</div>';
                 for (let i = 0; i < bins.length; i++) {
                     const pct = Math.max(1, Math.round(100 * bins[i] / max));
-                    html += '<div style="display:flex; align-items:center; gap:8px; margin:2px 0;"><span style="flex:0 0 52px; font-family:monospace; font-size:0.85em;">' + labels[i] + '</span><span style="flex:1 1 auto; min-width:0;"><span style="display:block; height:14px; width:' + pct + '%; background:#5271ff;"></span></span><span class="muted" style="flex:0 0 auto; font-size:0.85em;">' + bins[i] + '</span></div>';
+                    html += '<div style="display:flex; align-items:center; gap:8px; margin:2px 0;"><span style="flex:0 0 52px; font-family:monospace; font-size:0.85em;">' + labels[i] + '</span><span style="flex:1 1 auto; min-width:0;"><span style="display:block; height:14px; width:' + pct + '%; background:var(--accent);"></span></span><span class="muted" style="flex:0 0 auto; font-size:0.85em;">' + bins[i] + '</span></div>';
                 }
                 html += '<div style="margin-top:8px;">Most decoys are recent, matching how people actually spend, with a realistic long tail. Your real output sits inside this same distribution, so it does not stand out.</div>';
 
@@ -583,7 +583,7 @@
                         '<div class="step"><span class="label">Amount ' + v + ' in bits:</span> <span class="mono">' + v.toString(2).padStart(8, '0') + '</span></div>' +
                         '<div class="step"><span class="label">Sum of the 8 bit-commitments:</span><br/><span class="mono">' + shorten(hex(ed25519.encode(acc))) + '</span></div>' +
                         '<div class="step"><span class="label">Commitment to the amount:</span><br/><span class="mono">' + shorten(hex(ed25519.encode(Cv))) + '</span></div>' +
-                        '<div style="color:' + (okMatch ? '#6fce6f' : '#e06666') + '">' + (okMatch ? '✓ They match. The bits sum to the amount, and each committed bit can be proven to be 0 or 1, so the amount is provably in range without being revealed.' : '✗ mismatch') + '</div>';
+                        '<div style="color:' + (okMatch ? 'var(--ok)' : 'var(--bad)') + '">' + (okMatch ? '✓ They match. The bits sum to the amount, and each committed bit can be proven to be 0 or 1, so the amount is provably in range without being revealed.' : '✗ mismatch') + '</div>';
                     btn.disabled = false;
                 }, 25);
             });
@@ -627,13 +627,13 @@
                         '<div class="step"><span class="label">C(input):</span> <span class="mono">' + shorten(hex(ed25519.encode(Cin))) + '</span></div>' +
                         '<div class="step"><span class="label">C(pay)+C(change)+fee:</span> <span class="mono">' + shorten(hex(ed25519.encode(outsTotal))) + '</span></div>' +
                         '<div class="step"><span class="label">fee:</span> 1 XMR <span class="muted">(the only amount anyone can see)</span></div>' +
-                        '<div style="color:' + (balanced ? '#6fce6f' : '#e06666') + '; margin-top:8px;">' + (balanced ? '✓ The commitments balance (10 in = 7 + 2 + 1), so no coins were created, yet sender, recipient, and amounts are all hidden at once. Only the fee is visible.' : '✗ unbalanced') + '</div>';
+                        '<div style="color:' + (balanced ? 'var(--ok)' : 'var(--bad)') + '; margin-top:8px;">' + (balanced ? '✓ The commitments balance (10 in = 7 + 2 + 1), so no coins were created, yet sender, recipient, and amounts are all hidden at once. Only the fee is visible.' : '✗ unbalanced') + '</div>';
                     btn.disabled = false;
                 }, 25);
             });
         </script>
         <hr/>
-        <p style="font-size: 0.9em; color: gray; text-align:center;">This page is for education. The demo keys it generates are illustration only and must never be used for real funds.</p>
+        <p style="font-size: 0.9em; color: var(--muted); text-align:center;">This page is for education. The demo keys it generates are illustration only and must never be used for real funds.</p>
             <footer>
                 <p style="text-align:center;">An initiative started April 15, 2025 by <a href="https://tech1k.com" target="_blank" rel="noopener">Tech1k</a>.<br/>This site is <a href="https://github.com/Tech1k/cyphertoshi.com" target="_blank" rel="noopener">open-source</a>, with code under <a href="https://github.com/Tech1k/cyphertoshi.com/blob/master/LICENSE" target="_blank" rel="noopener">MIT</a> and words under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.<br/>You can <a href="/donate">support it</a> with Monero.</p>
             </footer>
