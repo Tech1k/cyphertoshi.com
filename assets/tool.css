@@ -168,7 +168,9 @@ input[type="submit"], button[type="button"] {
 input[type="submit"]:hover, button[type="button"]:hover { filter: brightness(1.1); }
 input[type="submit"]:disabled, button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-button.copy {
+button.copy, a.copy {
+    display: inline-block;
+    vertical-align: middle;
     background: transparent;
     color: var(--text);
     border: 1px solid var(--border2);
@@ -176,8 +178,9 @@ button.copy {
     padding: 0.25em 0.8em;
     font-size: 0.8em;
     font-weight: 400;
+    text-decoration: none;
 }
-button.copy:hover { background: var(--accent-bg); border-color: var(--accent); filter: none; }
+button.copy:hover, a.copy:hover { background: var(--accent-bg); border-color: var(--accent); filter: none; text-decoration: none; }
 
 /* ---- Result panel ---- */
 .result {
